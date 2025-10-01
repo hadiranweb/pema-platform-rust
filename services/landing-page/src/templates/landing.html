@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">
+                    <h2>PEMA</h2>
+                </div>
+                <div class="nav-links">
+                    <a href="#home">خانه</a>
+                    <a href="#products">محصولات</a>
+                    <a href="#about">درباره ما</a>
+                    <a href="#contact">تماس با ما</a>
+                </div>
+                <button class="login-btn" onclick="openLoginModal()">ورود</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>پلتفرم تجارت الکترونیک PEMA</h1>
+                <p>بهترین محصولات را با کیفیت عالی و قیمت مناسب از ما بخرید</p>
+                <button class="cta-btn" onclick="document.getElementById('products').scrollIntoView()">
+                    مشاهده محصولات
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="products">
+        <div class="container">
+            <h2>محصولات ویژه</h2>
+            <div class="products-grid" id="products-grid">
+                <div class="loading">در حال بارگذاری محصولات...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2>درباره PEMA</h2>
+            <p>
+                پلتفرم PEMA یکی از پیشروترین پلتفرم‌های تجارت الکترونیک در ایران است که با ارائه 
+                محصولات باکیفیت و خدمات مطلوب، تجربه خریدی بی‌نظیر را برای مشتریان فراهم می‌کند.
+            </p>
+            <div class="features">
+                <div class="feature">
+                    <h3>تحویل سریع</h3>
+                    <p>تحویل محصولات در کمترین زمان ممکن</p>
+                </div>
+                <div class="feature">
+                    <h3>کیفیت تضمینی</h3>
+                    <p>تمام محصولات دارای گارانتی و کیفیت بالا</p>
+                </div>
+                <div class="feature">
+                    <h3>پشتیبانی ۲۴/۷</h3>
+                    <p>پشتیبانی در تمام ساعات شبانه‌روز</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            
+            <!-- Step 1: Email/Phone Input -->
+            <div id="step1" class="auth-step active">
+                <h3>ورود / ثبت‌نام</h3>
+                <form id="checkUserForm">
+                    <input type="text" id="emailOrPhone" placeholder="ایمیل یا شماره تلفن" required>
+                    <button type="submit">ادامه</button>
+                </form>
+            </div>
+
+            <!-- Step 2: Password Input (for existing users) -->
+            <div id="step2" class="auth-step">
+                <h3>ورود</h3>
+                <p id="userMessage"></p>
+                <form id="loginForm">
+                    <input type="password" id="password" placeholder="رمز عبور" required>
+                    <button type="submit">ورود</button>
+                    <button type="button" onclick="forgotPassword()">فراموشی رمز عبور</button>
+                </form>
+            </div>
+
+            <!-- Step 3: Verification Code -->
+            <div id="step3" class="auth-step">
+                <h3>تایید کد</h3>
+                <p id="codeMessage"></p>
+                <form id="verifyForm">
+                    <input type="text" id="verificationCode" placeholder="کد تایید" required>
+                    <button type="submit">تایید</button>
+                </form>
+            </div>
+
+            <!-- Step 4: Registration Form -->
+            <div id="step4" class="auth-step">
+                <h3>تکمیل ثبت‌نام</h3>
+                <form id="registerForm">
+                    <input type="text" id="username" placeholder="نام کاربری" required>
+                    <input type="email" id="email" placeholder="ایمیل" required>
+                    <input type="tel" id="phone" placeholder="شماره تلفن" required>
+                    <button type="submit">ثبت‌نام</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
