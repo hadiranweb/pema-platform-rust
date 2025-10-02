@@ -1,3 +1,2 @@
-pub mod health_handler;
-pub mod product_handlers;
+pub mod vendor_handlers;
 

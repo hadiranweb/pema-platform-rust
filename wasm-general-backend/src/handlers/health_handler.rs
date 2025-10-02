@@ -1,6 +1,6 @@
 use actix_web::{HttpResponse, Responder};
 
 pub async fn health_check() -> impl Responder {
-    HttpResponse::Ok().body("Product Catalog Service is running!")
+    HttpResponse::Ok().body("Inventory Management Service is running!")
 }
 
