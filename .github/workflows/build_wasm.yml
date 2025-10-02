@@ -35,43 +35,48 @@ jobs:
     - name: Build WASM project
       run: wasm-pack build --target web --out-dir wasm-frontend/pkg wasm-frontend
 
-    - name: Install Node.js
-      uses: actions/setup-node@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        node-version: '20'
+        python-version: '3.9'
 
-    - name: Install Manus MCP CLI (assuming npm package)
-      run: npm install -g manus-mcp-cli
+    - name: Install MCP CLI
+      run: |
+        git clone https://github.com/chrishayuk/mcp-cli.git
+        cd mcp-cli
+        pip install --upgrade pip wheel
+        pip install .
+        echo "$(pwd)/mcp-cli" >> $GITHUB_PATH
 
     - name: Run Manus AI Code Analysis
       env:
-        MANUS_API_KEY: ${{ secrets.MANUS_API_KEY }}
+        MCP_TOKEN: ${{ secrets.MANUS_API_KEY }}
+        MCP_ENDPOINT: "https://manus.im/mcp" # Assuming a default Manus MCP endpoint
       run: |
         echo "--- Running Manus AI Code Analysis ---"
-        # This is a generic command. Replace with actual Manus CLI command for code analysis.
-        # Example: manus-mcp-cli analyze code --project-path ./wasm-frontend --output-format github-actions
-        manus-mcp-cli analyze --project pema-platform-rust --target wasm-frontend --type code-quality
+        # Replace with actual Manus CLI command for code analysis if different
+        mcp analyze --project pema-platform-rust --path ./wasm-frontend
         echo "Manus AI Code Analysis completed."
 
     - name: Run Manus AI-driven Tests
       env:
-        MANUS_API_KEY: ${{ secrets.MANUS_API_KEY }}
+        MCP_TOKEN: ${{ secrets.MANUS_API_KEY }}
+        MCP_ENDPOINT: "https://manus.im/mcp" # Assuming a default Manus MCP endpoint
       run: |
         echo "--- Running Manus AI-driven Tests ---"
-        # This is a generic command. Replace with actual Manus CLI command for AI-driven testing.
-        # Example: manus-mcp-cli test --suite wasm-frontend --config manus-test-config.json
-        manus-mcp-cli test --project pema-platform-rust --target wasm-frontend --suite unit-integration
+        # Replace with actual Manus CLI command for AI-driven testing if different
+        mcp test --project pema-platform-rust --suite wasm-frontend
         echo "Manus AI-driven Testing completed."
 
     - name: Deploy AI Models via Manus (if applicable)
       if: github.ref == 'refs/heads/master'
       env:
-        MANUS_API_KEY: ${{ secrets.MANUS_API_KEY }}
+        MCP_TOKEN: ${{ secrets.MANUS_API_KEY }}
+        MCP_ENDPOINT: "https://manus.im/mcp" # Assuming a default Manus MCP endpoint
       run: |
         echo "--- Deploying AI Models via Manus ---"
-        # This is a generic command. Replace with actual Manus CLI command for AI model deployment.
-        # Example: manus-mcp-cli deploy model --model-path ./models/my_ai_model --target production
-        manus-mcp-cli deploy --project pema-platform-rust --target production --model-version latest
+        # Replace with actual Manus CLI command for AI model deployment if different
+        mcp deploy --project pema-platform-rust --target production --model-version latest
         echo "Manus AI Model Deployment completed."
 
     # Example step to push changes back to the repository (if AI analysis generates artifacts)
