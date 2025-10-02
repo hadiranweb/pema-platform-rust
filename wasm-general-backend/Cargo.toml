@@ -15,23 +15,9 @@ uuid = { version = "1", features = ["serde", "v4"] }
 models = { path = "../../shared/models" }
 config = { path = "../../shared/config" }
 
-# Optional dependencies for server-side execution (if still needed for a hybrid approach)
-actix-web = { version = "4", optional = true }
-tokio = { version = "1", features = ["full"], optional = true }
-sqlx = { version = "0.7", features = [ "runtime-tokio-rustls", "postgres", "macros", "uuid", "chrono" ], optional = true }
-dotenv = { version = "0.15", optional = true }
-log = { version = "0.4", optional = true }
-env_logger = { version = "0.10", optional = true }
+
 
 [features]
-default = ["server"]
-server = [
-    "actix-web",
-    "tokio",
-    "sqlx",
-    "dotenv",
-    "log",
-    "env_logger"
-]
+default = []
 wasm = ["wasm-bindgen"]
 
