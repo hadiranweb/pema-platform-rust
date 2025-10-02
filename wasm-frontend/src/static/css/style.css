@@ -1071,3 +1071,54 @@ html {
 ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(135deg, #667eea, #764ba2);
 }
+
+
+/* Grok Dark Theme - Inspired by Grok */
+
+:root {  
+    --grok-bg-color: rgb(22, 22, 24);  
+    --grok-text-color: rgb(252, 252, 252);  
+    --grok-button-bg-color: rgba(249, 248, 246, 0.9); /* Example from Sign up button */  
+    --grok-button-text-color: rgb(22, 22, 24); /* Assuming dark text on light button */  
+    --grok-font-family: universalSans, Inter, "Inter Fallback", Roboto, "Open Sans", Arial, sans-serif, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";  
+}
+
+body {  
+    background-color: var(--grok-bg-color);  
+    color: var(--grok-text-color);  
+    font-family: var(--grok-font-family);  
+    font-size: 16px;  
+    margin: 0;  
+    padding: 0;  
+    overflow: hidden; /* Hide scrollbars to keep the starry background fixed */  
+}
+
+.dark-theme-content {  
+    position: relative;  
+    z-index: 1;  
+    text-align: center;  
+    padding: 50px;  
+}
+
+h1 {  
+    font-size: 3em;  
+    margin-bottom: 20px;  
+    color: var(--grok-text-color);  
+}
+
+p {  
+    font-size: 1.2em;  
+    line-height: 1.6;  
+    color: var(--grok-text-color);  
+}
+
+/* Canvas for Shooting Star Effect */  
+#starry-background {  
+    position: fixed;  
+    top: 0;  
+    left: 0;  
+    width: 100%;  
+    height: 100%;  
+    z-index: 0;  
+}
+
