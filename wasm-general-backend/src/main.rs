@@ -21,16 +21,15 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(pool.clone()))
             .service(
-                web::scope("/api/products")
-                    .route("/health", web::get().to(handlers::health_handler::health_check))
-                    .route("", web::post().to(handlers::product_handlers::create_product))
-                    .route("", web::get().to(handlers::product_handlers::get_products))
-                    .route("/{product_id}", web::get().to(handlers::product_handlers::get_product_by_id))
-                    .route("/{product_id}", web::put().to(handlers::product_handlers::update_product))
-                    .route("/{product_id}", web::delete().to(handlers::product_handlers::delete_product)),
+                web::scope("/api/notifications")
+                    .route("", web::post().to(handlers::notification_handlers::create_notification))
+                    .route("", web::get().to(handlers::notification_handlers::get_notifications))
+                    .route("/{notification_id}", web::get().to(handlers::notification_handlers::get_notification_by_id))
+                    .route("/{notification_id}", web::put().to(handlers::notification_handlers::update_notification))
+                    .route("/{notification_id}", web::delete().to(handlers::notification_handlers::delete_notification)),
             )
     })
-    .bind("127.0.0.1:8081")?
+    .bind("127.0.0.1:8085")?
     .run()
     .await
 }
