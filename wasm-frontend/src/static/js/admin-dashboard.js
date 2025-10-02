@@ -135,6 +135,12 @@ class AdminDashboard {
         if (exportUsersBtn) {
             exportUsersBtn.addEventListener('click', () => this.exportUsers());
         }
+
+        // Google Login Placeholder
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        if (googleLoginBtn) {
+            googleLoginBtn.addEventListener('click', () => this.handleGoogleLogin());
+        }
     }
 
     toggleSidebar() {
@@ -237,13 +243,19 @@ class AdminDashboard {
             if (!this.wasmGeneral) return;
 
             // Use WASM to get stats data
-            const statsData = this.wasmGeneral.get_dashboard_stats();
+            // const statsData = this.wasmGeneral.get_dashboard_stats();
+            const statsData = {
+                total_users: '1,234',
+                active_orders: '56',
+                daily_revenue: '$12,345',
+                total_products: '789'
+            }; // Mock data
             
             // Update stat cards
-            this.updateStatCard('totalUsers', statsData.total_users || '1,234');
-            this.updateStatCard('activeOrders', statsData.active_orders || '56');
-            this.updateStatCard('dailyRevenue', statsData.daily_revenue || '$12,345');
-            this.updateStatCard('totalProducts', statsData.total_products || '789');
+            this.updateStatCard('totalUsers', statsData.total_users);
+            this.updateStatCard('activeOrders', statsData.active_orders);
+            this.updateStatCard('dailyRevenue', statsData.daily_revenue);
+            this.updateStatCard('totalProducts', statsData.total_products);
             
         } catch (error) {
             console.error('Failed to load stats:', error);
@@ -394,7 +406,34 @@ class AdminDashboard {
     }
 
     async loadTopProducts() {
-        // Implementation for top products
+        try {
+            if (!this.wasmGeneral) return;
+            // const topProducts = this.wasmGeneral.get_top_products(); // Example WASM call
+            const topProducts = [
+                { name: 'لپ‌تاپ گیمینگ', sales: '1,200', progress: 90 },
+                { name: 'موس بی‌سیم', sales: '850', progress: 75 },
+                { name: 'کیبورد مکانیکی', sales: '700', progress: 60 }
+            ]; // Mock data
+            this.renderTopProducts(topProducts);
+        } catch (error) {
+            console.error('Failed to load top products:', error);
+        }
+    }
+
+    renderTopProducts(products) {
+        const topProductsContainer = document.getElementById('topProductsList');
+        if (!topProductsContainer) return;
+        topProductsContainer.innerHTML = products.map(product => `
+            <div class="product-item">
+                <div class="product-info">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-sales">فروش: ${product.sales}</div>
+                </div>
+                <div class="product-progress">
+                    <div class="progress-bar" style="width: ${product.progress}%;"></div>
+                </div>
+            </div>
+        `).join('');
     }
 
     async loadSectionData(sectionName) {
@@ -427,6 +466,7 @@ class AdminDashboard {
             if (!this.wasmGeneral) return;
 
             // Mock users data - replace with WASM call
+            // const users = this.wasmGeneral.get_users();
             const users = [
                 {
                     id: 1,
@@ -443,6 +483,14 @@ class AdminDashboard {
                     role: 'vendor',
                     status: 'active',
                     joinDate: '1403/01/10'
+                },
+                {
+                    id: 3,
+                    name: 'علی حسینی',
+                    email: 'ali@example.com',
+                    role: 'admin',
+                    status: 'active',
+                    joinDate: '1402/12/01'
                 }
             ];
             
@@ -570,28 +618,258 @@ class AdminDashboard {
     }
 
     async loadProductsData() {
-        // Implementation for products data
-        console.log('Loading products data...');
+        try {
+            if (!this.wasmGeneral) return;
+            // const products = this.wasmGeneral.get_products(); // Example WASM call
+            const products = [
+                { id: 1, name: 'لپ‌تاپ گیمینگ', category: 'الکترونیک', price: '$1500', stock: 50, status: 'in-stock' },
+                { id: 2, name: 'موس بی‌سیم', category: 'لوازم جانبی', price: '$50', stock: 200, status: 'in-stock' },
+                { id: 3, name: 'کیبورد مکانیکی', category: 'لوازم جانبی', price: '$120', stock: 80, status: 'low-stock' }
+            ]; // Mock data
+            this.renderProductsTable(products);
+        } catch (error) {
+            console.error('Failed to load products data:', error);
+        }
+    }
+
+    renderProductsTable(products) {
+        const tbody = document.getElementById('productsTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = products.map(product => `
+            <tr>
+                <td>${product.id}</td>
+                <td>${product.name}</td>
+                <td>${product.category}</td>
+                <td>${product.price}</td>
+                <td>${product.stock}</td>
+                <td><span class="status-badge ${product.status}">${product.status}</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="adminDashboard.editProduct(${product.id})"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn" onclick="adminDashboard.deleteProduct(${product.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
     }
 
     async loadOrdersData() {
-        // Implementation for orders data
-        console.log('Loading orders data...');
+        try {
+            if (!this.wasmGeneral) return;
+            // const orders = this.wasmGeneral.get_orders(); // Example WASM call
+            const orders = [
+                { id: 101, customer: 'احمد محمدی', total: '$250', date: '1403/07/01', status: 'pending' },
+                { id: 102, customer: 'فاطمه احمدی', total: '$1500', date: '1403/06/28', status: 'completed' },
+                { id: 103, customer: 'علی حسینی', total: '$75', date: '1403/06/25', status: 'cancelled' }
+            ]; // Mock data
+            this.renderOrdersTable(orders);
+        } catch (error) {
+            console.error('Failed to load orders data:', error);
+        }
+    }
+
+    renderOrdersTable(orders) {
+        const tbody = document.getElementById('ordersTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = orders.map(order => `
+            <tr>
+                <td>${order.id}</td>
+                <td>${order.customer}</td>
+                <td>${order.total}</td>
+                <td>${order.date}</td>
+                <td><span class="status-badge ${order.status}">${order.status}</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="adminDashboard.viewOrder(${order.id})"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn" onclick="adminDashboard.editOrder(${order.id})"><i class="fas fa-edit"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
     }
 
     async loadVendorsData() {
-        // Implementation for vendors data
-        console.log('Loading vendors data...');
+        try {
+            if (!this.wasmGeneral) return;
+            // const vendors = this.wasmGeneral.get_vendors(); // Example WASM call
+            const vendors = [
+                { id: 1, name: 'فروشگاه تکنولوژی', email: 'tech@example.com', products: 150, status: 'active' },
+                { id: 2, name: 'لوازم خانگی مدرن', email: 'home@example.com', products: 80, status: 'active' },
+                { id: 3, name: 'کتابفروشی دانش', email: 'books@example.com', products: 30, status: 'inactive' }
+            ]; // Mock data
+            this.renderVendorsTable(vendors);
+        } catch (error) {
+            console.error('Failed to load vendors data:', error);
+        }
+    }
+
+    renderVendorsTable(vendors) {
+        const tbody = document.getElementById('vendorsTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = vendors.map(vendor => `
+            <tr>
+                <td>${vendor.id}</td>
+                <td>${vendor.name}</td>
+                <td>${vendor.email}</td>
+                <td>${vendor.products}</td>
+                <td><span class="status-badge ${vendor.status}">${vendor.status}</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="adminDashboard.viewVendor(${vendor.id})"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn" onclick="adminDashboard.editVendor(${vendor.id})"><i class="fas fa-edit"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
     }
 
     async loadReportsData() {
-        // Implementation for reports data
-        console.log('Loading reports data...');
+        try {
+            if (!this.wasmGeneral) return;
+            // const reports = this.wasmGeneral.get_reports(); // Example WASM call
+            const reports = [
+                { id: 1, name: 'گزارش فروش ماهانه', date: '1403/07/01', type: 'PDF', actions: 'Download' },
+                { id: 2, name: 'گزارش عملکرد کاربر', date: '1403/06/15', type: 'CSV', actions: 'Download' }
+            ]; // Mock data
+            this.renderReportsTable(reports);
+        } catch (error) {
+            console.error('Failed to load reports data:', error);
+        }
+    }
+
+    renderReportsTable(reports) {
+        const tbody = document.getElementById('reportsTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = reports.map(report => `
+            <tr>
+                <td>${report.id}</td>
+                <td>${report.name}</td>
+                <td>${report.date}</td>
+                <td>${report.type}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="adminDashboard.downloadReport(${report.id})"><i class="fas fa-download"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
     }
 
     async loadSettingsData() {
-        // Implementation for settings data
-        console.log('Loading settings data...');
+        try {
+            if (!this.wasmGeneral) return;
+            // const settings = this.wasmGeneral.get_settings(); // Example WASM call
+            const settings = [
+                { id: 1, name: 'نام سایت', value: 'PEMA Platform', type: 'text' },
+                { id: 2, name: 'زبان پیش‌فرض', value: 'فارسی', type: 'select', options: ['فارسی', 'انگلیسی'] }
+            ]; // Mock data
+            this.renderSettingsForm(settings);
+        } catch (error) {
+            console.error('Failed to load settings data:', error);
+        }
+    }
+
+    renderSettingsForm(settings) {
+        const settingsFormContainer = document.getElementById('settingsForm');
+        if (!settingsFormContainer) return;
+        settingsFormContainer.innerHTML = settings.map(setting => {
+            if (setting.type === 'text') {
+                return `
+                    <div class="form-group">
+                        <label for="setting-${setting.id}">${setting.name}</label>
+                        <input type="text" id="setting-${setting.id}" value="${setting.value}">
+                    </div>
+                `;
+            } else if (setting.type === 'select') {
+                const optionsHtml = setting.options.map(option => `
+                    <option value="${option}" ${setting.value === option ? 'selected' : ''}>${option}</option>
+                `).join('');
+                return `
+                    <div class="form-group">
+                        <label for="setting-${setting.id}">${setting.name}</label>
+                        <select id="setting-${setting.id}">
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                `;
+            }
+            return '';
+        }).join('');
+    }
+
+    handleGoogleLogin() {
+        console.log("Initiating Google Login...");
+        // Google Sign-In button is rendered by the g-signin2 div
+        // The onSignIn callback will handle the actual login process
+        this.showInfo("Please click the Google Sign-In button.");
+    }
+
+    async onSignIn(googleUser) {
+        console.log("Google Sign-In successful!");
+        const profile = googleUser.getBasicProfile();
+        const id_token = googleUser.getAuthResponse().id_token;
+
+        console.log("ID: " + profile.getId()); // Do not send to your backend!
+        console.log("Name: " + profile.getName());
+        console.log("Image URL: " + profile.getImageUrl());
+        console.log("Email: " + profile.getEmail());
+        console.log("ID Token: " + id_token);
+
+        try {
+            if (!this.wasmAuth) {
+                throw new Error("WASM Auth module not loaded.");
+            }
+            // Send the ID token to your WASM backend for verification
+            // The WASM backend should verify the token and return a session token or user data
+            const response = await this.wasmAuth.google_login(id_token);
+            console.log("WASM Backend Google Login Response:", response);
+
+            if (response && response.success) {
+                this.showSuccess("ورود با گوگل با موفقیت انجام شد!");
+                // Redirect or update UI based on successful login
+                // Example: window.location.href = "/admin/dashboard";
+            } else {
+                this.showError(response.message || "خطا در ورود با گوگل از طریق بک‌اند.");
+            }
+        } catch (error) {
+            console.error("Error during Google Login with WASM backend:", error);
+            this.showError("خطا در ارتباط با بک‌اند برای ورود با گوگل.");
+        }
+    }
+}
+
+// Make onSignIn globally accessible for Google Sign-In library
+window.onSignIn = (googleUser) => {
+    if (window.adminDashboard) {
+        window.adminDashboard.onSignIn(googleUser);
+    } else {
+        // If adminDashboard is not yet initialized, store the user and process later
+        console.warn("adminDashboard not initialized yet, storing googleUser.");
+        window._googleUser = googleUser;
+    }
+};
+
+    showInfo(message) {
+        const notification = document.createElement('div');
+        notification.className = 'info-notification';
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #2196F3;
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            z-index: 10000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
     }
 
     showError(message) {
@@ -652,3 +930,4 @@ document.addEventListener('DOMContentLoaded', () => {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AdminDashboard;
 }
+

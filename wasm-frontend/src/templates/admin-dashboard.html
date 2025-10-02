@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>پنل مدیریت - پلتفرم PEMA</title>
+    <meta name="google-signin-client_id" content="831482696852-1evkheeuvoobf7j3jhqddqungi69qbn6.apps.googleusercontent.com">
     <link rel="stylesheet" href="/static/css/admin-dashboard.css">
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
 <body>
     <div class="admin-layout">
@@ -148,6 +150,12 @@
 
             <!-- Content Area -->
             <div class="admin-content">
+                <!-- Login Section -->
+                <section id="login-section" class="content-section">
+                    <h2>ورود به پنل مدیریت</h2>
+                    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+                </section>
+
                 <!-- Dashboard Section -->
                 <section id="dashboard-section" class="content-section active">
                     <!-- Stats Cards -->
@@ -231,34 +239,8 @@
                             <div class="card-header">
                                 <h3>محصولات پرفروش</h3>
                             </div>
-                            <div class="top-products">
-                                <div class="product-item">
-                                    <div class="product-info">
-                                        <div class="product-name">محصول A</div>
-                                        <div class="product-sales">123 فروش</div>
-                                    </div>
-                                    <div class="product-progress">
-                                        <div class="progress-bar" style="width: 85%"></div>
-                                    </div>
-                                </div>
-                                <div class="product-item">
-                                    <div class="product-info">
-                                        <div class="product-name">محصول B</div>
-                                        <div class="product-sales">98 فروش</div>
-                                    </div>
-                                    <div class="product-progress">
-                                        <div class="progress-bar" style="width: 70%"></div>
-                                    </div>
-                                </div>
-                                <div class="product-item">
-                                    <div class="product-info">
-                                        <div class="product-name">محصول C</div>
-                                        <div class="product-sales">76 فروش</div>
-                                    </div>
-                                    <div class="product-progress">
-                                        <div class="progress-bar" style="width: 55%"></div>
-                                    </div>
-                                </div>
+                            <div class="top-products" id="topProductsList">
+                                <!-- Top products will be rendered here by JavaScript -->
                             </div>
                         </div>
                     </div>
@@ -270,39 +252,8 @@
                             <button class="btn-link">مشاهده همه</button>
                         </div>
                         
-                        <div class="activity-list">
-                            <div class="activity-item">
-                                <div class="activity-icon success">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">کاربر جدید ثبت‌نام کرد</div>
-                                    <div class="activity-desc">احمد محمدی به سیستم پیوست</div>
-                                    <div class="activity-time">5 دقیقه پیش</div>
-                                </div>
-                            </div>
-                            
-                            <div class="activity-item">
-                                <div class="activity-icon warning">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">سفارش جدید</div>
-                                    <div class="activity-desc">سفارش #12345 ثبت شد</div>
-                                    <div class="activity-time">10 دقیقه پیش</div>
-                                </div>
-                            </div>
-                            
-                            <div class="activity-item">
-                                <div class="activity-icon info">
-                                    <i class="fas fa-box"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">محصول جدید</div>
-                                    <div class="activity-desc">محصول "لپ‌تاپ گیمینگ" اضافه شد</div>
-                                    <div class="activity-time">1 ساعت پیش</div>
-                                </div>
-                            </div>
+                        <div class="activity-list" id="recentActivityList">
+                            <!-- Recent activities will be rendered here by JavaScript -->
                         </div>
                     </div>
                 </section>
@@ -326,14 +277,14 @@
                     <div class="table-card">
                         <div class="table-filters">
                             <div class="filter-group">
-                                <input type="text" class="filter-input" placeholder="جستجوی کاربران..." id="userSearch">
-                                <select class="filter-select" id="userRoleFilter">
+                                <input type="text" id="userSearch" placeholder="جستجوی کاربر...">
+                                <select id="userRoleFilter">
                                     <option value="">همه نقش‌ها</option>
                                     <option value="admin">مدیر</option>
                                     <option value="vendor">فروشنده</option>
                                     <option value="customer">مشتری</option>
                                 </select>
-                                <select class="filter-select" id="userStatusFilter">
+                                <select id="userStatusFilter">
                                     <option value="">همه وضعیت‌ها</option>
                                     <option value="active">فعال</option>
                                     <option value="inactive">غیرفعال</option>
@@ -341,15 +292,12 @@
                                 </select>
                             </div>
                         </div>
-
                         <div class="table-container">
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>
-                                            <input type="checkbox" id="selectAllUsers">
-                                        </th>
-                                        <th>کاربر</th>
+                                        <th><input type="checkbox"></th>
+                                        <th>نام</th>
                                         <th>ایمیل</th>
                                         <th>نقش</th>
                                         <th>وضعیت</th>
@@ -358,130 +306,133 @@
                                     </tr>
                                 </thead>
                                 <tbody id="usersTableBody">
-                                    <!-- Users will be loaded here via JavaScript -->
+                                    <!-- User rows will be rendered here by JavaScript -->
                                 </tbody>
                             </table>
                         </div>
-
                         <div class="table-pagination">
-                            <div class="pagination-info">
-                                نمایش 1 تا 10 از 1234 کاربر
-                            </div>
+                            <div class="pagination-info">نمایش ۱ تا ۱۰ از ۱۲۳۴ کاربر</div>
                             <div class="pagination-controls">
-                                <button class="pagination-btn" disabled>قبلی</button>
-                                <button class="pagination-btn active">1</button>
-                                <button class="pagination-btn">2</button>
-                                <button class="pagination-btn">3</button>
+                                <button class="pagination-btn">قبلی</button>
+                                <button class="pagination-btn active">۱</button>
+                                <button class="pagination-btn">۲</button>
+                                <button class="pagination-btn">۳</button>
                                 <button class="pagination-btn">بعدی</button>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Other sections will be loaded dynamically -->
+                <!-- Products Section -->
                 <section id="products-section" class="content-section">
-                    <div class="loading-placeholder">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <span>در حال بارگذاری محصولات...</span>
+                    <h2>مدیریت محصولات</h2>
+                    <div class="table-card">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>نام محصول</th>
+                                        <th>دسته</th>
+                                        <th>قیمت</th>
+                                        <th>موجودی</th>
+                                        <th>وضعیت</th>
+                                        <th>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productsTableBody">
+                                    <!-- Product rows will be rendered here by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
 
+                <!-- Orders Section -->
                 <section id="orders-section" class="content-section">
-                    <div class="loading-placeholder">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <span>در حال بارگذاری سفارشات...</span>
+                    <h2>مدیریت سفارشات</h2>
+                    <div class="table-card">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>مشتری</th>
+                                        <th>مجموع</th>
+                                        <th>تاریخ</th>
+                                        <th>وضعیت</th>
+                                        <th>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ordersTableBody">
+                                    <!-- Order rows will be rendered here by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
 
+                <!-- Vendors Section -->
                 <section id="vendors-section" class="content-section">
-                    <div class="loading-placeholder">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <span>در حال بارگذاری فروشندگان...</span>
+                    <h2>مدیریت فروشندگان</h2>
+                    <div class="table-card">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>نام فروشگاه</th>
+                                        <th>ایمیل</th>
+                                        <th>تعداد محصولات</th>
+                                        <th>وضعیت</th>
+                                        <th>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vendorsTableBody">
+                                    <!-- Vendor rows will be rendered here by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
 
+                <!-- Reports Section -->
                 <section id="reports-section" class="content-section">
-                    <div class="loading-placeholder">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <span>در حال بارگذاری گزارشات...</span>
+                    <h2>گزارشات</h2>
+                    <div class="table-card">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>نام گزارش</th>
+                                        <th>تاریخ</th>
+                                        <th>نوع</th>
+                                        <th>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportsTableBody">
+                                    <!-- Report rows will be rendered here by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
 
+                <!-- Settings Section -->
                 <section id="settings-section" class="content-section">
-                    <div class="loading-placeholder">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <span>در حال بارگذاری تنظیمات...</span>
+                    <h2>تنظیمات</h2>
+                    <div class="settings-form" id="settingsForm">
+                        <!-- Settings form will be rendered here by JavaScript -->
                     </div>
+                    <button class="btn btn-primary mt-4">ذخیره تغییرات</button>
                 </section>
+
             </div>
         </main>
-    </div>
-
-    <!-- User Menu Dropdown -->
-    <div id="userDropdown" class="dropdown-menu">
-        <div class="dropdown-header">
-            <div class="user-avatar">
-                <img src="/static/images/admin-avatar.jpg" alt="Admin" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="avatar-fallback">م</div>
-            </div>
-            <div class="user-details">
-                <div class="user-name">مدیر سیستم</div>
-                <div class="user-email">admin@pema.ir</div>
-            </div>
-        </div>
-        <div class="dropdown-divider"></div>
-        <a href="#profile" class="dropdown-item">
-            <i class="fas fa-user"></i>
-            پروفایل
-        </a>
-        <a href="#account" class="dropdown-item">
-            <i class="fas fa-cog"></i>
-            تنظیمات حساب
-        </a>
-        <a href="#help" class="dropdown-item">
-            <i class="fas fa-question-circle"></i>
-            راهنما
-        </a>
-        <div class="dropdown-divider"></div>
-        <a href="#logout" class="dropdown-item danger">
-            <i class="fas fa-sign-out-alt"></i>
-            خروج
-        </a>
-    </div>
-
-    <!-- Notifications Dropdown -->
-    <div id="notificationsDropdown" class="dropdown-menu notifications">
-        <div class="dropdown-header">
-            <h4>اعلان‌ها</h4>
-            <button class="mark-all-read">همه را خوانده علامت‌گذاری کن</button>
-        </div>
-        <div class="notifications-list">
-            <div class="notification-item unread">
-                <div class="notification-icon success">
-                    <i class="fas fa-user-plus"></i>
-                </div>
-                <div class="notification-content">
-                    <div class="notification-title">کاربر جدید</div>
-                    <div class="notification-desc">احمد محمدی ثبت‌نام کرد</div>
-                    <div class="notification-time">5 دقیقه پیش</div>
-                </div>
-            </div>
-            <div class="notification-item">
-                <div class="notification-icon warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div class="notification-content">
-                    <div class="notification-title">هشدار موجودی</div>
-                    <div class="notification-desc">موجودی محصول "لپ‌تاپ" کم است</div>
-                    <div class="notification-time">1 ساعت پیش</div>
-                </div>
-            </div>
-        </div>
-        <div class="dropdown-footer">
-            <a href="#all-notifications">مشاهده همه اعلان‌ها</a>
-        </div>
     </div>
 
     <script src="/static/js/admin-dashboard.js"></script>
 </body>
 </html>
+
