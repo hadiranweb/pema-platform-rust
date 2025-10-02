@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>PEMA Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; /* Hide scrollbars */
+        }
+        #starry-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Ensure it's behind other content */
+        }
+        .content {
+            position: relative;
+            z-index: 1; /* Ensure content is above the background */
+            color: white;
+            text-align: center;
+            padding-top: 100px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="starry-background"></canvas>
+    <div class="content">
+        <script type="module">
+            import init from './pkg/wasm_frontend.js';
+            async function run() {
+                await init();
+            }
+            run();
+        </script>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('starry-background');
+            const ctx = canvas.getContext('2d');
+
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            window.addEventListener('resize', () => {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            });
+
+            const stars = [];
+            const numStars = 200;
+
+            function createStar() {
+                return {
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.random() * 1.5,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.5 + 0.1
+                };
+            }
+
+            for (let i = 0; i < numStars; i++) {
+                stars.push(createStar());
+            }
+
+            function drawStars() {
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, width, height);
+
+                stars.forEach(star => {
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+                    ctx.fill();
+
+                    star.y += star.speed;
+                    if (star.y > height) {
+                        star.y = 0;
+                        star.x = Math.random() * width;
+                    }
+                });
+            }
+
+            const shootingStars = [];
+            const numShootingStars = 5;
+
+            function createShootingStar() {
+                return {
+                    x: Math.random() * width,
+                    y: Math.random() * height / 2, // Start from upper half
+                    length: Math.random() * 100 + 50,
+                    speed: Math.random() * 10 + 5,
+                    angle: Math.PI / 4, // 45 degrees for diagonal movement
+                    alpha: 1,
+                    fadeSpeed: 0.02
+                };
+            }
+
+            function drawShootingStars() {
+                if (Math.random() < 0.02 && shootingStars.length < numShootingStars) { // Randomly add new shooting stars
+                    shootingStars.push(createShootingStar());
+                }
+
+                shootingStars.forEach((sStar, index) => {
+                    ctx.beginPath();
+                    ctx.moveTo(sStar.x, sStar.y);
+                    ctx.lineTo(sStar.x + sStar.length * Math.cos(sStar.angle), sStar.y + sStar.length * Math.sin(sStar.angle));
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${sStar.alpha})`;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    sStar.x += sStar.speed * Math.cos(sStar.angle);
+                    sStar.y += sStar.speed * Math.sin(sStar.angle);
+                    sStar.alpha -= sStar.fadeSpeed;
+
+                    if (sStar.alpha <= 0 || sStar.x > width || sStar.y > height) {
+                        shootingStars.splice(index, 1);
+                    }
+                });
+            }
+
+            function animate() {
+                drawStars();
+                drawShootingStars();
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        });
+    </script>
+</body>
+</html>
+
