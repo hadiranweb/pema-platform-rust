@@ -3,10 +3,10 @@ name: Build WASM and AI Integration
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   build:
@@ -35,47 +35,52 @@ jobs:
     - name: Build WASM project
       run: wasm-pack build --target web --out-dir wasm-frontend/pkg wasm-frontend
 
-    - name: Install Manus MCP CLI
-      run: | # Assuming manus-mcp-cli is a globally available utility or can be installed via pip/npm
-        # Replace with actual installation command if needed, e.g., pip install manus-mcp-cli or npm install -g manus-mcp-cli
-        echo "manus-mcp-cli is assumed to be pre-installed or installed via a custom script."
-        # For demonstration, we'll just ensure it's callable. In a real scenario, you'd add installation steps here.
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
 
-    - name: Manus AI Code Analysis
+    - name: Install Manus MCP CLI (assuming npm package)
+      run: npm install -g manus-mcp-cli
+
+    - name: Run Manus AI Code Analysis
       env:
         MANUS_API_KEY: ${{ secrets.MANUS_API_KEY }}
       run: |
         echo "--- Running Manus AI Code Analysis ---"
-        # Replace with actual Manus CLI command for code analysis
-        manus-mcp-cli analyze code --project-path . --output-format github-actions
+        # This is a generic command. Replace with actual Manus CLI command for code analysis.
+        # Example: manus-mcp-cli analyze code --project-path ./wasm-frontend --output-format github-actions
+        manus-mcp-cli analyze --project pema-platform-rust --target wasm-frontend --type code-quality
         echo "Manus AI Code Analysis completed."
 
-    - name: Manus AI-driven Testing
+    - name: Run Manus AI-driven Tests
       env:
         MANUS_API_KEY: ${{ secrets.MANUS_API_KEY }}
       run: |
         echo "--- Running Manus AI-driven Tests ---"
-        # Replace with actual Manus CLI command for AI-driven testing
-        manus-mcp-cli test --project-path . --test-suite wasm-frontend
+        # This is a generic command. Replace with actual Manus CLI command for AI-driven testing.
+        # Example: manus-mcp-cli test --suite wasm-frontend --config manus-test-config.json
+        manus-mcp-cli test --project pema-platform-rust --target wasm-frontend --suite unit-integration
         echo "Manus AI-driven Testing completed."
 
-    - name: Manus AI Model Deployment (if applicable)
+    - name: Deploy AI Models via Manus (if applicable)
+      if: github.ref == 'refs/heads/master'
       env:
         MANUS_API_KEY: ${{ secrets.MANUS_API_KEY }}
       run: |
         echo "--- Deploying AI Models via Manus ---"
-        # Replace with actual Manus CLI command for AI model deployment
-        # This might involve pushing models to a Manus-managed registry or deploying to a specific service.
-        manus-mcp-cli deploy model --model-path ./models/my_ai_model --target production
+        # This is a generic command. Replace with actual Manus CLI command for AI model deployment.
+        # Example: manus-mcp-cli deploy model --model-path ./models/my_ai_model --target production
+        manus-mcp-cli deploy --project pema-platform-rust --target production --model-version latest
         echo "Manus AI Model Deployment completed."
 
     # Example step to push changes back to the repository (if AI analysis generates artifacts)
     # - name: Commit and Push AI Analysis Results (Optional)
-    #   if: github.event_name == 'push'
+    #   if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     #   run: |
     #     git config user.name "github-actions[bot]"
     #     git config user.email "github-actions[bot]@users.noreply.github.com"
     #     git add .
     #     git commit -m "CI: Add AI analysis results" || echo "No changes to commit"
-    #     git push origin main
+    #     git push origin master
 
