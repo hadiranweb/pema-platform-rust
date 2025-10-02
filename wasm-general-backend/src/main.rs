@@ -21,15 +21,12 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(pool.clone()))
             .service(
-                web::scope("/api/notifications")
-                    .route("", web::post().to(handlers::notification_handlers::create_notification))
-                    .route("", web::get().to(handlers::notification_handlers::get_notifications))
-                    .route("/{notification_id}", web::get().to(handlers::notification_handlers::get_notification_by_id))
-                    .route("/{notification_id}", web::put().to(handlers::notification_handlers::update_notification))
-                    .route("/{notification_id}", web::delete().to(handlers::notification_handlers::delete_notification)),
+                web::scope("/api/payments")
+                    .route("/process", web::post().to(handlers::payment_handlers::process_payment))
+                    .route("/{payment_id}", web::get().to(handlers::payment_handlers::get_payment_status)),
             )
     })
-    .bind("127.0.0.1:8085")?
+    .bind("127.0.0.1:8086")?
     .run()
     .await
 }

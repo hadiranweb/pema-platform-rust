@@ -8,7 +8,7 @@ pub enum ServiceError {
     NotFound(String),
     InternalServerError(String),
     BadRequest(String),
-    DuplicateEntry(String),
+    PaymentFailed(String),
 }
 
 impl Display for ServiceError {
@@ -26,7 +26,7 @@ impl ResponseError for ServiceError {
                 .json(serde_json::json!({ "message": msg })),
             ServiceError::BadRequest(msg) => HttpResponse::build(StatusCode::BAD_REQUEST)
                 .json(serde_json::json!({ "message": msg })),
-            ServiceError::DuplicateEntry(msg) => HttpResponse::build(StatusCode::CONFLICT)
+            ServiceError::PaymentFailed(msg) => HttpResponse::build(StatusCode::PAYMENT_REQUIRED)
                 .json(serde_json::json!({ "message": msg })),
         }
     }
@@ -37,9 +37,6 @@ impl From<SqlxError> for ServiceError {
         log::error!("SQLx error: {:?}", err);
         match err {
             SqlxError::RowNotFound => ServiceError::NotFound("Record not found".to_string()),
-            SqlxError::Database(db_err) if db_err.is_unique_violation() => {
-                ServiceError::DuplicateEntry("A record with this unique identifier already exists.".to_string())
-            }
             _ => ServiceError::InternalServerError("Database error occurred".to_string()),
         }
     }
