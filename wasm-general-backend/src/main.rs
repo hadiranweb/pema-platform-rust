@@ -1,7 +1,7 @@
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
-use sqlx::PgPool;
-use std::env;
+
+use config::AppConfig;
 
 mod error;
 mod handlers;
@@ -12,21 +12,18 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
     env_logger::init();
 
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let pool = PgPool::connect(&database_url)
-        .await
-        .expect("Failed to create database pool");
+    let config = AppConfig::from_env().expect("Failed to load app configuration");
 
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(pool.clone()))
+            .app_data(web::Data::new(config.clone()))
             .service(
-                web::scope("/api/payments")
-                    .route("/process", web::post().to(handlers::payment_handlers::process_payment))
-                    .route("/{payment_id}", web::get().to(handlers::payment_handlers::get_payment_status)),
+                web::scope("/api/token")
+                    .route("/generate", web::post().to(handlers::token_handlers::generate_token))
+                    .route("/validate", web::post().to(handlers::token_handlers::validate_token)),
             )
     })
-    .bind("127.0.0.1:8086")?
+    .bind("127.0.0.1:8082")?
     .run()
     .await
 }

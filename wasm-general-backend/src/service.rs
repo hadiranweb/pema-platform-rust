@@ -1,37 +1,55 @@
-use sqlx::PgPool;
+use jsonwebtoken::{encode, decode, Header, EncodingKey, DecodingKey, Validation};
+use serde::{Deserialize, Serialize};
+use chrono::{Utc, Duration};
 use uuid::Uuid;
-use chrono::Utc;
-use models::payment::{Payment, CreatePayment, PaymentStatus};
+use config::AppConfig;
 use crate::error::ServiceError;
 
-pub async fn process_payment(pool: &PgPool, new_payment: CreatePayment) -> Result<Payment, ServiceError> {
-    // Simulate payment processing
-    let transaction_id = Uuid::new_v4().to_string();
-    let payment_status = "completed".to_string(); // In a real scenario, this would come from a payment gateway
-
-    let payment = sqlx::query_as::<_, Payment>(
-        "INSERT INTO payments (order_id, amount, status, transaction_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *"
-    )
-    .bind(new_payment.order_id)
-    .bind(new_payment.amount)
-    .bind(payment_status)
-    .bind(transaction_id)
-    .bind(Utc::now())
-    .bind(Utc::now())
-    .fetch_one(pool)
-    .await?;
-
-    Ok(payment)
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    pub sub: Uuid,
+    pub exp: usize,
+    pub iat: usize,
 }
 
-pub async fn get_payment_status(pool: &PgPool, payment_id: Uuid) -> Result<Payment, ServiceError> {
-    let payment = sqlx::query_as::<_, Payment>(
-        "SELECT * FROM payments WHERE id = $1"
-    )
-    .bind(payment_id)
-    .fetch_one(pool)
-    .await?;
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TokenResponse {
+    pub token: String,
+}
 
-    Ok(payment)
+#[derive(Debug, Deserialize)]
+pub struct GenerateTokenRequest {
+    pub user_id: Uuid,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ValidateTokenRequest {
+    pub token: String,
+}
+
+pub fn generate_jwt_token(user_id: Uuid, config: &AppConfig) -> Result<String, ServiceError> {
+    let now = Utc::now();
+    let expiration = now + Duration::hours(24);
+
+    let claims = Claims {
+        sub: user_id,
+        iat: now.timestamp() as usize,
+        exp: expiration.timestamp() as usize,
+    };
+
+    let header = Header::default();
+    let encoding_key = EncodingKey::from_secret(config.jwt_secret.as_bytes());
+
+    encode(&header, &claims, &encoding_key)
+          .map_err(|e| ServiceError::InternalServerError(format!("Failed to encode token: {}", e).to_string()))
+}
+
+pub fn validate_jwt_token(token: &str, config: &AppConfig) -> Result<Claims, ServiceError> {
+    let decoding_key = DecodingKey::from_secret(config.jwt_secret.as_bytes());
+    let validation = Validation::default();
+
+    decode::<Claims>(token, &decoding_key, &validation)
+        .map(|data| data.claims)
+        .map_err(|e| ServiceError::Unauthorized(format!("Invalid token: {}", e).to_string()))
 }
 
