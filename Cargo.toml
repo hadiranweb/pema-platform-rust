@@ -1,4 +1,5 @@
 [workspace]
+resolver = "2"
 members = [
     "wasm-frontend",
     "wasm-auth-backend",
@@ -9,4 +10,10 @@ members = [
 
 [profile.dev]
 overflow-checks = false
+
+
+
+[patch.crates-io]
+ahash = { path = "./ahash_fork" }
+tempfile = { path = "./tempfile_fork" }
 
