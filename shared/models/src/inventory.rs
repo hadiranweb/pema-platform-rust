@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
+
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
-#[derive(Debug, FromRow, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct InventoryItem {
     pub id: Uuid,
     pub product_id: Uuid,
