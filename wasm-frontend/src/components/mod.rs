@@ -1,7 +1,9 @@
 pub mod landing_page;
 pub mod admin_dashboard;
 pub mod product_card;
+pub mod product_management;
 pub mod order_item;
+pub mod order_management;
 pub mod user_profile;
 pub mod vendor_card;
 pub mod notification_item;
@@ -9,9 +11,11 @@ pub mod pagination;
 pub mod stats_widget;
 
 pub use landing_page::LandingPage;
-pub use admin_dashboard::AdminDashboard;
+pub use admin_dashboard::{AdminDashboard, DashboardStats};
 pub use product_card::ProductCard;
+pub use product_management::{ProductManagement, ProductModal};
 pub use order_item::OrderItem;
+pub use order_management::{OrderManagement, OrderDetailsModal};
 pub use user_profile::UserProfile;
 pub use vendor_card::VendorCard;
 pub use notification_item::NotificationItem;

@@ -10,6 +10,8 @@ pub struct Product {
     pub description: Option<String>,
     pub price: f64,
     pub stock: i32,
+    pub category: String,
+    pub vendor_id: Uuid,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
