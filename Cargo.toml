@@ -1,14 +1,8 @@
 [workspace]
 members = [
-    "services/user-management",
-    "services/product-catalog",
-    "services/token-service",
-    "services/inventory-management",
-    "services/order-management",
-    "services/notification-service",
-    "services/payment-gateway",
-    "services/vendor-management",
-    "services/landing-page",
+    "wasm-frontend",
+    "wasm-auth-backend",
+    "wasm-general-backend",
     "shared/models",
     "shared/config",
 ]
