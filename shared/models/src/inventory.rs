@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct InventoryItem {
     pub id: Uuid,
     pub product_id: Uuid,
@@ -13,14 +13,14 @@ pub struct InventoryItem {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct CreateInventoryItem {
     pub product_id: Uuid,
     pub quantity: i32,
     pub location: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct UpdateInventoryItem {
     pub quantity: Option<i32>,
     pub location: Option<String>,

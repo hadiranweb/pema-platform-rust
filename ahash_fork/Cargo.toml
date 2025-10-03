@@ -10,5 +10,5 @@ getrandom = { version = "0.2", features = ["js"], optional = true }
 default = ["std"]
 std = []
 
-[target.\'wasm32-unknown-unknown\'.dependencies]
+[target.'wasm32-unknown-unknown'.dependencies]
 getrandom = { version = "0.2", features = ["js"] }

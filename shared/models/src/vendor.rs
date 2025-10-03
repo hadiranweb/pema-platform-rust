@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct Vendor {
     pub id: Uuid,
     pub name: String,
@@ -15,7 +15,7 @@ pub struct Vendor {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct CreateVendor {
     pub name: String,
     pub contact_person: String,
@@ -24,7 +24,7 @@ pub struct CreateVendor {
     pub address: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct UpdateVendor {
     pub name: Option<String>,
     pub contact_person: Option<String>,
