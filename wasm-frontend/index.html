@@ -30,9 +30,30 @@
     <canvas id="starry-background"></canvas>
     <div class="content">
         <script type="module">
-            import init from './pkg/wasm_frontend.js';
+            import init_frontend from './pkg/wasm_frontend.js';
+            import * as wasm_general_backend from './wasm_general_backend_pkg/wasm_general_backend.js';
+            import * as wasm_auth_backend from './wasm_auth_backend_pkg/wasm_auth_backend.js';
+
             async function run() {
-                await init();
+                await init_frontend();
+                await wasm_general_backend.default();
+                await wasm_auth_backend.default();
+
+                // Expose backend functions globally for testing/demonstration
+                window.wasm_general_backend = wasm_general_backend;
+                window.wasm_auth_backend = wasm_auth_backend;
+
+                console.log("WASM Frontend and Backend modules loaded.");
+                console.log("wasm_general_backend functions:", Object.keys(wasm_general_backend));
+                console.log("wasm_auth_backend functions:", Object.keys(wasm_auth_backend));
+
+                // Example usage (for demonstration, can be removed later)
+                // wasm_general_backend.get_product_list().then(products => {
+                //     console.log("Products from WASM backend:", products);
+                // });
+                // wasm_auth_backend.generate_auth_token("test_user").then(token => {
+                //     console.log("Generated token:", token);
+                // });
             }
             run();
         </script>
