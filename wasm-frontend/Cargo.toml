@@ -6,13 +6,30 @@ edition = "2021"
 [dependencies]
 yew = { version = "0.21", features = ["csr"] }
 wasm-bindgen = "0.2"
-web-sys = { version = "0.3", features = ["Window", "Document", "Element", "HtmlElement", "HtmlSelectElement", "Event"] }
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = [
+  "Window", 
+  "Document", 
+  "Element", 
+  "HtmlElement", 
+  "HtmlSelectElement", 
+  "HtmlInputElement",
+  "Event",
+  "Request",
+  "RequestInit",
+  "RequestMode",
+  "Response",
+  "Headers",
+  "Storage",
+] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 reqwest = { version = "0.11", features = ["json"] }
-wasm-bindgen-futures = "0.4"
+urlencoding = "2.1"
+base64 = "0.21"
 models = { path = "../shared/models" }
-uuid = { version = "1", features = ["serde"] }
+uuid = { version = "1", features = ["serde", "v4"] }
 chrono = { version = "0.4", features = ["serde"] }
 
 [lib]

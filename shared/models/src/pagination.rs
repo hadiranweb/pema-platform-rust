@@ -11,7 +11,7 @@ pub struct Pagination {
 fn default_page() -> u32 { 1 }
 fn default_limit() -> u32 { 10 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PaginatedResponse<T> {
     pub items: Vec<T>,
     pub total_items: u32,
