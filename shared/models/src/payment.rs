@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
+
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
-#[derive(Debug, FromRow, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Payment {
     pub id: Uuid,
     pub order_id: Uuid,
