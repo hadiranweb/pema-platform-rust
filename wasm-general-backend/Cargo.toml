@@ -14,7 +14,6 @@ uuid = { version = "1", features = ["serde", "v4"] }
 models = { path = "../shared/models" }
 config = { path = "../shared/config" }
 
-[target.
-    'wasm32-unknown-unknown'.dependencies]
+[target."wasm32-unknown-unknown".dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 
