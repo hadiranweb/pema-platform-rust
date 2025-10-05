@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{Request, RequestInit, RequestMode, Response, Headers};
-use js_sys::Promise;
+
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
