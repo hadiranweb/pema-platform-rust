@@ -4,11 +4,18 @@ use yew::prelude::*;
 mod components;
 mod services;
 mod state;
+mod i18n;
 
 use components::{LandingPage, AdminDashboard, DashboardStats};
-use services::{ApiService, AuthService};
+
+
+
+
+
+
 use services::auth::TokenStorage;
 use state::{AppState, AppAction, AppStateContext, AuthAction};
+use i18n::context::I18nProvider;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum AppRoute {
@@ -50,34 +57,36 @@ fn app() -> Html {
 
     html! {
         <ContextProvider<AppStateContext> context={app_state}>
-            {match *current_route {
-                AppRoute::Landing => html! {
-                    <div>
-                        <LandingPage />
-                        <div class="fixed bottom-4 right-4">
-                            <button 
-                                onclick={handle_route_change.reform(|_| AppRoute::AdminDashboard)}
-                                class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
-                            >
-                                {"داشبورد مدیریت"}
-                            </button>
+            <I18nProvider>
+                {match *current_route {
+                    AppRoute::Landing => html! {
+                        <div>
+                            <LandingPage />
+                            <div class="fixed bottom-4 right-4">
+                                <button 
+                                    onclick={handle_route_change.reform(|_| AppRoute::AdminDashboard)}
+                                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
+                                >
+                                    {"داشبورد مدیریت"}
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                },
-                AppRoute::AdminDashboard => html! {
-                    <div>
-                        <AdminDashboard stats={DashboardStats::default()} />
-                        <div class="fixed bottom-4 right-4">
-                            <button 
-                                onclick={handle_route_change.reform(|_| AppRoute::Landing)}
-                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
-                            >
-                                {"صفحه اصلی"}
-                            </button>
+                    },
+                    AppRoute::AdminDashboard => html! {
+                        <div>
+                            <AdminDashboard stats={DashboardStats::default()} />
+                            <div class="fixed bottom-4 right-4">
+                                <button 
+                                    onclick={handle_route_change.reform(|_| AppRoute::Landing)}
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
+                                >
+                                    {"صفحه اصلی"}
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                },
-            }}
+                    },
+                }}
+            </I18nProvider>
         </ContextProvider<AppStateContext>>
     }
 }
@@ -86,3 +95,4 @@ fn app() -> Html {
 pub fn run_app() {
     yew::Renderer::<App>::new().render();
 }
+

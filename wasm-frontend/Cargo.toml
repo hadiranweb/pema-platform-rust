@@ -29,7 +29,7 @@ reqwest = { version = "0.11", features = ["json"] }
 urlencoding = "2.1"
 base64 = "0.21"
 models = { path = "../shared/models" }
-uuid = { version = "1", features = ["serde", "v4"] }
+uuid = { version = "1", features = ["serde", "v4", "js"] }
 chrono = { version = "0.4", features = ["serde"] }
 
 [lib]
