@@ -1,0 +1,15 @@
+{
+  "app.welcome": "خوش آمدید به برنامه ما",
+  "user.greeting": "سلام {name}، چطور هستید؟",
+  "counter.title": "شمارنده پیام",
+  "messages.count.zero": "پیامی ندارید",
+  "messages.count.one": "یک پیام دارید",
+  "messages.count.other": "{count} پیام دارید",
+  "complex.message": "این برنامه با {app} ساخته شده است",
+  "form.title": "فرم تماس",
+  "form.name": "نام",
+  "form.email": "ایمیل",
+  "form.submit": "ارسال",
+  "footer.copyright": "© تمام حقوق محفوظ است",
+  "footer.language": "زبان فعلی"
+}
