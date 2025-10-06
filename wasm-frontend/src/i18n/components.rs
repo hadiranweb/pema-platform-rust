@@ -1,10 +1,8 @@
 use yew::prelude::*;
-use super::hooks::{use_language, use_i18n};
-use super::core::{Language, TranslatableString};
+use super::hooks::{use_language, use_translation, use_translation_params};
+use super::core::Language;
 use std::collections::HashMap;
 
-
-/// Language switcher component
 #[derive(Properties, PartialEq)]
 pub struct LanguageSwitcherProps {
     #[prop_or_default]
@@ -18,7 +16,7 @@ pub fn language_switcher(props: &LanguageSwitcherProps) -> Html {
     let (current_lang, change_lang) = use_language();
     
     let languages = vec![
-        (Language::Farsi, "🇮🇷", "فارسی"),
+        (Language::Persian, "🇮🇷", "فارسی"),
         (Language::English, "🇬🇧", "English"),
     ];
     
@@ -34,10 +32,7 @@ pub fn language_switcher(props: &LanguageSwitcherProps) -> Html {
                 
                 html! {
                     <button
-                        class={classes!(
-                            "lang-btn",
-                            is_active.then(|| "active")
-                        )}
+                        class={classes!("lang-btn", is_active.then(|| "active"))}
                         onclick={on_click}
                     >
                         { if props.show_flags {
@@ -53,21 +48,27 @@ pub fn language_switcher(props: &LanguageSwitcherProps) -> Html {
     }
 }
 
-/// Trans component for complex translations with HTML
 #[derive(Properties, PartialEq)]
 pub struct TransProps {
-        pub text_key: String,
-    #[prop_or_default]
-    pub children: Children,
+    pub key: AttrValue,
     #[prop_or_default]
     pub params: HashMap<String, String>,
 }
 
 #[function_component(Trans)]
 pub fn trans(props: &TransProps) -> Html {
-    let i18n = use_i18n();
-        let translation = i18n.i18n.t_with_params(&props.text_key, &props.params);
-
+    let key_string = props.key.to_string();
+    
+    let translation = if props.params.is_empty() {
+        use_translation(&key_string)
+    } else {
+        let params: HashMap<&str, &str> = props.params
+            .iter()
+            .map(|(k, v)| (k.as_str(), v.as_str()))
+            .collect();
+        use_translation_params(&key_string, params)
+    };
+    
     html! {
         <span class="i18n-trans">{ translation }</span>
     }

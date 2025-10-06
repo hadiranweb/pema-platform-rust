@@ -1,74 +1,131 @@
-use std::borrow::Cow;
 use std::collections::HashMap;
-use once_cell::sync::Lazy;
-use std::rc::Rc;
+use serde::{Deserialize, Serialize};
 
-pub type I18nString = Cow<'static, str>;
-
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Language {
+    Persian,
     English,
-    Farsi,
 }
 
 impl Language {
-    pub fn as_str(&self) -> &'static str {
+    pub fn code(&self) -> &\'static str {
         match self {
+            Language::Persian => "fa",
             Language::English => "en",
-            Language::Farsi => "fa",
         }
+    }
+    
+    pub fn name(&self) -> &\'static str {
+        match self {
+            Language::Persian => "فارسی",
+            Language::English => "English",
+        }
+    }
+    
+    pub fn is_rtl(&self) -> bool {
+        matches!(self, Language::Persian)
+    }
+    
+    pub fn direction(&self) -> &\'static str {
+        if self.is_rtl() { "rtl" } else { "ltr" }
     }
 }
 
-#[derive(PartialEq)]
+impl Default for Language {
+    fn default() -> Self {
+        Language::Persian
+    }
+}
+
 pub struct I18n {
-    language: Language,
-    translations: HashMap<String, String>,
+    current_language: Language,
+    fallback_language: Language,
+    translations: HashMap<Language, HashMap<String, String>>,
 }
 
 impl I18n {
-    pub fn new(language: Language) -> Self {
-        let translations = Self::load_translations(language);
-        I18n { language, translations }
-    }
-
-    fn load_translations(language: Language) -> HashMap<String, String> {
-        let json_str = match language {
-            Language::English => include_str!("en.json"),
-            Language::Farsi => include_str!("fa.json"),
-        };
-        serde_json::from_str(json_str).unwrap_or_default()
-    }
-
-    pub fn t(&self, key: &str) -> I18nString {
-        self.translations
-            .get(key)
-            .map(|s| Cow::Owned(s.clone()))
-            .unwrap_or_else(move || Cow::Owned(key.to_string()))
-    }
-
-    pub fn t_with_params(&self, key: &str, params: &HashMap<String, String>) -> I18nString {
-        let mut translated = self.t(key).to_string();
-        for (param_key, param_value) in params {
-            translated = translated.replace(&format!("{{{{{}}}}}", param_key), param_value);
+    pub fn new(default_language: Language) -> Self {
+        Self {
+            current_language: default_language,
+            fallback_language: Language::English,
+            translations: HashMap::new(),
         }
-        Cow::Owned(translated)
     }
-
-    pub fn t_plural(&self, key: &str, count: i64) -> I18nString {
-        let plural_key = match self.language {
+    
+    pub fn load_translations(&mut self, lang: Language, trans: HashMap<String, String>) {
+        self.translations.insert(lang, trans);
+    }
+    
+    pub fn load_from_json(&mut self, lang: Language, json: &str) -> Result<(), String> {
+        let trans: HashMap<String, String> = serde_json::from_str(json)
+            .map_err(|e| format!("Failed to parse JSON: {}", e))?;
+        self.load_translations(lang, trans);
+        Ok(())
+    }
+    
+    pub fn t(&self, key: &str) -> String {
+        if let Some(translations) = self.translations.get(&self.current_language) {
+            if let Some(text) = translations.get(key) {
+                return text.clone();
+            }
+        }
+        
+        if self.current_language != self.fallback_language {
+            if let Some(translations) = self.translations.get(&self.fallback_language) {
+                if let Some(text) = translations.get(key) {
+                    return text.clone();
+                }
+            }
+        }
+        
+        key.to_string()
+    }
+    
+    pub fn t_with_params(&self, key: &str, params: &HashMap<&str, &str>) -> String {
+        let mut text = self.t(key);
+        for (k, v) in params {
+            let placeholder = format!("{{}}", k);
+            text = text.replace(&placeholder, v);
+        }
+        text
+    }
+    
+    pub fn t_plural(&self, key: &str, count: i64) -> String {
+        let plural_key = match self.current_language {
+            Language::Persian => {
+                if count == 0 {
+                    format!("{}.zero", key)
+                } else if count == 1 {
+                    format!("{}.one", key)
+                } else {
+                    format!("{}.other", key)
+                }
+            }
             Language::English => {
-                if count == 1 { format!("{}_one", key) } else { format!("{}_other", key) }
-            },
-            Language::Farsi => {
-                // Simplified pluralization for Farsi, usually more complex
-                if count == 0 { format!("{}_zero", key) }
-                else if count == 1 { format!("{}_one", key) }
-                else { format!("{}_other", key) }
+                if count == 1 {
+                    format!("{}.one", key)
+                } else {
+                    format!("{}.other", key)
+                }
             }
         };
-        self.t(&plural_key)
+        
+        let count_str = count.to_string();
+        let mut params = HashMap::new();
+        params.insert("count", count_str.as_str());
+        self.t_with_params(&plural_key, &params)
+    }
+    
+    pub fn set_language(&mut self, lang: Language) {
+        self.current_language = lang;
+    }
+    
+    pub fn current_language(&self) -> Language {
+        self.current_language
+    }
+    
+    pub fn set_fallback_language(&mut self, lang: Language) {
+        self.fallback_language = lang;
     }
 }
 
