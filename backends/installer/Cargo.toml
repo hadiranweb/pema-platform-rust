@@ -1,0 +1,12 @@
+[package]
+name = "pema-installer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4.0"
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+shared-config = { path = "../../shared/config" }
+
