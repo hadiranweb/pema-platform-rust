@@ -1,15 +1,14 @@
-## PEMA Platform Installation Guide (Simplified with Makefile and Systemd)
+## PEMA Platform Setup Guide
 
-This comprehensive guide provides step-by-step instructions for installing the PEMA Platform on your server, leveraging the `Makefile` for automation and `systemd` for service management. This assumes you have already cloned the repository to your server.
+This guide provides instructions for setting up the PEMA Platform on your server. This assumes you have already cloned the repository to your server.
 
 ### 1. Project Architecture Overview
 
-Understanding the project structure is crucial for a smooth installation:
+Understanding the project structure is crucial for a smooth setup:
 
 *   **`backend-server/`**: This is the **main traditional Rust backend** (Actix-web server). It is responsible for loading the application configuration, serving the main API endpoints, and integrating with the WASM backend libraries.
-*   **`backends/installer/`**: This is a **standalone Actix-web server** specifically designed for the initial web-based installation process. It generates the `config.toml` file.
-*   **`backends/wasm-auth-backend/`**: This is a **WASM library** for authentication logic. It is *not* a standalone server but is integrated into the `backend-server/`.
-*   **`backends/wasm-general-backend/`**: This is a **WASM library** for general business logic. It is *not* a standalone server but is integrated into the `backend-server/`.
+*   **`wasm-auth-backend/`**: This is a **WASM library** for authentication logic. It is *not* a standalone server but is integrated into the `backend-server/`.
+*   **`wasm-general-backend/`**: This is a **WASM library** for general business logic. It is *not* a standalone server but is integrated into the `backend-server/`.
 *   **`wasm-frontend/`**: This is the Yew-based WebAssembly (WASM) frontend application.
 *   **`shared/`**: Contains shared modules, including the `config` module used by backend components.
 
@@ -69,7 +68,7 @@ sudo systemctl start postgresql
 sudo systemctl enable postgresql
 ```
 
-Create a database user and database for the PEMA Platform (remember these credentials for the installer):
+Create a database user and database for the PEMA Platform:
 
 ```bash
 sudo -i -u postgres psql
@@ -91,23 +90,22 @@ CREATE DATABASE pema_db OWNER pema_user;
     cd pema-platform-rust
     ```
 
-2.  **Prepare `.env` for the installer:**
+2.  **Configure `.env` for `backend-server`:**
 
-    Copy the example environment file and edit it for your server. This file is crucial for the installer to run.
+    Create a `.env` file in the `backend-server/` directory and edit it for your server. This file is crucial for the backend to run.
 
     ```bash
-    cp .env.example backends/installer/.env
-    nano backends/installer/.env
+    cp backend-server/.env.example backend-server/.env
+    nano backend-server/.env
     ```
 
-    **Key variables to configure in `backends/installer/.env`:**
+    **Key variables to configure in `backend-server/.env`:**
 
     *   `SERVER_HOST`: `0.0.0.0` (to listen on all interfaces) or `127.0.0.1`.
-    *   `SERVER_PORT`: The port the installer will listen on (default `8080`). **Ensure this port is free.**
+    *   `SERVER_PORT`: The port the backend will listen on (default `8080`). **Ensure this port is free.**
     *   `DOMAIN`, `BASE_URL`: Your server's public domain or IP.
     *   `DB_*`: Your PostgreSQL credentials.
     *   `JWT_SECRET`: A strong, random string (min 32 chars).
-    *   `CONFIG_PATH`: (Optional) Absolute path where `config.toml` should be saved (e.g., `/etc/pema/config.toml`). Ensure write permissions.
 
 ### 4. Build All Components
 
@@ -118,38 +116,12 @@ make all
 ```
 
 This command will:
-*   Build the `pema-installer` backend.
 *   Build the `wasm-auth-backend` (WASM library).
 *   Build the `wasm-general-backend` (WASM library).
 *   Build the `wasm-frontend` (generating static files in `wasm-frontend/dist/`).
+*   Build the `backend-server`.
 
-### 5. Run the Web Installer
-
-1.  **Run the installer backend:**
-
-    From the repository root, execute the `install-config` Makefile target:
-
-    ```bash
-    make install-config
-    ```
-
-    This will start the `pema-installer` server. You should see log messages indicating it's running, typically on `0.0.0.0:8080` (or your configured port).
-
-    **Important:** If you have a firewall, open the installer's port (e.g., `sudo ufw allow 8080/tcp`).
-
-2.  **Access the installer in your browser:**
-
-    Open a web browser and navigate to `http://<your_server_ip>:<installer_port>/`.
-
-3.  **Complete the installation form:**
-
-    Fill in all the required details, ensuring accuracy for domain, database credentials, and security settings. Click **"Install & Configure"**.
-
-4.  **Stop the installer:**
-
-    Once the installation is successful (you'll see a success message in the browser), stop the `pema-installer` process by pressing `Ctrl+C` in your terminal.
-
-### 6. Nginx Configuration
+### 5. Nginx Configuration
 
 Configure Nginx as a reverse proxy to serve your frontend and proxy requests to your `backend-server`.
 
@@ -242,7 +214,7 @@ Configure Nginx as a reverse proxy to serve your frontend and proxy requests to 
     sudo systemctl reload nginx
     ```
 
-### 7. Systemd Service Setup for `backend-server`
+### 6. Systemd Service Setup for `backend-server`
 
 To ensure your main `backend-server` runs continuously and automatically, set it up as a `systemd` service.
 
@@ -292,19 +264,19 @@ To ensure your main `backend-server` runs continuously and automatically, set it
     journalctl -u pema-backend -f # View live logs
     ```
 
-### 8. Troubleshooting
+### 7. Troubleshooting
 
-*   **Port Conflicts**: If a service fails to start, check `sudo netstat -tulnp` to see if its port is already in use. Adjust the port in the relevant configuration (e.g., `.env` for installer, `backend-server` code, Nginx config).
+*   **Port Conflicts**: If a service fails to start, check `sudo netstat -tulnp` to see if its port is already in use. Adjust the port in the relevant configuration (e.g., `backend-server/.env`, Nginx config).
 *   **Nginx `502 Bad Gateway`**: This usually means Nginx cannot connect to your backend server. Check:
     *   Is `pema-backend.service` running (`sudo systemctl status pema-backend`)?
     *   Is the `proxy_pass` URL in Nginx correct and does it match the port your `backend-server` is listening on?
     *   Are there any firewall rules blocking Nginx from connecting to the backend?
-*   **File Permissions**: Ensure the user running the `pema-installer` and `pema-backend.service` has read/write permissions to necessary directories (e.g., where `config.toml` is stored, `wasm-frontend/dist`).
+*   **File Permissions**: Ensure the user running the `pema-backend.service` has read/write permissions to necessary directories (e.g., `wasm-frontend/dist`).
 *   **Logs**: Always check `journalctl -u <service_name> -f` for detailed error messages from your services.
 
 ### Conclusion
 
-By following this updated guide, you will have a fully installed and configured PEMA Platform. The `Makefile` streamlines the build process, the web installer simplifies initial configuration, and `systemd` ensures your main backend runs reliably. Nginx serves your frontend efficiently and securely, acting as a reverse proxy to your `backend-server`.
+By following this guide, you will have a fully installed and configured PEMA Platform. The `Makefile` streamlines the build process, and `systemd` ensures your main backend runs reliably. Nginx serves your frontend efficiently and securely, acting as a reverse proxy to your `backend-server`.
 
 Your PEMA Platform is now ready for production use!
 
