@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پلتفرم پما - سرمایه‌گذاری هوشمند در نقره‌های ارزشمند</title>
+    <link rel="stylesheet" href="./static/styles.css">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet" type="text/css" />
+<link rel="modulepreload" href="/wasm-frontend-c5d074310fe0f90d.js" crossorigin="anonymous" integrity="sha384-ESk0Hfe54/FCwk+/x/UBqzd9emd3uT7EibyDOtaxTfAoguzJe99IZPH858isLPMY"><link rel="preload" href="/wasm-frontend-c5d074310fe0f90d_bg.wasm" crossorigin="anonymous" integrity="sha384-tfLoOTcOuc3SDOl02AziznwzpH6TodkzeGls+AgHJ1vuT/PjufZzlhTXmbwA8aGc" as="fetch" type="application/wasm"></head>
+<body>
+    <div id="app"></div>
+
+    <script type="module">
+        // Console logging function for debugging
+        function log(message) {
+            console.log(`[PEMA Platform] ${message}`);
+        }
+        
+        // Initialize WASM modules
+        async function initWasmModules() {
+            try {
+                log("Loading WASM general backend...");
+                const wasmGeneralBackend = await import('./wasm_general_backend_pkg/wasm_general_backend.js');
+                await wasmGeneralBackend.default();
+                window.wasm_general_backend = wasmGeneralBackend;
+                log("✓ WASM general backend loaded successfully");
+                
+                log("Loading WASM auth backend...");
+                const wasmAuthBackend = await import('./wasm_auth_backend_pkg/wasm_auth_backend.js');
+                await wasmAuthBackend.default();
+                window.wasm_auth_backend = wasmAuthBackend;
+                log("✓ WASM auth backend loaded successfully");
+                
+                log("All WASM modules loaded. Platform ready!");
+                
+            } catch (error) {
+                log("✗ Error loading WASM modules: " + error.message);
+                console.error(error);
+            }
+        }
+        
+        // Initialize the application
+        async function init() {
+            try {
+                log("Initializing PEMA Platform Frontend...");
+                
+                // Load WASM modules first
+                await initWasmModules();
+                
+                // Load the main Yew application
+                log("Loading main application...");
+                const wasmApp = await import('./pkg/wasm_frontend.js');
+                await wasmApp.default();
+                log("✓ Main application loaded successfully");
+                
+                log("PEMA Platform is ready!");
+                
+            } catch (error) {
+                log("✗ Error initializing application: " + error.message);
+                console.error(error);
+                
+                // Show error message to user
+                document.getElementById('app').innerHTML = `
+                    <div style="padding: 2rem; text-align: center; color: #e74c3c;">
+                        <h2>خطا در بارگذاری پلتفرم</h2>
+                        <p>متأسفانه در بارگذاری پلتفرم پما خطایی رخ داده است.</p>
+                        <p>لطفاً صفحه را مجدداً بارگذاری کنید.</p>
+                        <button onclick="location.reload()" style="padding: 0.75rem 1.5rem; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            بارگذاری مجدد
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Start the application when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+
+<script type="module">
+import init, * as bindings from '/wasm-frontend-c5d074310fe0f90d.js';
+const wasm = await init({ module_or_path: '/wasm-frontend-c5d074310fe0f90d_bg.wasm' });
+
+
+window.wasmBindings = bindings;
+
+
+dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
+
+</script></body>
+</html>

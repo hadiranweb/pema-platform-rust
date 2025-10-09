@@ -1,32 +1,50 @@
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
+use yew_router::prelude::*;
+use std::collections::HashMap;
+use serde_json;
 
-mod components;
-mod services;
-mod state;
-mod i18n;
+pub mod components;
+pub mod services;
+pub mod state;
+pub mod i18n;
+pub mod pages;
+pub mod models;
 
-use components::{LandingPage, AdminDashboard, DashboardStats};
+use crate::services::auth::TokenStorage;
+use crate::state::{AppState, AppAction, AppStateContext, AuthAction};
+use crate::i18n::{I18nProvider, Language};
+use crate::components::{Header, Footer, Sidebar};
 
-
-
-
-
-
-use services::auth::TokenStorage;
-use state::{AppState, AppAction, AppStateContext, AuthAction};
-use i18n::context::I18nProvider;
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Routable)]
 pub enum AppRoute {
-    Landing,
+    #[at("/")]
+    Home,
+    #[at("/login")]
+    Login,
+    #[at("/dashboard")]
     AdminDashboard,
+    #[at("/products")]
+    Products,
+    #[at("/orders")]
+    Orders,
+    #[at("/inventory")]
+    Inventory,
+    #[at("/vendors")]
+    Vendors,
+    #[at("/profile")]
+    Profile,
+    #[not_found]
+    #[at("/404")]
+    NotFound,
 }
 
 #[function_component(App)]
 fn app() -> Html {
     let app_state = use_reducer(AppState::default);
-    let current_route = use_state(|| AppRoute::Landing);
+
+    // Prepare translations
+    let translations = load_translations_from_json();
 
     // Initialize authentication state from local storage
     use_effect_with((), {
@@ -35,7 +53,7 @@ fn app() -> Html {
             if let Some(token) = TokenStorage::get_token() {
                 if let Some(user) = TokenStorage::get_user() {
                     app_state.dispatch(AppAction::Auth(AuthAction::LoginSuccess(
-                        services::auth::AuthResponse {
+                        crate::models::auth::AuthResponse {
                             user,
                             token,
                             refresh_token: TokenStorage::get_refresh_token().unwrap_or_default(),
@@ -48,46 +66,99 @@ fn app() -> Html {
         }
     });
 
-    let handle_route_change = {
-        let current_route = current_route.clone();
-        Callback::from(move |route: AppRoute| {
-            current_route.set(route);
-        })
-    };
-
     html! {
         <ContextProvider<AppStateContext> context={app_state}>
-            <I18nProvider>
-                {match *current_route {
-                    AppRoute::Landing => html! {
-                        <div>
-                            <LandingPage />
-                            <div class="fixed bottom-4 right-4">
-                                <button 
-                                    onclick={handle_route_change.reform(|_| AppRoute::AdminDashboard)}
-                                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
-                                >
-                                    {"داشبورد مدیریت"}
-                                </button>
-                            </div>
-                        </div>
-                    },
-                    AppRoute::AdminDashboard => html! {
-                        <div>
-                            <AdminDashboard stats={DashboardStats::default()} />
-                            <div class="fixed bottom-4 right-4">
-                                <button 
-                                    onclick={handle_route_change.reform(|_| AppRoute::Landing)}
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
-                                >
-                                    {"صفحه اصلی"}
-                                </button>
-                            </div>
-                        </div>
-                    },
-                }}
-            </I18nProvider>
+            <BrowserRouter>
+                <I18nProvider 
+                    default_language={Language::Persian}
+                    translations={Some(translations)}
+                >
+                    <AppRouter />
+                </I18nProvider>
+            </BrowserRouter>
         </ContextProvider<AppStateContext>>
+    }
+}
+
+#[function_component(AppRouter)]
+fn app_router() -> Html {
+    let navigator = use_navigator().expect("Navigator not found!");
+    let route = use_route::<AppRoute>().expect("Route not found!");
+
+    let handle_route_change = Callback::from(move |r: AppRoute| {
+        navigator.push(&r);
+    });
+
+    html! {
+        <div class="app-container">
+            <Header />
+            <Sidebar on_route_change={handle_route_change.clone()} />
+            <main class="main-content">
+                { match route {
+                    AppRoute::Home => html! { <pages::home::Home /> },
+                    AppRoute::AdminDashboard => html! { <pages::dashboard::Dashboard on_route_change={handle_route_change.clone()} /> },
+                    AppRoute::Products => html! { <pages::products::Products /> },
+                    AppRoute::Orders => html! { <pages::orders::Orders /> },
+                    AppRoute::Inventory => html! { <pages::inventory::Inventory /> },
+                    AppRoute::Vendors => html! { <pages::vendors::Vendors /> },
+                    AppRoute::Profile => html! { <pages::profile::Profile /> },
+                    AppRoute::Login => html! { <pages::login::Login /> },
+                    AppRoute::NotFound => html! { <pages::not_found::NotFound /> },
+                }}
+            </main>
+            <Footer />
+        </div>
+    }
+}
+
+// Helper function to load from JSON (compile-time embedding)
+fn load_translations_from_json() -> HashMap<Language, HashMap<String, String>> {
+    let mut translations = HashMap::new();
+    
+    // Embed JSON files at compile time
+    let fa_json = include_str!("../../locales/fa.json");
+    let en_json = include_str!("../../locales/en.json");
+    
+    // Parse and flatten
+    if let Ok(fa_map) = parse_and_flatten_json(fa_json) {
+        translations.insert(Language::Persian, fa_map);
+    }
+    
+    if let Ok(en_map) = parse_and_flatten_json(en_json) {
+        translations.insert(Language::English, en_map);
+    }
+    
+    translations
+}
+
+// Flatten nested JSON to dot notation
+fn parse_and_flatten_json(json: &str) -> Result<HashMap<String, String>, serde_json::Error> {
+    let value: serde_json::Value = serde_json::from_str(json)?;
+    let mut result = HashMap::new();
+    flatten_json_value(&value, String::new(), &mut result);
+    Ok(result)
+}
+
+fn flatten_json_value(
+    value: &serde_json::Value,
+    prefix: String,
+    result: &mut HashMap<String, String>,
+) {
+    match value {
+        serde_json::Value::Object(map) => {
+            for (key, val) in map {
+                let new_prefix = if prefix.is_empty() {
+                    key.clone()
+                } else {
+                    format!("{}.{}", prefix, key)
+                };
+                flatten_json_value(val, new_prefix, result);
+            }
+        }
+        serde_json::Value::String(s) => {
+            result.insert(prefix, s.clone());
+        }
+        _ => {}
     }
 }
 

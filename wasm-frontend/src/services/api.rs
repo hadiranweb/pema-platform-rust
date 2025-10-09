@@ -28,6 +28,14 @@ impl std::error::Error for ApiError {}
 pub type ApiResult<T> = Result<T, ApiError>;
 
 impl ApiService {
+    pub async fn fetch_products(&self) -> ApiResult<Vec<models::product::Product>> {
+        self.get("products").await
+    }
+
+    pub async fn fetch_orders(&self) -> ApiResult<Vec<models::order::Order>> {
+        self.get("orders").await
+    }
+
     pub fn new(base_url: &str) -> Self {
         Self {
             base_url: base_url.to_string(),
@@ -81,9 +89,9 @@ impl ApiService {
     {
         let url = format!("{}/{}", self.base_url.trim_end_matches('/'), endpoint.trim_start_matches('/'));
         
-        let mut opts = RequestInit::new();
-        opts.method(method);
-        opts.mode(RequestMode::Cors);
+                let opts = RequestInit::new();
+                opts.set_method(method);
+                opts.set_mode(RequestMode::Cors);
 
         // Set headers
         let headers = Headers::new().map_err(|_| ApiError {
@@ -103,7 +111,7 @@ impl ApiService {
             })?;
         }
 
-        opts.headers(&headers);
+                opts.set_headers(&headers);
 
         // Set body if provided
         if let Some(body) = body {
@@ -111,7 +119,7 @@ impl ApiService {
                 message: format!("Failed to serialize request body: {}", e),
                 code: None,
             })?;
-            opts.body(Some(&JsValue::from_str(&body_str)));
+                        opts.set_body(&JsValue::from_str(&body_str));
         }
 
         let request = Request::new_with_str_and_init(&url, &opts).map_err(|_| ApiError {

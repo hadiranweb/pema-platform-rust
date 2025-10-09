@@ -1,13 +1,15 @@
 use yew::prelude::*;
-use yew_router::prelude::*;
-use crate::Route;
+
+use crate::AppRoute;
 
 #[derive(Properties, PartialEq)]
 pub struct SidebarProps {
     #[prop_or(false)]
     pub is_open: bool,
     #[prop_or_default]
-    pub onclose: Callback<()>,
+    pub onclose: Callback<MouseEvent>,
+    #[prop_or_default]
+    pub on_route_change: Callback<AppRoute>,
 }
 
 #[function_component(Sidebar)]
@@ -16,6 +18,36 @@ pub fn sidebar(props: &SidebarProps) -> Html {
         "sidebar sidebar-open"
     } else {
         "sidebar"
+    };
+
+    let on_dashboard_click = {
+        let on_route_change = props.on_route_change.clone();
+        Callback::from(move |_| on_route_change.emit(AppRoute::AdminDashboard))
+    };
+
+    let on_products_click = {
+        let on_route_change = props.on_route_change.clone();
+        Callback::from(move |_| on_route_change.emit(AppRoute::Products))
+    };
+
+    let on_orders_click = {
+        let on_route_change = props.on_route_change.clone();
+        Callback::from(move |_| on_route_change.emit(AppRoute::Orders))
+    };
+
+    let on_inventory_click = {
+        let on_route_change = props.on_route_change.clone();
+        Callback::from(move |_| on_route_change.emit(AppRoute::Inventory))
+    };
+
+    let on_vendors_click = {
+        let on_route_change = props.on_route_change.clone();
+        Callback::from(move |_| on_route_change.emit(AppRoute::Vendors))
+    };
+
+    let on_profile_click = {
+        let on_route_change = props.on_route_change.clone();
+        Callback::from(move |_| on_route_change.emit(AppRoute::Profile))
     };
 
     html! {
@@ -28,25 +60,26 @@ pub fn sidebar(props: &SidebarProps) -> Html {
             </div>
             
             <nav class="sidebar-nav">
-                <Link<Route> to={Route::Dashboard} classes="sidebar-link">
+                <button class="sidebar-link" onclick={on_dashboard_click}>
                     {"داشبورد"}
-                </Link<Route>>
-                <Link<Route> to={Route::Products} classes="sidebar-link">
+                </button>
+                <button class="sidebar-link" onclick={on_products_click}>
                     {"محصولات"}
-                </Link<Route>>
-                <Link<Route> to={Route::Orders} classes="sidebar-link">
+                </button>
+                <button class="sidebar-link" onclick={on_orders_click}>
                     {"سفارشات"}
-                </Link<Route>>
-                <Link<Route> to={Route::Inventory} classes="sidebar-link">
+                </button>
+                <button class="sidebar-link" onclick={on_inventory_click}>
                     {"موجودی"}
-                </Link<Route>>
-                <Link<Route> to={Route::Vendors} classes="sidebar-link">
+                </button>
+                <button class="sidebar-link" onclick={on_vendors_click}>
                     {"تأمین‌کنندگان"}
-                </Link<Route>>
-                <Link<Route> to={Route::Profile} classes="sidebar-link">
+                </button>
+                <button class="sidebar-link" onclick={on_profile_click}>
                     {"پروفایل"}
-                </Link<Route>>
+                </button>
             </nav>
         </aside>
     }
 }
+

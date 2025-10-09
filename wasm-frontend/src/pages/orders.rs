@@ -1,5 +1,5 @@
 use yew::prelude::*;
-use crate::components::{button::Button, card::Card, input::Input};
+use crate::components::{Button, Card, Input};
 use crate::services::api::ApiService;
 
 #[derive(Clone, PartialEq)]
@@ -27,7 +27,8 @@ pub fn orders() -> Html {
         
         move |_| {
             wasm_bindgen_futures::spawn_local(async move {
-                match ApiService::fetch_orders().await {
+                let api_service = ApiService::new("http://localhost:8080/api");
+                match api_service.fetch_orders().await {
                     Ok(_result) => {
                         // For demo purposes, use static data
                         let demo_orders = vec![
@@ -63,7 +64,7 @@ pub fn orders() -> Html {
                         loading.set(false);
                     },
                     Err(err_msg) => {
-                        error.set(Some(err_msg));
+                        error.set(Some(err_msg.to_string()));
                         loading.set(false);
                     }
                 }
@@ -163,7 +164,7 @@ pub fn orders() -> Html {
                                         <td>{&order.customer_name}</td>
                                         <td>{&order.product_name}</td>
                                         <td>{order.quantity}</td>
-                                        <td>{format!("{:,} تومان", order.total_price as i64)}</td>
+                                        <td>{format!("{} تومان", order.total_price as i64)}</td>
                                         <td>
                                             <span class={format!("status-badge {}", status_class)}>
                                                 {&order.status}
@@ -211,3 +212,4 @@ pub fn orders() -> Html {
         </div>
     }
 }
+

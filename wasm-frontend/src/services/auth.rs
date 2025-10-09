@@ -1,13 +1,7 @@
+use crate::models::auth::{LoginRequest, AuthResponse};
 use models::user::User;
 use super::api::{ApiService, ApiResult};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LoginRequest {
-    pub email: String,
-    pub password: String,
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RegisterRequest {
@@ -15,14 +9,6 @@ pub struct RegisterRequest {
     pub password: String,
     pub name: String,
     pub phone: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AuthResponse {
-    pub user: User,
-    pub token: String,
-    pub refresh_token: String,
-    pub expires_in: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -139,9 +125,9 @@ impl Default for AuthService {
 pub struct TokenStorage;
 
 impl TokenStorage {
-    const TOKEN_KEY: &'static str = "auth_token";
-    const REFRESH_TOKEN_KEY: &'static str = "refresh_token";
-    const USER_KEY: &'static str = "user_data";
+   const TOKEN_KEY: &'static str = "auth_token";
+   const REFRESH_TOKEN_KEY: &'static str = "refresh_token";
+   const USER_KEY: &'static str = "user_data";
 
     pub fn save_auth_data(auth_response: &AuthResponse) {
         if let Some(storage) = Self::get_local_storage() {
@@ -185,4 +171,5 @@ impl TokenStorage {
         web_sys::window()?.local_storage().ok()?
     }
 }
+
 

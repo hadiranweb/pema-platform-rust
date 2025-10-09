@@ -1,7 +1,7 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::Route;
-use crate::components::{button::Button, card::Card};
+use crate::AppRoute;
+use crate::components::{Button, Card};
 
 #[function_component(Home)]
 pub fn home() -> Html {
@@ -10,14 +10,14 @@ pub fn home() -> Html {
     let on_get_started = {
         let navigator = navigator.clone();
         Callback::from(move |_| {
-            navigator.push(&Route::Login);
+            navigator.push(&AppRoute::Login);
         })
     };
 
     let on_view_products = {
         let navigator = navigator.clone();
         Callback::from(move |_| {
-            navigator.push(&Route::Products);
+            navigator.push(&AppRoute::Products);
         })
     };
 
@@ -31,7 +31,7 @@ pub fn home() -> Html {
                         {"با استفاده از فناوری Rust و هوش مصنوعی Manus AI، در دنیای نقره‌های گردآفرید سرمایه‌گذاری کنید"}
                     </p>
                     <div class="hero-actions">
-                        <Button onclick={on_get_started} variant="primary" size="large">
+                        <Button onclick={on_get_started.clone()} variant="primary" size="large">
                             {"شروع کنید"}
                         </Button>
                         <Button onclick={on_view_products} variant="secondary" size="large">
@@ -108,3 +108,4 @@ pub fn home() -> Html {
         </div>
     }
 }
+
