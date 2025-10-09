@@ -8,14 +8,14 @@ pub enum Language {
 }
 
 impl Language {
-    pub fn code(&self) -> &\'static str {
+    pub fn code(&self) -> &'static str {
         match self {
             Language::Persian => "fa",
             Language::English => "en",
         }
     }
     
-    pub fn name(&self) -> &\'static str {
+    pub fn name(&self) -> &'static str {
         match self {
             Language::Persian => "فارسی",
             Language::English => "English",
@@ -26,7 +26,7 @@ impl Language {
         matches!(self, Language::Persian)
     }
     
-    pub fn direction(&self) -> &\'static str {
+    pub fn direction(&self) -> &'static str {
         if self.is_rtl() { "rtl" } else { "ltr" }
     }
 }
@@ -128,4 +128,3 @@ impl I18n {
         self.fallback_language = lang;
     }
 }
-
