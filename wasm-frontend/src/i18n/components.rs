@@ -59,16 +59,15 @@ pub struct TransProps {
 pub fn trans(props: &TransProps) -> Html {
     let key_string = props.key.to_string();
     
-    let translation = if props.params.is_empty() {
-        use_translation(&key_string)
+    let translation_output = if props.params.is_empty() {
+        use_translation(key_string.clone())
     } else {
-        let params: HashMap<&str, &str> = props.params
-            .iter()
-            .map(|(k, v)| (k.as_str(), v.as_str()))
-            .collect();
-        use_translation_params(&key_string, params)
+        let params_owned: HashMap<String, String> = props.params.clone();
+        use_translation_params(key_string.clone(), params_owned)
     };
     
+    let translation = translation_output.to_string();
+
     html! {
         <span class="i18n-trans">{ translation }</span>
     }

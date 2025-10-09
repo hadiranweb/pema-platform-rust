@@ -2,6 +2,7 @@ use jsonwebtoken::{encode, decode, Header, Algorithm, Validation, EncodingKey, D
 use serde::{Deserialize, Serialize};
 use chrono::{Utc, Duration};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsValue;
 
 // Our claims struct, it needs to derive `Serialize` and `Deserialize`
 #[derive(Debug, Serialize, Deserialize)]

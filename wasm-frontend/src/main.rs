@@ -2,7 +2,7 @@ mod i18n;
 
 use yew::prelude::*;
 use std::collections::HashMap;
-use i18n::*;
+use i18n::{I18nProvider, Language, use_translation, use_translation_plural, use_translation_params, use_language, format_number_persian, format_date_jalali, LanguageSwitcher, Trans};
 use serde_json;
 
 fn main() {
@@ -45,7 +45,6 @@ fn header() -> Html {
             <LanguageSwitcher show_flags={true} />
         </header>
     }
-}
 
 #[function_component(MainContent)]
 fn main_content() -> Html {
@@ -122,7 +121,7 @@ fn form_example() -> Html {
     
     html! {
         <section class="form-section">
-            <h2>{ use_translation("form.title") }</h2>
+                <h2>{ use_translation("form.title") }</h2>
             <form {onsubmit}>
                 <div class="form-group">
                     <label>{ use_translation("form.name") }</label>
@@ -237,3 +236,5 @@ fn flatten_json_value(
     }
 }
 
+
+}

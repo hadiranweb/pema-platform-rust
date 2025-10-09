@@ -37,6 +37,7 @@ impl Default for Language {
     }
 }
 
+#[derive(PartialEq, Clone, Debug)]
 pub struct I18n {
     current_language: Language,
     fallback_language: Language,

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 pub mod landing_page;
 pub mod admin_dashboard;
 pub mod product_card;
@@ -10,6 +9,14 @@ pub mod vendor_card;
 pub mod notification_item;
 pub mod pagination;
 pub mod stats_widget;
+pub mod header;
+pub mod footer;
+pub mod button;
+pub mod input;
+pub mod card;
+pub mod modal;
+pub mod table;
+pub mod sidebar;
 
 pub use landing_page::LandingPage;
 pub use admin_dashboard::{AdminDashboard, DashboardStats};
@@ -22,13 +29,12 @@ pub use vendor_card::VendorCard;
 pub use notification_item::NotificationItem;
 pub use pagination::PaginationComponent;
 pub use stats_widget::StatsWidget;
-=======
-pub mod header;
-pub mod footer;
-pub mod button;
-pub mod input;
-pub mod card;
-pub mod modal;
-pub mod table;
-pub mod sidebar;
->>>>>>> origin/branch-4
+pub use header::Header;
+pub use footer::Footer;
+pub use button::Button;
+pub use input::Input;
+pub use card::Card;
+pub use modal::Modal;
+pub use table::Table;
+pub use sidebar::Sidebar;
+

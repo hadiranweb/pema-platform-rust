@@ -20,11 +20,14 @@ pub fn use_translation(key: &str) -> String {
 }
 
 #[hook]
-pub fn use_translation_params(key: &str, params: HashMap<&str, &str>) -> String {
+pub fn use_translation_params(key: String, params: HashMap<String, String>) -> String {
     let ctx = use_i18n();
     let translation = use_memo(
-        (key.to_string(), params.clone(), ctx.version),
-        |(k, p, _)| ctx.t_with_params(k, p)
+        (key.clone(), params.clone(), ctx.version),
+        |(k, p, _)| {
+            let params_ref: HashMap<&str, &str> = p.iter().map(|(k_str, v_str)| (k_str.as_str(), v_str.as_str())).collect();
+            ctx.t_with_params(&k, &params_ref)
+        }
     );
     (*translation).clone()
 }
