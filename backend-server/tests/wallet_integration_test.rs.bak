@@ -1,0 +1,95 @@
+use actix_web::{test, web, App};
+use sqlx::PgPool;
+use uuid::Uuid;
+
+use pema_backend_server::wallet::models::{CreateWalletRequest, WalletResponse, WalletStatus};
+use pema_backend_server::wallet::routes::wallet_routes;
+use pema_backend_server::config::AppConfig;
+
+async fn setup_test_app() -> (App<impl actix_web::dev::ServiceFactory>, PgPool, AppConfig) {
+    // Load test configuration
+    let config = AppConfig::load_from_env().expect("Failed to load test config");
+
+    // Create a connection pool for the test database
+    let pool = PgPool::connect(&config.database.url())
+        .await
+        .expect("Failed to connect to test database");
+
+    // Run migrations for the test database
+    sqlx::migrate!("../migrations")
+        .run(&pool)
+        .await
+        .expect("Failed to run migrations");
+
+    // Create a test Actix-web application
+    let app = test::init_service(
+        App::new()
+            .app_data(web::Data::new(pool.clone()))
+            .app_data(web::Data::new(config.clone()))
+            .configure(wallet_routes)
+    ).await;
+
+    (app, pool, config)
+}
+
+#[actix_web::test]
+async fn test_create_wallet() {
+    let (app, pool, config) = setup_test_app().await;
+
+    let user_id = Uuid::new_v4();
+    let create_req = CreateWalletRequest { user_id };
+
+    let req = test::TestRequest::post()
+        .uri("/wallet/")
+        .set_json(&create_req)
+        .to_request();
+
+    let resp = test::call_service(&app, req).await;
+    assert!(resp.status().is_created());
+
+    let wallet: WalletResponse = test::read_body_json(resp).await;
+    assert_eq!(wallet.user_id, user_id);
+    assert_eq!(wallet.balance, 0);
+    assert_eq!(wallet.currency, "PMC");
+    assert_eq!(wallet.status, WalletStatus::Active);
+
+    // Clean up test data
+    sqlx::query!("DELETE FROM wallets WHERE id = $1", wallet.id)
+        .execute(&pool)
+        .await
+        .unwrap();
+}
+
+#[actix_web::test]
+async fn test_get_wallet_by_user_id() {
+    let (app, pool, config) = setup_test_app().await;
+
+    let user_id = Uuid::new_v4();
+    let create_req = CreateWalletRequest { user_id };
+
+    let req = test::TestRequest::post()
+        .uri("/wallet/")
+        .set_json(&create_req)
+        .to_request();
+
+    let resp = test::call_service(&app, req).await;
+    let created_wallet: WalletResponse = test::read_body_json(resp).await;
+
+    let req = test::TestRequest::get()
+        .uri(&format!("/wallet/user/{}", user_id))
+        .to_request();
+
+    let resp = test::call_service(&app, req).await;
+    assert!(resp.status().is_ok());
+
+    let fetched_wallet: WalletResponse = test::read_body_json(resp).await;
+    assert_eq!(fetched_wallet.id, created_wallet.id);
+    assert_eq!(fetched_wallet.user_id, user_id);
+
+    // Clean up test data
+    sqlx::query!("DELETE FROM wallets WHERE id = $1", created_wallet.id)
+        .execute(&pool)
+        .await
+        .unwrap();
+}
+

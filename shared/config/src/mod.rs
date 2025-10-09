@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
-use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppConfig {
@@ -27,6 +26,19 @@ pub struct DatabaseConfig {
     pub user: String,
     pub password: String,
     pub pool_size: u32,
+}
+
+impl DatabaseConfig {
+    pub fn url(&self) -> String {
+        format!(
+            "postgres://{}:{}@{}:{}/{}",
+            self.user,
+            self.password,
+            self.host,
+            self.port,
+            self.name
+        )
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -55,13 +67,14 @@ pub enum Environment {
 impl AppConfig {
     /// Load config from file or environment
     pub fn load() -> Result<Self, ConfigError> {
-        // 1. Check if config file exists
+        // 1. Try to load from config.toml
         if Path::new("config.toml").exists() {
             return Self::load_from_file("config.toml");
         }
         
-        // 2. Try .env file
-        if Path::new(".env").exists() {
+        // 2. Try to load from .env file
+        dotenvy::dotenv().ok(); // Load .env file if it exists
+        if std::env::var("SERVER_HOST").is_ok() { // Check if any env var is set
             return Self::load_from_env();
         }
         
@@ -146,7 +159,7 @@ impl AppConfig {
     
     /// Check if installation is needed
     pub fn is_installed() -> bool {
-        Path::new("config.toml").exists() || Path::new(".env").exists()
+        Path::new("config.toml").exists() || std::env::var("SERVER_HOST").is_ok()
     }
 }
 
