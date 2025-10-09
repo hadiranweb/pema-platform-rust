@@ -7,6 +7,7 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+<<<<<<< HEAD
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
@@ -16,4 +17,38 @@ config = { path = "../shared/config" }
 
 [target."wasm32-unknown-unknown".dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
+=======
+js-sys = "0.3"
+
+wasm-bindgen-futures = { version = "0.4" }
+
+wasm-bindgen = { version = "0.2", optional = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["serde", "v4", "js"] }
+models = { path = "../shared/models" }
+config = { path = "../shared/config" }
+
+
+[features]
+default = []
+wasm = ["wasm-bindgen"]
+>>>>>>> origin/branch-4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

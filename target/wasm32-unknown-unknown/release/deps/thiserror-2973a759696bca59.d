@@ -1,0 +1,14 @@
+/home/ubuntu/pema-platform/target/wasm32-unknown-unknown/release/deps/thiserror-2973a759696bca59.d: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/aserror.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/display.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/var.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/private.rs /home/ubuntu/pema-platform/target/wasm32-unknown-unknown/release/build/thiserror-7d345cdca674fbe2/out/private.rs
+
+/home/ubuntu/pema-platform/target/wasm32-unknown-unknown/release/deps/libthiserror-2973a759696bca59.rlib: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/aserror.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/display.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/var.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/private.rs /home/ubuntu/pema-platform/target/wasm32-unknown-unknown/release/build/thiserror-7d345cdca674fbe2/out/private.rs
+
+/home/ubuntu/pema-platform/target/wasm32-unknown-unknown/release/deps/libthiserror-2973a759696bca59.rmeta: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/aserror.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/display.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/var.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/private.rs /home/ubuntu/pema-platform/target/wasm32-unknown-unknown/release/build/thiserror-7d345cdca674fbe2/out/private.rs
+
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/lib.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/aserror.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/display.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/var.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/private.rs:
+/home/ubuntu/pema-platform/target/wasm32-unknown-unknown/release/build/thiserror-7d345cdca674fbe2/out/private.rs:
+
+# env-dep:OUT_DIR=/home/ubuntu/pema-platform/target/wasm32-unknown-unknown/release/build/thiserror-7d345cdca674fbe2/out
