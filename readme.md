@@ -1,6 +1,6 @@
-## PEMA Platform Setup Guide
+## PEMA Platform Setup Guide (No Installer Version)
 
-This guide provides instructions for setting up the PEMA Platform on your server. This assumes you have already cloned the repository to your server.
+This guide provides instructions for setting up the PEMA Platform on your server using the `no-installer-version` branch. It includes an automated setup script for server configurations and detailed steps for building and running the application.
 
 ### 1. Project Architecture Overview
 
@@ -12,209 +12,65 @@ Understanding the project structure is crucial for a smooth setup:
 *   **`wasm-frontend/`**: This is the Yew-based WebAssembly (WASM) frontend application.
 *   **`shared/`**: Contains shared modules, including the `config` module used by backend components.
 
-### 2. Server Prerequisites
+### 2. Initial Server Setup with `setup_server.sh`
 
-Ensure your server is prepared with the necessary software and dependencies.
+To automate the installation of Nginx, PostgreSQL, Certbot, and UFW, and to configure them for your domain `pemalune.ir` and server IP `37.32.4.142`, use the provided `setup_server.sh` script.
 
-#### 2.1. System Updates
+**Before running the script:**
+*   Ensure your server is a fresh Ubuntu/Debian installation.
+*   Make sure your domain `pemalune.ir` is pointing to your server's IP `37.32.4.142`.
+*   **Important:** Edit the `setup_server.sh` script to replace `your_email@example.com` with your actual email address for Certbot registration.
 
-Keep your server's operating system up-to-date:
-
-*   **Ubuntu/Debian:** `sudo apt update && sudo apt upgrade -y`
-*   **Red Hat/CentOS:** `sudo yum update -y`
-
-#### 2.2. Rust Toolchain
-
-Install the Rust toolchain using `rustup`:
-
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source $HOME/.cargo/env
-```
-
-Verify the installation:
-
-```bash
-rustc --version
-cargo --version
-```
-
-#### 2.3. Nginx (Recommended Reverse Proxy)
-
-Install Nginx:
-
-*   **Ubuntu/Debian:** `sudo apt install nginx -y`
-*   **Red Hat/CentOS:** `sudo yum install nginx -y`
-
-Start and enable Nginx:
-
-```bash
-sudo systemctl start nginx
-sudo systemctl enable nginx
-```
-
-#### 2.4. PostgreSQL (Recommended Database)
-
-Install PostgreSQL:
-
-*   **Ubuntu/Debian:** `sudo apt install postgresql postgresql-contrib -y`
-*   **Red Hat/CentOS:** `sudo yum install postgresql-server postgresql-contrib -y`
-
-Initialize and start the database service if needed:
-
-```bash
-sudo postgresql-setup initdb
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-```
-
-Create a database user and database for the PEMA Platform:
-
-```bash
-sudo -i -u postgres psql
-```
-
-Inside the PostgreSQL prompt:
-
-```sql
-CREATE USER pema_user WITH PASSWORD 'your_strong_password';
-CREATE DATABASE pema_db OWNER pema_user;
-\q
-```
-
-### 3. Initial Project Setup
-
-1.  **Navigate to the repository root:**
+1.  **Clone the project (if you haven't already):**
 
     ```bash
+    git clone -b no-installer-version https://github.com/hadiranweb/pema-platform-rust.git
     cd pema-platform-rust
     ```
 
-2.  **Configure `.env` for `backend-server`:**
-
-    Create a `.env` file in the `backend-server/` directory and edit it for your server. This file is crucial for the backend to run.
+2.  **Make the setup script executable and run it:**
 
     ```bash
-    cp backend-server/.env.example backend-server/.env
-    nano backend-server/.env
+    chmod +x setup_server.sh
+    sudo ./setup_server.sh
     ```
 
-    **Key variables to configure in `backend-server/.env`:**
+    This script will:
+    *   Update system packages.
+    *   Install and configure Nginx.
+    *   Install and configure PostgreSQL, creating the `pema_user` and `pema_db` with password `F8s77@98`.
+    *   Install Certbot and obtain SSL certificates for `pemalune.ir` and `www.pemalune.ir`.
+    *   Configure UFW (firewall) to allow SSH and Nginx traffic.
+    *   Create and configure the `backend-server/.env` file with `SERVER_HOST=127.0.0.1`, `SERVER_PORT=8080`, `DOMAIN=pemalune.ir`, `BASE_URL=https://pemalune.ir`, and the database credentials. It will also generate a random `JWT_SECRET`.
 
-    *   `SERVER_HOST`: `0.0.0.0` (to listen on all interfaces) or `127.0.0.1`.
-    *   `SERVER_PORT`: The port the backend will listen on (default `8080`). **Ensure this port is free.**
-    *   `DOMAIN`, `BASE_URL`: Your server's public domain or IP.
-    *   `DB_*`: Your PostgreSQL credentials.
-    *   `JWT_SECRET`: A strong, random string (min 32 chars).
+### 3. Rust Toolchain and Project Build
 
-### 4. Build All Components
+After the server setup is complete, install the Rust toolchain and build the project components.
 
-From the repository root (`pema-platform-rust/`), use the `Makefile` to build all parts of the application:
-
-```bash
-make all
-```
-
-This command will:
-*   Build the `wasm-auth-backend` (WASM library).
-*   Build the `wasm-general-backend` (WASM library).
-*   Build the `wasm-frontend` (generating static files in `wasm-frontend/dist/`).
-*   Build the `backend-server`.
-
-### 5. Nginx Configuration
-
-Configure Nginx as a reverse proxy to serve your frontend and proxy requests to your `backend-server`.
-
-1.  **Create an Nginx configuration file:**
+1.  **Install Rust Toolchain (if not already installed by the script):**
 
     ```bash
-    sudo nano /etc/nginx/sites-available/pema-platform.conf
+    curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    source $HOME/.cargo/env
+    rustup target add wasm32-unknown-unknown
+    cargo install trunk
     ```
 
-2.  **Add the server block configuration:**
+2.  **Build All Components:**
 
-    Paste the following content, making sure to replace placeholders:
-
-    ```nginx
-    server {
-        listen 80;
-        listen [::]:80;
-        server_name your_domain.com www.your_domain.com; # Replace with your actual domain
-
-        # Redirect HTTP to HTTPS (recommended for production)
-        return 301 https://$host$request_uri;
-    }
-
-    server {
-        listen 443 ssl http2;
-        listen [::]:443 ssl http2;
-        server_name your_domain.com www.your_domain.com; # Replace with your actual domain
-
-        # SSL configuration (replace with your actual certificate paths)
-        # Obtain these from Let's Encrypt (e.g., using Certbot)
-        ssl_certificate /etc/letsencrypt/live/your_domain.com/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/your_domain.com/privkey.pem;
-        ssl_session_cache shared:SSL:10m;
-        ssl_session_timeout 10m;
-        ssl_protocols TLSv1.2 TLSv1.3;
-        ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384';
-        ssl_prefer_server_ciphers on;
-
-        # Root for static frontend files
-        root /path/to/your/pema-platform-rust/wasm-frontend/dist; # IMPORTANT: Update this absolute path
-        index index.html;
-
-        # Serve static files directly
-        location / {
-            try_files $uri $uri/ /index.html;
-        }
-
-        # Proxy API requests to the main backend-server
-        location /api/ {
-            proxy_pass http://127.0.0.1:8080; # Assuming backend-server listens on 8080
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        # Proxy Auth requests to the main backend-server (if handled by it)
-        location /auth/ {
-            proxy_pass http://127.0.0.1:8080; # Assuming backend-server handles auth routes
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        # Error pages
-        error_page 404 /404.html;
-        location = /404.html {
-            internal;
-        }
-
-        error_page 500 502 503 504 /50x.html;
-        location = /50x.html {
-            internal;
-        }
-    }
-    ```
-
-    **Remember to update:**
-    *   `server_name`
-    *   `root` path to your `wasm-frontend/dist` directory
-    *   `proxy_pass` ports for your `backend-server` (e.g., `8080`)
-    *   `ssl_certificate` and `ssl_certificate_key` paths (use Certbot for free SSL).
-
-3.  **Enable and test Nginx configuration:**
+    From the repository root (`/home/ubuntu/pema-platform-rust/`), use the `Makefile` to build all parts of the application:
 
     ```bash
-    sudo ln -s /etc/nginx/sites-available/pema-platform.conf /etc/nginx/sites-enabled/
-    sudo nginx -t
-    sudo systemctl reload nginx
+    make all
     ```
 
-### 6. Systemd Service Setup for `backend-server`
+    This command will:
+    *   Build `wasm-auth-backend` (WASM library).
+    *   Build `wasm-general-backend` (WASM library).
+    *   Build `wasm-frontend` (generating static files in `wasm-frontend/dist/`).
+    *   Build `backend-server` (executable in `backend-server/target/release/pema-backend`).
+
+### 4. Systemd Service Setup for `backend-server`
 
 To ensure your main `backend-server` runs continuously and automatically, set it up as a `systemd` service.
 
@@ -226,6 +82,8 @@ To ensure your main `backend-server` runs continuously and automatically, set it
 
 2.  **Add the following content:**
 
+    Copy and paste the content below into the `pema-backend.service` file. **Do not change anything.**
+
     ```ini
     [Unit]
     Description=PEMA Platform Backend Server
@@ -233,21 +91,16 @@ To ensure your main `backend-server` runs continuously and automatically, set it
 
     [Service]
     Type=simple
-    User=pema # IMPORTANT: Create this user or use an existing non-root user
-    WorkingDirectory=/path/to/pema-platform-rust/backend-server # IMPORTANT: Update this absolute path
-    ExecStart=/path/to/pema-platform-rust/backend-server/target/release/pema-backend # IMPORTANT: Update this absolute path
+    User=ubuntu # This uses your current user. Adjust if you have a dedicated user.
+    WorkingDirectory=/home/ubuntu/pema-platform-rust/backend-server
+    ExecStart=/home/ubuntu/pema-platform-rust/backend-server/target/release/pema-backend
     Restart=always
     RestartSec=10
-    Environment="RUST_LOG=info" # Adjust log level as needed
+    Environment="RUST_LOG=info"
 
     [Install]
     WantedBy=multi-user.target
     ```
-
-    **Remember to update:**
-    *   `User`: Create a dedicated system user (e.g., `sudo useradd -r -s /bin/false pema`) or use an existing non-root user.
-    *   `WorkingDirectory`: The absolute path to your `pema-platform-rust/backend-server` directory.
-    *   `ExecStart`: The absolute path to the compiled `pema-backend` executable within `target/release/`.
 
 3.  **Reload systemd, enable, and start the service:**
 
@@ -264,28 +117,16 @@ To ensure your main `backend-server` runs continuously and automatically, set it
     journalctl -u pema-backend -f # View live logs
     ```
 
-### 7. Troubleshooting
+### 5. Troubleshooting
 
-*   **Port Conflicts**: If a service fails to start, check `sudo netstat -tulnp` to see if its port is already in use. Adjust the port in the relevant configuration (e.g., `backend-server/.env`, Nginx config).
 *   **Nginx `502 Bad Gateway`**: This usually means Nginx cannot connect to your backend server. Check:
     *   Is `pema-backend.service` running (`sudo systemctl status pema-backend`)?
-    *   Is the `proxy_pass` URL in Nginx correct and does it match the port your `backend-server` is listening on?
-    *   Are there any firewall rules blocking Nginx from connecting to the backend?
+    *   Are there any firewall rules blocking Nginx from connecting to the backend? (The `setup_server.sh` script configures UFW to allow Nginx traffic).
 *   **File Permissions**: Ensure the user running the `pema-backend.service` has read/write permissions to necessary directories (e.g., `wasm-frontend/dist`).
 *   **Logs**: Always check `journalctl -u <service_name> -f` for detailed error messages from your services.
 
 ### Conclusion
 
-By following this guide, you will have a fully installed and configured PEMA Platform. The `Makefile` streamlines the build process, and `systemd` ensures your main backend runs reliably. Nginx serves your frontend efficiently and securely, acting as a reverse proxy to your `backend-server`.
+By following this guide and using the `setup_server.sh` script, your PEMA Platform will be fully installed and configured. Nginx serves your frontend efficiently and securely via `https://pemalune.ir`, acting as a reverse proxy to your `backend-server` which listens internally. Mobile applications can connect to `https://pemalune.ir/api/` and `https://pemalune.ir/auth/`.
 
 Your PEMA Platform is now ready for production use!
-
-
-## Clone the repository
-
-To clone the repository, use the following command:
-
-```bash
-git clone https://github.com/hadiranweb/pema-platform-rust.git
-```
-
