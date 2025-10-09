@@ -1,6 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::fs;
-use std::path::Path;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppConfig {
@@ -69,18 +67,10 @@ impl AppConfig {
     pub fn load() -> Result<Self, ConfigError> {
         // Load from .env file
         dotenvy::dotenv().ok(); // Load .env file if it exists
-        Self::load_from_env()
+        Self::load_from_env()?
     }
     
-    /// Load from TOML file
-    fn load_from_file(path: &str) -> Result<Self, ConfigError> {
-        let content = fs::read_to_string(path)
-            .map_err(|e| ConfigError::FileReadError(e.to_string()))?;
-        
-        toml::from_str(&content)
-            .map_err(|e| ConfigError::ParseError(e.to_string()))
-    }
-    
+
     /// Load from environment variables
     fn load_from_env() -> Result<Self, ConfigError> {
         Ok(Self {
