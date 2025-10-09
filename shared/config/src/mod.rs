@@ -67,19 +67,9 @@ pub enum Environment {
 impl AppConfig {
     /// Load config from file or environment
     pub fn load() -> Result<Self, ConfigError> {
-        // 1. Try to load from config.toml
-        if Path::new("config.toml").exists() {
-            return Self::load_from_file("config.toml");
-        }
-        
-        // 2. Try to load from .env file
+        // Load from .env file
         dotenvy::dotenv().ok(); // Load .env file if it exists
-        if std::env::var("SERVER_HOST").is_ok() { // Check if any env var is set
-            return Self::load_from_env();
-        }
-        
-        // 3. Return error - needs installation
-        Err(ConfigError::NotInstalled)
+        Self::load_from_env()
     }
     
     /// Load from TOML file
@@ -145,27 +135,11 @@ impl AppConfig {
             },
         })
     }
-    
-    /// Save config to file
-    pub fn save(&self, path: &str) -> Result<(), ConfigError> {
-        let content = toml::to_string_pretty(self)
-            .map_err(|e| ConfigError::SerializeError(e.to_string()))?;
-        
-        fs::write(path, content)
-            .map_err(|e| ConfigError::FileWriteError(e.to_string()))?;
-        
-        Ok(())
-    }
-    
-    /// Check if installation is needed
-    pub fn is_installed() -> bool {
-        Path::new("config.toml").exists() || std::env::var("SERVER_HOST").is_ok()
-    }
+
 }
 
 #[derive(Debug)]
 pub enum ConfigError {
-    NotInstalled,
     FileReadError(String),
     FileWriteError(String),
     ParseError(String),
@@ -176,7 +150,7 @@ pub enum ConfigError {
 impl std::fmt::Display for ConfigError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            ConfigError::NotInstalled => write!(f, "Application not installed. Please run installer."),
+
             ConfigError::FileReadError(e) => write!(f, "Failed to read config file: {}", e),
             ConfigError::FileWriteError(e) => write!(f, "Failed to write config file: {}", e),
             ConfigError::ParseError(e) => write!(f, "Failed to parse config: {}", e),
