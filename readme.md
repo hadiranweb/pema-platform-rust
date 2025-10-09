@@ -307,3 +307,13 @@ To ensure your main `backend-server` runs continuously and automatically, set it
 By following this updated guide, you will have a fully installed and configured PEMA Platform. The `Makefile` streamlines the build process, the web installer simplifies initial configuration, and `systemd` ensures your main backend runs reliably. Nginx serves your frontend efficiently and securely, acting as a reverse proxy to your `backend-server`.
 
 Your PEMA Platform is now ready for production use!
+
+
+## Clone the repository
+
+To clone the repository, use the following command:
+
+```bash
+git clone https://github.com/hadiranweb/pema-platform-rust.git
+```
+
