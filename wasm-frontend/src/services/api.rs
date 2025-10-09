@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
@@ -29,6 +28,14 @@ impl std::error::Error for ApiError {}
 pub type ApiResult<T> = Result<T, ApiError>;
 
 impl ApiService {
+    pub async fn fetch_products(&self) -> ApiResult<Vec<models::product::Product>> {
+        self.get("products").await
+    }
+
+    pub async fn fetch_orders(&self) -> ApiResult<Vec<models::order::Order>> {
+        self.get("orders").await
+    }
+
     pub fn new(base_url: &str) -> Self {
         Self {
             base_url: base_url.to_string(),
@@ -82,9 +89,9 @@ impl ApiService {
     {
         let url = format!("{}/{}", self.base_url.trim_end_matches('/'), endpoint.trim_start_matches('/'));
         
-        let mut opts = RequestInit::new();
-        opts.method(method);
-        opts.mode(RequestMode::Cors);
+                let opts = RequestInit::new();
+                opts.set_method(method);
+                opts.set_mode(RequestMode::Cors);
 
         // Set headers
         let headers = Headers::new().map_err(|_| ApiError {
@@ -104,7 +111,7 @@ impl ApiService {
             })?;
         }
 
-        opts.headers(&headers);
+                opts.set_headers(&headers);
 
         // Set body if provided
         if let Some(body) = body {
@@ -112,7 +119,7 @@ impl ApiService {
                 message: format!("Failed to serialize request body: {}", e),
                 code: None,
             })?;
-            opts.body(Some(&JsValue::from_str(&body_str)));
+                        opts.set_body(&JsValue::from_str(&body_str));
         }
 
         let request = Request::new_with_str_and_init(&url, &opts).map_err(|_| ApiError {
@@ -182,46 +189,6 @@ impl Default for ApiService {
     fn default() -> Self {
         // In a real application, this would come from environment variables or configuration
         Self::new("http://localhost:8080/api")
-=======
-use wasm_bindgen::prelude::*;
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "wasm_general_backend"])]
-    fn get_products() -> JsValue;
-    
-    #[wasm_bindgen(js_namespace = ["window", "wasm_general_backend"])]
-    fn get_orders() -> JsValue;
-    
-    #[wasm_bindgen(js_namespace = ["window", "wasm_general_backend"])]
-    fn get_inventory() -> JsValue;
-    
-    #[wasm_bindgen(js_namespace = ["window", "wasm_general_backend"])]
-    fn get_vendors() -> JsValue;
-}
-
-pub struct ApiService;
-
-impl ApiService {
-    pub async fn fetch_products() -> Result<JsValue, String> {
-        // Call the WASM general backend
-        let result = get_products();
-        Ok(result)
-    }
-    
-    pub async fn fetch_orders() -> Result<JsValue, String> {
-        let result = get_orders();
-        Ok(result)
-    }
-    
-    pub async fn fetch_inventory() -> Result<JsValue, String> {
-        let result = get_inventory();
-        Ok(result)
-    }
-    
-    pub async fn fetch_vendors() -> Result<JsValue, String> {
-        let result = get_vendors();
-        Ok(result)
->>>>>>> origin/branch-4
     }
 }
+

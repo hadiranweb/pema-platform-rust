@@ -1,5 +1,5 @@
 use models::user::User;
-use crate::services::auth::AuthResponse;
+use crate::models::auth::AuthResponse;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct AuthState {

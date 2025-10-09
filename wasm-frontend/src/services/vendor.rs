@@ -3,6 +3,8 @@ use models::pagination::PaginatedResponse;
 use super::api::{ApiService, ApiResult};
 use uuid::Uuid;
 use serde::{Deserialize, Serialize};
+use base64::engine::general_purpose;
+use base64::Engine;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VendorQuery {
@@ -280,7 +282,7 @@ impl VendorService {
         // For now, we'll use a placeholder implementation
         let endpoint = format!("vendors/{}/logo", vendor_id);
         let body = serde_json::json!({
-            "logo_data": base64::encode(logo_data),
+            "logo_data": general_purpose::STANDARD.encode(logo_data),
             "content_type": content_type
         });
         self.api.put(&endpoint, Some(body)).await

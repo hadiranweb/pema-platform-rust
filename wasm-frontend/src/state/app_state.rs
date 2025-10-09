@@ -1,6 +1,6 @@
 use yew::prelude::*;
 use std::rc::Rc;
-use models::user::User;
+
 use super::{AuthState, ProductState, OrderState};
 
 #[derive(Debug, Clone, PartialEq)]

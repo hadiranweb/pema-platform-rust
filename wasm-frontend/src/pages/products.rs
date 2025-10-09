@@ -1,5 +1,5 @@
 use yew::prelude::*;
-use crate::components::{button::Button, card::Card, input::Input};
+use crate::components::{Button, Card, Input};
 use crate::services::api::ApiService;
 
 #[derive(Clone, PartialEq)]
@@ -28,7 +28,8 @@ pub fn products() -> Html {
         
         move |_| {
             wasm_bindgen_futures::spawn_local(async move {
-                match ApiService::fetch_products().await {
+                let api_service = ApiService::new("http://localhost:8080/api");
+                match api_service.fetch_products().await {
                     Ok(_result) => {
                         // For demo purposes, use static data
                         // In a real implementation, we would parse the result from WASM backend
@@ -68,7 +69,7 @@ pub fn products() -> Html {
                         loading.set(false);
                     },
                     Err(err_msg) => {
-                        error.set(Some(err_msg));
+                        error.set(Some(err_msg.to_string()));
                         loading.set(false);
                     }
                 }
@@ -154,7 +155,7 @@ pub fn products() -> Html {
 
             <div class="products-grid">
                 { for filtered_products.iter().map(|product| {
-                    let product_clone = product.clone();
+
                     html! {
                         <Card class="product-card" key={product.id.clone()}>
                             <div class="product-image">
@@ -172,7 +173,7 @@ pub fn products() -> Html {
                                 <div class="product-details">
                                     <div class="detail-item">
                                         <span class="detail-label">{"قیمت:"}</span>
-                                        <span class="detail-value">{format!("{:,} تومان", product.price as i64)}</span>
+                                        <span class="detail-value">{format!("{} تومان", product.price as i64)}</span>
                                     </div>
                                     <div class="detail-item">
                                         <span class="detail-label">{"وزن:"}</span>
@@ -280,3 +281,4 @@ pub fn products() -> Html {
         </div>
     }
 }
+

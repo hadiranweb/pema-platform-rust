@@ -1,7 +1,8 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::Route;
+use crate::AppRoute;
 use crate::services::auth::AuthService;
+use wasm_bindgen_futures;
 
 #[derive(Properties, PartialEq)]
 pub struct HeaderProps {
@@ -17,28 +18,23 @@ pub fn header(props: &HeaderProps) -> Html {
 
     let on_login_click = {
         let navigator = navigator.clone();
-        Callback::from(move |_| {
-            navigator.push(&Route::Login);
+        Callback::from(move |_: web_sys::MouseEvent| {
+            navigator.push(&AppRoute::Login);
         })
     };
 
-    let on_dashboard_click = {
-        let navigator = navigator.clone();
-        Callback::from(move |_| {
-            navigator.push(&Route::Dashboard);
-        })
-    };
+
 
     let on_home_click = {
         let navigator = navigator.clone();
-        Callback::from(move |_| {
-            navigator.push(&Route::Home);
+        Callback::from(move |_: web_sys::MouseEvent| {
+            navigator.push(&AppRoute::Home);
         })
     };
 
     let on_logout_click = {
         let navigator = navigator.clone();
-        Callback::from(move |_| {
+        Callback::from(move |_: web_sys::MouseEvent| {
             // Clear authentication state
             if let Some(window) = web_sys::window() {
                 if let Ok(Some(storage)) = window.local_storage() {
@@ -48,10 +44,13 @@ pub fn header(props: &HeaderProps) -> Html {
             }
             
             // Call AuthService logout
-            let _ = AuthService::logout();
+            let auth_service = AuthService::default();
+            wasm_bindgen_futures::spawn_local(async move {
+                let _ = auth_service.logout().await;
+            });
             
             // Navigate to home
-            navigator.push(&Route::Home);
+            navigator.push(&AppRoute::Home);
         })
     };
 
@@ -64,13 +63,13 @@ pub fn header(props: &HeaderProps) -> Html {
                 </div>
                 
                 <nav class="nav">
-                    <Link<Route> to={Route::Home} classes="nav-link">{"خانه"}</Link<Route>>
-                    <Link<Route> to={Route::Products} classes="nav-link">{"محصولات"}</Link<Route>>
+                    <Link<AppRoute> to={AppRoute::Home} classes="nav-link">{"خانه"}</Link<AppRoute>>
+                    <Link<AppRoute> to={AppRoute::Products} classes="nav-link">{"محصولات"}</Link<AppRoute>>
                     if props.is_authenticated {
-                        <Link<Route> to={Route::Dashboard} classes="nav-link">{"داشبورد"}</Link<Route>>
-                        <Link<Route> to={Route::Orders} classes="nav-link">{"سفارشات"}</Link<Route>>
-                        <Link<Route> to={Route::Inventory} classes="nav-link">{"موجودی"}</Link<Route>>
-                        <Link<Route> to={Route::Vendors} classes="nav-link">{"تأمین‌کنندگان"}</Link<Route>>
+                        <Link<AppRoute> to={AppRoute::AdminDashboard} classes="nav-link">{"داشبورد"}</Link<AppRoute>>
+                        <Link<AppRoute> to={AppRoute::Orders} classes="nav-link">{"سفارشات"}</Link<AppRoute>>
+                        <Link<AppRoute> to={AppRoute::Inventory} classes="nav-link">{"موجودی"}</Link<AppRoute>>
+                        <Link<AppRoute> to={AppRoute::Vendors} classes="nav-link">{"تأمین‌کنندگان"}</Link<AppRoute>>
                     }
                 </nav>
 
@@ -78,7 +77,7 @@ pub fn header(props: &HeaderProps) -> Html {
                     if props.is_authenticated {
                         <div class="user-menu">
                             <span class="username">{props.username.as_ref().unwrap_or(&"کاربر".to_string())}</span>
-                            <Link<Route> to={Route::Profile} classes="profile-link">{"پروفایل"}</Link<Route>>
+                            <Link<AppRoute> to={AppRoute::Profile} classes="profile-link">{"پروفایل"}</Link<AppRoute>>
                             <button class="logout-btn" onclick={on_logout_click}>{"خروج"}</button>
                         </div>
                     } else {

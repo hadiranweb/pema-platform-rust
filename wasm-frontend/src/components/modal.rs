@@ -4,7 +4,7 @@ use yew::prelude::*;
 pub struct ModalProps {
     pub show: bool,
     #[prop_or_default]
-    pub onclose: Callback<()>,
+        pub onclose: Callback<MouseEvent>,
     #[prop_or_default]
     pub title: Option<String>,
     pub children: Children,
@@ -14,8 +14,8 @@ pub struct ModalProps {
 pub fn modal(props: &ModalProps) -> Html {
     let on_overlay_click = {
         let onclose = props.onclose.clone();
-        Callback::from(move |_| {
-            onclose.emit(());
+        Callback::from(move |e: MouseEvent| {
+            onclose.emit(e);
         })
     };
 

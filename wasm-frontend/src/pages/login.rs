@@ -1,21 +1,21 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::Route;
-use crate::components::{button::Button, input::Input, card::Card};
+use crate::AppRoute;
+use crate::components::{Button, Input, Card};
 use crate::services::auth::AuthService;
+use crate::models::auth::LoginRequest;
 
 #[function_component(Login)]
 pub fn login() -> Html {
     let navigator = use_navigator().unwrap();
-    let username = use_state(|| String::new());
+    let email = use_state(|| String::new());
     let password = use_state(|| String::new());
-    let loading = use_state(|| false);
     let error = use_state(|| None::<String>);
 
-    let on_username_change = {
-        let username = username.clone();
+    let on_email_change = {
+        let email = email.clone();
         Callback::from(move |value: String| {
-            username.set(value);
+            email.set(value);
         })
     };
 
@@ -26,115 +26,69 @@ pub fn login() -> Html {
         })
     };
 
-    let on_submit = {
-        let username = username.clone();
-        let password = password.clone();
-        let loading = loading.clone();
-        let error = error.clone();
-        let navigator = navigator.clone();
+    // Clone handles for the outer Callback closure to be moved into it
+    let email_handle_for_submit = email.clone();
+    let password_handle_for_submit = password.clone();
+    let error_handle_for_submit = error.clone();
+    let navigator_handle_for_submit = navigator.clone();
+
+    let on_submit = Callback::from(move |e: web_sys::SubmitEvent| {
+        e.prevent_default();
         
-        Callback::from(move |e: SubmitEvent| {
-            e.prevent_default();
-            
-            if username.is_empty() || password.is_empty() {
-                error.set(Some("لطفاً تمامی فیلدها را پر کنید".to_string()));
-                return;
-            }
+        // Clone the values from the UseStateHandles for the async block
+        let email_value = (*email_handle_for_submit).clone();
+        let password_value = (*password_handle_for_submit).clone();
+        let navigator_clone = navigator_handle_for_submit.clone();
+        let error_for_async = error_handle_for_submit.clone();
 
-            loading.set(true);
-            error.set(None);
+        wasm_bindgen_futures::spawn_local(async move {
+            let auth_service = AuthService::new(crate::services::api::ApiService::new("http://localhost:8080/api"));
+            let login_request = LoginRequest {
+                email: email_value,
+                password: password_value,
+            };
 
-            // Use AuthService to authenticate with WASM backend
-            let username_val = (*username).clone();
-            let password_val = (*password).clone();
-            let loading_clone = loading.clone();
-            let error_clone = error.clone();
-            let navigator_clone = navigator.clone();
-
-            wasm_bindgen_futures::spawn_local(async move {
-                match AuthService::login(&username_val, &password_val).await {
-                    Ok(token) => {
-                        // Store token in localStorage or session storage
-                        if let Some(window) = web_sys::window() {
-                            if let Ok(Some(storage)) = window.local_storage() {
-                                let _ = storage.set_item("auth_token", &token);
-                                let _ = storage.set_item("username", &username_val);
-                            }
-                        }
-                        
-                        // Navigate to dashboard
-                        navigator_clone.push(&Route::Dashboard);
-                    },
-                    Err(err_msg) => {
-                        error_clone.set(Some(err_msg));
-                    }
+            match auth_service.login(login_request).await {
+                Ok(auth_response) => {
+                    crate::services::auth::TokenStorage::save_auth_data(&auth_response);
+                    navigator_clone.push(&AppRoute::AdminDashboard);
                 }
-                
-                loading_clone.set(false);
-            });
-        })
-    };
-
-    let on_register_click = {
-        Callback::from(move |_| {
-            // Navigate to register page or show register modal
-            web_sys::console::log_1(&"Register clicked".into());
-        })
-    };
+                Err(err_msg) => {
+                    error_for_async.set(Some(err_msg.to_string()));
+                }
+            }
+        });
+    });
 
     html! {
         <div class="login-page">
-            <div class="login-container">
-                <Card title="ورود به پلتفرم پما" class="login-card">
-                    <form onsubmit={on_submit}>
-                        <Input
-                            label="نام کاربری"
-                            value={(*username).clone()}
-                            onchange={on_username_change}
-                            placeholder="نام کاربری خود را وارد کنید"
-                            required=true
-                            error={error.as_ref().clone()}
-                        />
-                        
-                        <Input
-                            label="رمز عبور"
-                            input_type="password"
-                            value={(*password).clone()}
-                            onchange={on_password_change}
-                            placeholder="رمز عبور خود را وارد کنید"
-                            required=true
-                        />
-
-                        if let Some(err) = error.as_ref() {
-                            <div class="error-message">{err}</div>
-                        }
-
-                        <div class="login-actions">
-                            <Button
-                                variant="primary"
-                                size="large"
-                                loading={*loading}
-                                disabled={*loading}
-                            >
-                                {"ورود"}
-                            </Button>
-                        </div>
-                    </form>
-
-                    <div class="login-footer">
-                        <p>{"حساب کاربری ندارید؟"}</p>
-                        <button class="link-button" onclick={on_register_click}>
-                            {"ثبت‌نام کنید"}
-                        </button>
-                    </div>
-
-                    <div class="demo-credentials">
-                        <h4>{"اطلاعات دمو:"}</h4>
-                        <p>{"نام کاربری: admin"}</p>
-                        <p>{"رمز عبور: password"}</p>
-                    </div>
-                </Card>
-            </div>
+            <Card title="ورود به پنل مدیریت" class="login-card">
+                <form onsubmit={on_submit}>
+                    <Input
+                        label="ایمیل"
+                        input_type="email"
+                        placeholder="ایمیل خود را وارد کنید"
+                        value={(*email).clone()}
+                        onchange={on_email_change}
+                        required=true
+                    />
+                    <Input
+                        label="رمز عبور"
+                        input_type="password"
+                        placeholder="رمز عبور خود را وارد کنید"
+                        value={(*password).clone()}
+                        onchange={on_password_change}
+                        required=true
+                    />
+                    if let Some(err) = error.as_ref() {
+                        <p class="error-message">{err}</p>
+                    }
+                    <Button button_type="submit" variant="primary" class="login-button">
+                        {"ورود"}
+                    </Button>
+                </form>
+            </Card>
         </div>
     }
 }
+

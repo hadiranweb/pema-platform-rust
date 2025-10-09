@@ -6,3 +6,6 @@ pub mod orders;
 pub mod inventory;
 pub mod vendors;
 pub mod profile;
+
+pub mod not_found;
+

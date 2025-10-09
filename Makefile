@@ -2,8 +2,8 @@ SHELL := /bin/bash
 .PHONY: all auth-backend general-backend frontend clean run-auth-backend run-general-backend run-frontend
 
 # Define paths
-AUTH_BACKEND_DIR := backends/wasm-auth-backend
-GENERAL_BACKEND_DIR := backends/wasm-general-backend
+AUTH_BACKEND_DIR := wasm-auth-backend
+GENERAL_BACKEND_DIR := wasm-general-backend
 FRONTEND_DIR := wasm-frontend
 SHARED_CONFIG_DIR := shared/config
 
@@ -15,12 +15,12 @@ all: auth-backend general-backend frontend
 # Build the authentication backend (WASM library)
 auth-backend: 
 	@echo "Building WASM Auth Backend..."
-	cargo build --target wasm32-unknown-unknown --$(BUILD_PROFILE) --manifest-path $(AUTH_BACKEND_DIR)/Cargo.toml
+	cargo build --target wasm32-unknown-unknown --$(BUILD_PROFILE) --features wasm --manifest-path $(AUTH_BACKEND_DIR)/Cargo.toml
 
 # Build the general backend (WASM library)
 general-backend: 
 	@echo "Building WASM General Backend..."
-	cargo build --target wasm32-unknown-unknown --$(BUILD_PROFILE) --manifest-path $(GENERAL_BACKEND_DIR)/Cargo.toml
+	cargo build --target wasm32-unknown-unknown --$(BUILD_PROFILE) --features wasm --manifest-path $(GENERAL_BACKEND_DIR)/Cargo.toml
 
 # Build the frontend
 frontend: 
@@ -32,7 +32,6 @@ clean:
 	@echo "Cleaning all build artifacts..."
 	cargo clean
 	rm -rf $(FRONTEND_DIR)/dist
-
 
 # Run the authentication backend (WASM library - typically run via a WASM runtime or integrated into a server)
 run-auth-backend:
@@ -51,17 +50,4 @@ run-frontend:
 	@echo "Serving PEMA Frontend..."
 	@echo "Ensure the frontend has been built using 'make frontend' first."
 	cd $(FRONTEND_DIR) && trunk serve --port 3000 --proxy-backend http://localhost:8081 --proxy-auth http://localhost:8082
-
-# Helper for local development
-local-dev:
-	@echo "Starting local development environment..."
-	@echo "1. Ensure the backend-server is running (e.g., via systemd or direct execution)."
-	@echo "2. Then run \'make run-frontend\' in another terminal."
-	@echo "This Makefile is primarily for building and serving the frontend."
-
-
-# Setup for deployment (e.g., systemd services, Docker Compose)
-deploy-setup:
-	@echo "Deployment setup involves creating systemd services or Docker Compose configurations."
-	@echo "This Makefile focuses on build and initial config. Deployment scripts are separate."
 
