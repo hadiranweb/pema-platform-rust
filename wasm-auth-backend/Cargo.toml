@@ -19,6 +19,6 @@ hmac = "0.12"
 sha2 = "0.10"
 
 [features]
-default = []
+default = ["wasm"]
 wasm = ["wasm-bindgen"]
 

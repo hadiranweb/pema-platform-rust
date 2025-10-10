@@ -6,7 +6,8 @@ use log::info;
 use dotenv::dotenv;
 
 mod wallet;
-mod config;
+mod auth;
+use shared_config::config::AppConfig;
 mod auth_routes;
 mod general_routes;
 
@@ -18,13 +19,13 @@ async fn main() -> io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
 
     // Load configuration
-    let app_config = config::AppConfig::load();
+    let app_config = AppConfig::load();
     info!("Application configuration loaded: {:?}", app_config);
 
     // Database connection pool
     let pool = PgPoolOptions::new()
         .max_connections(app_config.database.pool_size)
-        .connect(&app_config.database.url())
+        .connect(&app_config.database.url)
         .await
         .expect("Failed to create Postgres connection pool");
 

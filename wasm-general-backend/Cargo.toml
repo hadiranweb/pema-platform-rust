@@ -21,6 +21,6 @@ shared-config = { path = "../shared/config" }
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 
 [features]
-default = []
+default = ["wasm"]
 wasm = ["wasm-bindgen"]
 

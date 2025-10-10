@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 use chrono::{Utc, Duration};
 use uuid::Uuid;
 
-use crate::config::AppConfig;
+use shared_config::config::AppConfig;
 use crate::wallet::errors::WalletError;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

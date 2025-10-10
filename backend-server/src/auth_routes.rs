@@ -1,7 +1,6 @@
 use actix_web::{web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use wasm_auth_backend::{generate_auth_token, validate_auth_token};
-use wasm_bindgen::JsValue;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AuthRequest {
@@ -16,20 +15,20 @@ pub struct TokenValidationRequest {
 pub async fn auth_login(req: web::Json<AuthRequest>) -> impl Responder {
     match generate_auth_token(req.user_id.clone()) {
         Ok(token_js_value) => {
-            let token = token_js_value.as_string().unwrap_or_default();
+            let token = token_js_value.as_str().unwrap_or_default().to_string();
             HttpResponse::Ok().json(serde_json::json!({ "token": token }))
         },
-        Err(e) => HttpResponse::InternalServerError().body(format!("Failed to generate token: {:?}", e.as_string().unwrap_or_default())),
+        Err(e) => HttpResponse::InternalServerError().body(format!("Failed to generate token: {:?}", e.as_str().unwrap_or_default())),
     }
 }
 
 pub async fn auth_validate(req: web::Json<TokenValidationRequest>) -> impl Responder {
     match validate_auth_token(req.token.clone()) {
         Ok(user_id_js_value) => {
-            let user_id = user_id_js_value.as_string().unwrap_or_default();
+            let user_id = user_id_js_value.as_str().unwrap_or_default().to_string();
             HttpResponse::Ok().json(serde_json::json!({ "user_id": user_id }))
         },
-        Err(e) => HttpResponse::Unauthorized().body(format!("Failed to validate token: {:?}", e.as_string().unwrap_or_default())),
+        Err(e) => HttpResponse::Unauthorized().body(format!("Failed to validate token: {:?}", e.as_str().unwrap_or_default())),
     }
 }
 

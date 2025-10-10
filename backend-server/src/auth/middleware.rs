@@ -4,7 +4,7 @@ use futures_util::future::{ready, Ready};
 use actix_web::FromRequest;
 
 use crate::auth::utils::{validate_jwt, Claims};
-use crate::config::AppConfig;
+use shared_config::config::AppConfig;
 use crate::wallet::errors::WalletError;
 
 pub struct AuthenticatedUser {

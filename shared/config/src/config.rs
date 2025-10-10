@@ -1,16 +1,37 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct AppConfig {
-    pub database_url: String,
-    pub server_port: u16,
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct DatabaseConfig {
+    pub url: String,
+    pub pool_size: u32,
 }
 
-impl Default for AppConfig {
-    fn default() -> Self {
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct ServerConfig {
+    pub host: String,
+    pub port: u16,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct AppConfig {
+    pub database: DatabaseConfig,
+    pub server: ServerConfig,
+}
+
+impl AppConfig {
+    pub fn load() -> Self {
+        // For simplicity, loading from environment variables or default values
+        // In a real application, you might use a config file (e.g., TOML, YAML)
         Self {
-            database_url: "postgresql://localhost/pema".to_string(),
-            server_port: 8080,
+            database: DatabaseConfig {
+                url: std::env::var("DATABASE_URL").unwrap_or_else(|_| "postgresql://localhost/pema".to_string()),
+                pool_size: std::env::var("DATABASE_POOL_SIZE").map(|s| s.parse().unwrap_or(10)).unwrap_or(10),
+            },
+            server: ServerConfig {
+                host: std::env::var("SERVER_HOST").unwrap_or_else(|_| "127.0.0.1".to_string()),
+                port: std::env::var("SERVER_PORT").map(|s| s.parse().unwrap_or(8080)).unwrap_or(8080),
+            },
         }
     }
 }
+
