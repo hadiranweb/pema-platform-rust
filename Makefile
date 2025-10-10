@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: all auth-backend general-backend frontend clean run-auth-backend run-general-backend run-frontend
+.PHONY: all auth-backend general-backend frontend clean deploy-frontend
 
 # Define paths
 AUTH_BACKEND_DIR := wasm-auth-backend
@@ -13,17 +13,17 @@ BUILD_PROFILE ?= release
 all: auth-backend general-backend frontend
 
 # Build the authentication backend (WASM library)
-auth-backend: 
+auth-backend:
 	@echo "Building WASM Auth Backend..."
 	cargo build --target wasm32-unknown-unknown --$(BUILD_PROFILE) --features wasm --manifest-path $(AUTH_BACKEND_DIR)/Cargo.toml
 
 # Build the general backend (WASM library)
-general-backend: 
+general-backend:
 	@echo "Building WASM General Backend..."
 	cargo build --target wasm32-unknown-unknown --$(BUILD_PROFILE) --features wasm --manifest-path $(GENERAL_BACKEND_DIR)/Cargo.toml
 
-# Build the frontend
-frontend: 
+# Build the frontend (produces static files in wasm-frontend/dist)
+frontend:
 	@echo "Building WASM Frontend..."
 	cd $(FRONTEND_DIR) && trunk build --$(BUILD_PROFILE)
 
@@ -33,21 +33,13 @@ clean:
 	cargo clean
 	rm -rf $(FRONTEND_DIR)/dist
 
-# Run the authentication backend (WASM library - typically run via a WASM runtime or integrated into a server)
-run-auth-backend:
-	@echo "WASM Auth Backend is a library. It needs a runtime or server to execute."
-	@echo "You would typically integrate this into a server or use a WASM runtime."
-	@echo "For testing, you might use wasm-bindgen-cli or a custom test runner."
+# Deploy frontend static files to Nginx web root
+deploy-frontend:
+	@echo "Deploying frontend static files..."
+	sudo cp -r $(FRONTEND_DIR)/dist/* /var/www/pemalune.ir/
+	@echo "Frontend files deployed to /var/www/pemalune.ir/"
 
-# Run the general backend (WASM library - typically run via a WASM runtime or integrated into a server)
-run-general-backend:
-	@echo "WASM General Backend is a library. It needs a runtime or server to execute."
-	@echo "You would typically integrate this into a server or use a WASM runtime."
-	@echo "For testing, you might use wasm-bindgen-cli or a custom test runner."
-
-# Serve the frontend (after building)
-run-frontend:
-	@echo "Serving PEMA Frontend..."
-	@echo "Ensure the frontend has been built using 'make frontend' first."
-	cd $(FRONTEND_DIR) && trunk serve --port 3000 --proxy-backend http://localhost:8081 --proxy-auth http://localhost:8082
+# Note: Backend Rust servers (if any) should have their own build/run commands
+# and are expected to be managed by systemd services as configured in Phase 3.
+# The WASM libraries are built by 'auth-backend' and 'general-backend' targets.
 
