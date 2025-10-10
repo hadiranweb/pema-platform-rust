@@ -1,21 +1,33 @@
-
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use sqlx::FromRow;
+use std::str::FromStr;
 
 // --- Enums ---
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, FromRow, sqlx::Type)]
-#[sqlx(type_name = "wallet_status", rename_all = "lowercase")]
+#[sqlx(type_name = "TEXT", rename_all = "lowercase")]
 pub enum WalletStatus {
     Active,
     Inactive,
     Suspended,
 }
 
+impl FromStr for WalletStatus {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "active" => Ok(WalletStatus::Active),
+            "inactive" => Ok(WalletStatus::Inactive),
+            "suspended" => Ok(WalletStatus::Suspended),
+            _ => Err(format!("Invalid wallet status: {}", s)),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, FromRow, sqlx::Type)]
-#[sqlx(type_name = "transaction_type", rename_all = "lowercase")]
+#[sqlx(type_name = "TEXT", rename_all = "lowercase")]
 pub enum TransactionType {
     Deposit,
     Withdrawal,
@@ -23,8 +35,21 @@ pub enum TransactionType {
     Refund,
 }
 
+impl FromStr for TransactionType {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "deposit" => Ok(TransactionType::Deposit),
+            "withdrawal" => Ok(TransactionType::Withdrawal),
+            "purchase" => Ok(TransactionType::Purchase),
+            "refund" => Ok(TransactionType::Refund),
+            _ => Err(format!("Invalid transaction type: {}", s)),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, FromRow, sqlx::Type)]
-#[sqlx(type_name = "transaction_status", rename_all = "lowercase")]
+#[sqlx(type_name = "TEXT", rename_all = "lowercase")]
 pub enum TransactionStatus {
     Pending,
     Completed,
@@ -32,8 +57,21 @@ pub enum TransactionStatus {
     Reversed,
 }
 
+impl FromStr for TransactionStatus {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "pending" => Ok(TransactionStatus::Pending),
+            "completed" => Ok(TransactionStatus::Completed),
+            "failed" => Ok(TransactionStatus::Failed),
+            "reversed" => Ok(TransactionStatus::Reversed),
+            _ => Err(format!("Invalid transaction status: {}", s)),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, FromRow, sqlx::Type)]
-#[sqlx(type_name = "purchase_flow_status", rename_all = "lowercase")]
+#[sqlx(type_name = "TEXT", rename_all = "lowercase")]
 pub enum PurchaseFlowStatus {
     Initiated,
     PendingApproval,
@@ -43,8 +81,23 @@ pub enum PurchaseFlowStatus {
     Failed,
 }
 
+impl FromStr for PurchaseFlowStatus {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "initiated" => Ok(PurchaseFlowStatus::Initiated),
+            "pendingapproval" => Ok(PurchaseFlowStatus::PendingApproval),
+            "approved" => Ok(PurchaseFlowStatus::Approved),
+            "rejected" => Ok(PurchaseFlowStatus::Rejected),
+            "completed" => Ok(PurchaseFlowStatus::Completed),
+            "failed" => Ok(PurchaseFlowStatus::Failed),
+            _ => Err(format!("Invalid purchase flow status: {}", s)),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, FromRow, sqlx::Type)]
-#[sqlx(type_name = "refund_status", rename_all = "lowercase")]
+#[sqlx(type_name = "TEXT", rename_all = "lowercase")]
 pub enum RefundStatus {
     Pending,
     Approved,
@@ -52,14 +105,41 @@ pub enum RefundStatus {
     Completed,
 }
 
+impl FromStr for RefundStatus {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "pending" => Ok(RefundStatus::Pending),
+            "approved" => Ok(RefundStatus::Approved),
+            "rejected" => Ok(RefundStatus::Rejected),
+            "completed" => Ok(RefundStatus::Completed),
+            _ => Err(format!("Invalid refund status: {}", s)),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, FromRow, sqlx::Type)]
-#[sqlx(type_name = "admin_action_type", rename_all = "lowercase")]
+#[sqlx(type_name = "TEXT", rename_all = "lowercase")]
 pub enum AdminActionType {
     ApproveCharge,
     RejectCharge,
     ReverseTransaction,
     SuspendWallet,
     ActivateWallet,
+}
+
+impl FromStr for AdminActionType {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "approvecharge" => Ok(AdminActionType::ApproveCharge),
+            "rejectcharge" => Ok(AdminActionType::RejectCharge),
+            "reversetransaction" => Ok(AdminActionType::ReverseTransaction),
+            "suspendwallet" => Ok(AdminActionType::SuspendWallet),
+            "activatewallet" => Ok(AdminActionType::ActivateWallet),
+            _ => Err(format!("Invalid admin action type: {}", s)),
+        }
+    }
 }
 
 // --- Structs ---
@@ -240,37 +320,6 @@ pub struct CreateAdminActionRequest {
     pub admin_action_type: AdminActionType,
     pub target_id: Uuid,
     pub details: Option<serde_json::Value>,
-}
-
-
-
-use std::str::FromStr;
-
-impl FromStr for TransactionStatus {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "pending" => Ok(TransactionStatus::Pending),
-            "completed" => Ok(TransactionStatus::Completed),
-            "failed" => Ok(TransactionStatus::Failed),
-            "reversed" => Ok(TransactionStatus::Reversed),
-            _ => Err(()),
-        }
-    }
-}
-
-impl FromStr for TransactionType {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "deposit" => Ok(TransactionType::Deposit),
-            "withdrawal" => Ok(TransactionType::Withdrawal),
-            "purchase" => Ok(TransactionType::Purchase),
-            "refund" => Ok(TransactionType::Refund),
-            _ => Err(()),
-        }
-    }
+    pub created_at: DateTime<Utc>,
 }
 
