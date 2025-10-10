@@ -1,6 +1,6 @@
-## PEMA Platform Setup Guide (No Installer Version)
+## PEMA Platform Setup Guide
 
-This guide provides instructions for setting up the PEMA Platform on your server using the `no-installer-version` branch. It includes an automated setup script for server configurations and detailed steps for building and running the application.
+This guide provides instructions for setting up the PEMA Platform on your server. It includes an automated setup script for server configurations and detailed steps for building and running the application.
 
 ### 1. Project Architecture Overview
 
@@ -24,7 +24,7 @@ To automate the installation of Nginx, PostgreSQL, Certbot, and UFW, and to conf
 1.  **Clone the project (if you haven't already):**
 
     ```bash
-    git clone -b no-installer-version https://github.com/hadiranweb/pema-platform-rust.git
+    git clone https://github.com/hadiranweb/pema-platform-rust.git
     cd pema-platform-rust
     ```
 
@@ -125,8 +125,17 @@ To ensure your main `backend-server` runs continuously and automatically, set it
 *   **File Permissions**: Ensure the user running the `pema-backend.service` has read/write permissions to necessary directories (e.g., `wasm-frontend/dist`).
 *   **Logs**: Always check `journalctl -u <service_name> -f` for detailed error messages from your services.
 
+### 6. Recent Changes and Fixes
+
+This section summarizes recent structural and configuration improvements:
+
+*   **Directory Structure Consolidation**: Removed a redundant nested `pema-platform-rust` directory and its contents, including an unnecessary `installer` component. The project now uses a flat, consolidated structure at the root level.
+*   **Configuration Management**: Standardized configuration loading for the `backend-server` by implementing a shared `AppConfig` module in `shared/config`. This ensures consistent handling of database and server settings across the application.
+*   **Dependency and Build Fixes**: Resolved various compilation errors related to `wasm-bindgen` and `jsonwebtoken` dependencies in `wasm-auth-backend`, `wasm-general-backend`, and `backend-server`. This included updating dependency versions and correcting `JsValue` handling in backend routes.
+
 ### Conclusion
 
 By following this guide and using the `setup_server.sh` script, your PEMA Platform will be fully installed and configured. Nginx serves your frontend efficiently and securely via `https://pemalune.ir`, acting as a reverse proxy to your `backend-server` which listens internally. Mobile applications can connect to `https://pemalune.ir/api/` and `https://pemalune.ir/auth/`.
 
 Your PEMA Platform is now ready for production use!
+
