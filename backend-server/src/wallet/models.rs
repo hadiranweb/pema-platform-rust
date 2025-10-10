@@ -242,3 +242,35 @@ pub struct CreateAdminActionRequest {
     pub details: Option<serde_json::Value>,
 }
 
+
+
+use std::str::FromStr;
+
+impl FromStr for TransactionStatus {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "pending" => Ok(TransactionStatus::Pending),
+            "completed" => Ok(TransactionStatus::Completed),
+            "failed" => Ok(TransactionStatus::Failed),
+            "reversed" => Ok(TransactionStatus::Reversed),
+            _ => Err(()),
+        }
+    }
+}
+
+impl FromStr for TransactionType {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "deposit" => Ok(TransactionType::Deposit),
+            "withdrawal" => Ok(TransactionType::Withdrawal),
+            "purchase" => Ok(TransactionType::Purchase),
+            "refund" => Ok(TransactionType::Refund),
+            _ => Err(()),
+        }
+    }
+}
+
