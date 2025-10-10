@@ -3,13 +3,17 @@ use sqlx::postgres::PgPoolOptions;
 use std::io;
 use env_logger::Env;
 use log::info;
+use dotenv::dotenv;
 
 mod wallet;
 mod config;
-mod auth;
+mod auth_routes;
+mod general_routes;
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
+    dotenv().ok(); // Load .env file
+
     // Initialize logger
     env_logger::init_from_env(Env::default().default_filter_or("info"));
 
@@ -27,18 +31,19 @@ async fn main() -> io::Result<()> {
     info!("Database connection pool established.");
 
     // Run database migrations (if any)
-        sqlx::migrate!().run(&pool).await.expect("Failed to run database migrations");
+    sqlx::migrate!().run(&pool).await.expect("Failed to run database migrations");
 
     let server_address = format!("{}:{}", app_config.server.host, app_config.server.port);
     info!("Starting server at {}", server_address);
 
-        HttpServer::new(move || {
+    HttpServer::new(move || {
         let app_config_clone = app_config.clone();
         App::new()
             .app_data(web::Data::new(pool.clone()))
             .app_data(web::Data::new(app_config_clone.clone()))
             .configure(wallet::routes::wallet_routes)
-            // TODO: Add other service configurations here
+            .configure(auth_routes::auth_config)
+            .configure(general_routes::general_config)
     })
     .bind(&server_address)?
     .run()

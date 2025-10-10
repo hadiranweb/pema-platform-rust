@@ -1,0 +1,20 @@
+[Unit]
+Description=PEMA Unified Backend Server
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/pema-platform-rust/backend-server
+ExecStart=/home/ubuntu/pema-platform-rust/backend-server/target/release/pema-backend-server
+Environment="RUST_LOG=info"
+EnvironmentFile=/home/ubuntu/pema-platform-rust/.env
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=pema-backend-server
+
+[Install]
+WantedBy=multi-user.target
+

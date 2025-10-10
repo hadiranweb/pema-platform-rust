@@ -15,13 +15,16 @@ chrono = { version = "0.4", features = ["serde"] }
 log = "0.4"
 env_logger = "0.10"
 thiserror = "1.0"
-dotenvy = "0.15"
-jsonwebtoken = "8"
+dotenv = "0.15"
+jwt = "0.16"
 actix-web-httpauth = "0.6"
 futures-util = "0.3"
 
 # Local dependencies
 shared-config = { path = "../shared/config" }
+models = { path = "../shared/models" }
+wasm-auth-backend = { path = "../wasm-auth-backend" }
+wasm-general-backend = { path = "../wasm-general-backend" }
 
 [dev-dependencies]
 actix-web = "4"
@@ -31,8 +34,7 @@ uuid = { version = "1.0", features = ["serde", "v4"] }
 chrono = { version = "0.4", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-dotenvy = "0.15"
-
+dotenv = "0.15"
 
 pema-backend-server = { path = "." }
 

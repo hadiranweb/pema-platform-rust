@@ -1,16 +1,17 @@
 SHELL := /bin/bash
-.PHONY: all auth-backend general-backend frontend clean deploy-frontend
+.PHONY: all auth-backend general-backend frontend backend-server clean deploy-frontend
 
 # Define paths
 AUTH_BACKEND_DIR := wasm-auth-backend
 GENERAL_BACKEND_DIR := wasm-general-backend
 FRONTEND_DIR := wasm-frontend
+BACKEND_SERVER_DIR := backend-server
 SHARED_CONFIG_DIR := shared/config
 
 # Default build profile
 BUILD_PROFILE ?= release
 
-all: auth-backend general-backend frontend
+all: auth-backend general-backend frontend backend-server
 
 # Build the authentication backend (WASM library)
 auth-backend:
@@ -26,6 +27,11 @@ general-backend:
 frontend:
 	@echo "Building WASM Frontend..."
 	cd $(FRONTEND_DIR) && trunk build --$(BUILD_PROFILE)
+
+# Build the unified backend server
+backend-server:
+	@echo "Building Unified Backend Server..."
+	cd $(BACKEND_SERVER_DIR) && cargo build --$(BUILD_PROFILE)
 
 # Clean all build artifacts
 clean:

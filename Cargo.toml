@@ -7,6 +7,6 @@ members = [
     "backend-server",
     "shared/models",
     "shared/config",
-
+    "auth-server",
 ]
 
