@@ -1,51 +1,49 @@
 SHELL := /bin/bash
-.PHONY: all auth-backend general-backend frontend backend-server clean deploy-frontend
+.PHONY: all auth-backend general-backend frontend clean run-auth-backend run-general-backend run-backend run-frontend
 
-# Define paths
 AUTH_BACKEND_DIR := wasm-auth-backend
 GENERAL_BACKEND_DIR := wasm-general-backend
 FRONTEND_DIR := wasm-frontend
-BACKEND_SERVER_DIR := backend-server
 SHARED_CONFIG_DIR := shared/config
+BACKEND_SERVER_DIR := backend-server
 
-# Default build profile
 BUILD_PROFILE ?= release
 
-all: auth-backend general-backend frontend backend-server
+all: auth-backend general-backend frontend
 
-# Build the authentication backend (WASM library)
 auth-backend:
 	@echo "Building WASM Auth Backend..."
 	cargo build --target wasm32-unknown-unknown --$(BUILD_PROFILE) --features wasm --manifest-path $(AUTH_BACKEND_DIR)/Cargo.toml
 
-# Build the general backend (WASM library)
 general-backend:
 	@echo "Building WASM General Backend..."
 	cargo build --target wasm32-unknown-unknown --$(BUILD_PROFILE) --features wasm --manifest-path $(GENERAL_BACKEND_DIR)/Cargo.toml
 
-# Build the frontend (produces static files in wasm-frontend/dist)
 frontend:
 	@echo "Building WASM Frontend..."
 	cd $(FRONTEND_DIR) && trunk build --$(BUILD_PROFILE)
 
-# Build the unified backend server
-backend-server:
-	@echo "Building Unified Backend Server..."
-	cd $(BACKEND_SERVER_DIR) && cargo build --$(BUILD_PROFILE)
-
-# Clean all build artifacts
 clean:
 	@echo "Cleaning all build artifacts..."
 	cargo clean
 	rm -rf $(FRONTEND_DIR)/dist
 
-# Deploy frontend static files to Nginx web root
-deploy-frontend:
-	@echo "Deploying frontend static files..."
-	sudo cp -r $(FRONTEND_DIR)/dist/* /var/www/pemalune.ir/
-	@echo "Frontend files deployed to /var/www/pemalune.ir/"
+run-auth-backend:
+	@echo "Starting Auth Backend Server..."
+	cd $(BACKEND_SERVER_DIR) && dotenv -e ../.env.auth -- cargo run --release
 
-# Note: Backend Rust servers (if any) should have their own build/run commands
-# and are expected to be managed by systemd services as configured in Phase 3.
-# The WASM libraries are built by 'auth-backend' and 'general-backend' targets.
+run-general-backend:
+	@echo "Starting General Backend Server..."
+	cd $(BACKEND_SERVER_DIR) && dotenv -e ../.env.api -- cargo run --release
+
+run-backend:
+	@echo "Starting backend servers..."
+	cd $(BACKEND_SERVER_DIR) && dotenv -e ../.env.auth -- cargo run --release & \
+	cd $(BACKEND_SERVER_DIR) && dotenv -e ../.env.api -- cargo run --release &
+	@echo "Backend servers running on ports 8081 and 8082"
+
+run-frontend:
+	@echo "Serving PEMA Frontend..."
+	@echo "Ensure the frontend has been built using 'make frontend' first."
+	cd $(FRONTEND_DIR) && trunk serve --port 3000
 

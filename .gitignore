@@ -3,3 +3,7 @@
 /.env
 /pema.db
 
+
+.env.auth
+.env.api
+
