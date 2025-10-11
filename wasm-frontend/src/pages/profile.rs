@@ -8,7 +8,7 @@ use crate::models::wallet::{CreateWalletRequest, Wallet};
 #[wasm_bindgen(module = "/pkg/wasm_general_backend.js")]
 extern "C" {
     #[wasm_bindgen(js_name = createNewWallet)]
-    async fn create_new_wallet_wasm(user_id: String, currency: String, initial_balance: Option<f64>) -> Result<JsValue, JsValue>;
+    fn create_new_wallet_wasm(user_id: String, currency: String, initial_balance: Option<f64>) -> Result<JsValue, JsValue>;
 }
 
 #[function_component(Profile)]
