@@ -80,6 +80,20 @@ GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${DB_USER};
 \c ${DB_NAME};
 GRANT ALL ON SCHEMA public TO ${DB_USER};
 EOF
+
+log_info "Applying database migrations..."
+# Assuming migrations are in ${PROJECT_ROOT}/backend-server/migrations
+# For SQLx, typically you would run `sqlx migrate run` from the backend-server directory.
+# However, since this is a setup script, we'll execute the SQL directly.
+# This assumes the migration file is a single file or can be concatenated.
+
+# Check if the migration file exists
+if [ -f "${PROJECT_ROOT}/backend-server/migrations/20251008234714_create_wallet_schema.sql" ]; then
+    sudo -i -u postgres psql -d ${DB_NAME} -f "${PROJECT_ROOT}/backend-server/migrations/20251008234714_create_wallet_schema.sql"
+    log_success "Database migrations applied."
+else
+    log_error "Migration file not found: ${PROJECT_ROOT}/backend-server/migrations/20251008234714_create_wallet_schema.sql"
+fi
 log_success "PostgreSQL database and user configured."
 
 # 8. Create frontend distribution directory

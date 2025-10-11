@@ -39,6 +39,7 @@ To automate the installation of Nginx, PostgreSQL, Certbot, and UFW, and to conf
     *   Update system packages.
     *   Install and configure Nginx.
     *   Install and configure PostgreSQL, creating the `pema_user` and `pema_db` with password `F8s77@98`.
+*   Apply database migrations to initialize the database schema.
     *   Install Certbot and obtain SSL certificates for `pemalune.ir` and `www.pemalune.ir`.
     *   Configure UFW (firewall) to allow SSH and Nginx traffic.
     *   Create and configure the `backend-server/.env` file with `SERVER_HOST=127.0.0.1`, `SERVER_PORT=8080`, `DOMAIN=pemalune.ir`, `BASE_URL=https://pemalune.ir`, and the database credentials. It will also generate a random `JWT_SECRET`.
