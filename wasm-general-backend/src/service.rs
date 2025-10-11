@@ -86,3 +86,21 @@ pub async fn delete_vendor(pool: &PgPool, vendor_id: Uuid) -> Result<(), Service
     Ok(())
 }
 
+
+
+pub async fn create_wallet(pool: &PgPool, new_wallet: models::wallet::CreateWallet) -> Result<models::wallet::Wallet, ServiceError> {
+    let wallet = sqlx::query_as::<_, models::wallet::Wallet>(
+        "INSERT INTO wallets (user_id, balance, currency, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *"
+    )
+    .bind(new_wallet.user_id)
+    .bind(new_wallet.initial_balance.unwrap_or(0.0))
+    .bind(new_wallet.currency)
+    .bind(models::wallet::WalletStatus::Active.to_string())
+    .bind(chrono::Utc::now())
+    .bind(chrono::Utc::now())
+    .fetch_one(pool)
+    .await?;
+
+    Ok(wallet)
+}
+

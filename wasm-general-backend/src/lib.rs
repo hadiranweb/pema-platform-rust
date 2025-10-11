@@ -32,3 +32,30 @@ pub async fn get_order_details(order_id: &str) -> Result<JsValue, JsValue> {
     Ok(details)
 }
 
+
+
+mod service;
+mod error;
+
+use sqlx::PgPool;
+use uuid::Uuid;
+use models::wallet::{CreateWallet, Wallet};
+
+#[wasm_bindgen]
+pub async fn create_new_wallet(pool: &PgPool, user_id: String, currency: String, initial_balance: Option<f64>) -> Result<JsValue, JsValue> {
+    let user_uuid = Uuid::parse_str(&user_id)
+        .map_err(|e| JsValue::from_str(&format!("Invalid user_id UUID: {}", e)))?;
+
+    let new_wallet = CreateWallet {
+        user_id: user_uuid,
+        currency,
+        initial_balance,
+    };
+
+    let wallet = service::create_wallet(pool, new_wallet).await
+        .map_err(|e| JsValue::from_str(&format!("Failed to create wallet: {}", e)))?;
+
+    serde_wasm_bindgen::to_value(&wallet)
+        .map_err(|e| JsValue::from_str(&format!("Failed to serialize wallet: {}", e)))
+}
+
