@@ -1,5 +1,6 @@
 use actix_web::{web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 use wasm_auth_backend::{generate_auth_token, validate_auth_token};
 
 #[derive(Debug, Serialize, Deserialize)]

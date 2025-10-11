@@ -130,8 +130,9 @@ To ensure your main `backend-server` runs continuously and automatically, set it
 
 This section summarizes recent structural and configuration improvements:
 
-*   **Directory Structure Consolidation**: Removed a redundant nested `pema-platform-rust` directory and its contents, including an unnecessary `installer` component. The project now uses a flat, consolidated structure at the root level.
-*   **Configuration Management**: Standardized configuration loading for the `backend-server` by implementing a shared `AppConfig` module in `shared/config`. This ensures consistent handling of database and server settings across the application.
+*   **Project Cleanup**: Removed numerous unnecessary files and directories, including old installation scripts, temporary build outputs, unused backend components (`auth-server`), forked dependencies (`ahash_fork`, `tempfile_fork`), and internal documentation/planning documents. This streamlines the project structure and reduces clutter.
+*   **Configuration Management**: Standardized configuration loading for the `backend-server` by implementing a shared `AppConfig` module in `shared/config`. This ensures consistent handling of database and server settings across the application. The `AppConfig` now includes a `SecurityConfig` for `jwt_secret` and `session_timeout`.
+*   **JWT and Type Handling Consistency**: Addressed inconsistencies in JWT (JSON Web Token) library usage and `user_id` type handling. The project now consistently uses the `jwt` crate with `hmac` and `sha2` for token generation and validation. `user_id` is primarily handled as `Uuid` in backend logic, with necessary conversions to `String` for JWT claims and WASM-bound functions to maintain compatibility.
 *   **Dependency and Build Fixes**: Resolved various compilation errors related to `wasm-bindgen` and `jsonwebtoken` dependencies in `wasm-auth-backend`, `wasm-general-backend`, and `backend-server`. This included updating dependency versions and correcting `JsValue` handling in backend routes.
 
 ### Conclusion

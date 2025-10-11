@@ -3,6 +3,7 @@ use hmac::{Hmac, Mac};
 use sha2::Sha256;
 use serde::{Deserialize, Serialize};
 use chrono::{Duration, Utc};
+use uuid::Uuid;
 use shared_config::config::AppConfig;
 use crate::wallet::errors::WalletError;
 
@@ -13,12 +14,12 @@ pub struct Claims {
     pub iat: usize,
 }
 
-pub fn create_jwt(user_id: String, role: String, config: &AppConfig) -> Result<String, WalletError> {
+pub fn create_jwt(user_id: Uuid, role: String, config: &AppConfig) -> Result<String, WalletError> {
     let secret = config.security.jwt_secret.as_bytes();
     let now = Utc::now();
     let expires_at = now + Duration::seconds(config.security.session_timeout as i64);
     let claims = Claims {
-        sub: user_id,
+        sub: user_id.to_string(), // Convert Uuid to String for JWT claims
         iat: now.timestamp() as usize,
         exp: expires_at.timestamp() as usize,
     };

@@ -6,6 +6,7 @@ use chrono::{Utc, Duration};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use std::collections::BTreeMap;
+use shared_config::config::AppConfig;
 
 // Our claims struct, it needs to derive `Serialize` and `Deserialize`
 #[derive(Debug, Serialize, Deserialize)]
@@ -15,11 +16,14 @@ pub struct Claims {
     pub iat: usize,  // Issued at
 }
 
-const JWT_SECRET: &[u8] = b"supersecretjwtkey"; // TODO: Load from config
+fn get_jwt_secret() -> Result<Vec<u8>, JsValue> {
+    let config = AppConfig::load();
+    Ok(config.security.jwt_secret.clone().into_bytes())
+}
 
 #[wasm_bindgen]
 pub fn generate_token(user_id: String) -> Result<String, JsValue> {
-    let key: Hmac<Sha256> = Hmac::new_from_slice(JWT_SECRET)
+    let key: Hmac<Sha256> = Hmac::new_from_slice(&get_jwt_secret()?)
         .map_err(|e| JsValue::from_str(&format!("Failed to create key: {}", e)))?;
 
     let now = Utc::now();
@@ -45,7 +49,7 @@ pub fn generate_token(user_id: String) -> Result<String, JsValue> {
 
 #[wasm_bindgen]
 pub fn validate_token(token: String) -> Result<String, JsValue> {
-    let key: Hmac<Sha256> = Hmac::new_from_slice(JWT_SECRET)
+    let key: Hmac<Sha256> = Hmac::new_from_slice(&get_jwt_secret()?)
         .map_err(|e| JsValue::from_str(&format!("Failed to create key: {}", e)))?;
 
     let token: Token<Header, BTreeMap<String, String>, _> = token.verify_with_key(&key)
