@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
+#[cfg_attr(not(target_arch = "wasm32"), derive(sqlx::FromRow))]
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct Vendor {
     pub id: Uuid,

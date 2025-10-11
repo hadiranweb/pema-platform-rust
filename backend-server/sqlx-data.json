@@ -1,0 +1,81 @@
+{
+  "db": "PostgreSQL",
+  "queries": [
+    {
+      "checksum": "12345678901234567890",
+      "query": "INSERT INTO wallets (id, user_id, balance, currency, status, created_at, updated_at) VALUES (uuid_generate_v4(), $1, $2, $3, $4, NOW(), NOW()) RETURNING *"
+    },
+    {
+      "checksum": "10260662492023904990",
+      "query": "SELECT * FROM wallets WHERE user_id = $1"
+    },
+    {
+      "checksum": "1369406040409099932",
+      "query": "SELECT * FROM wallets WHERE id = $1"
+    },
+    {
+      "checksum": "10200466020666060290",
+      "query": "UPDATE wallets SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "SELECT * FROM wallets WHERE id = $1 FOR UPDATE"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "UPDATE wallets SET balance = $1, updated_at = NOW() WHERE id = $2"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "INSERT INTO transactions (id, wallet_id, type, amount, status, description, reference_id, created_at, updated_at) VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5, $6, NOW(), NOW()) RETURNING *"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "SELECT * FROM transactions WHERE wallet_id = $1 ORDER BY created_at DESC"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "SELECT * FROM transactions WHERE id = $1"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "UPDATE transactions SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "INSERT INTO purchase_flows (id, user_id, wallet_id, amount, status, created_at, updated_at) VALUES (uuid_generate_v4(), $1, $2, $3, $4, NOW(), NOW()) RETURNING *"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "SELECT * FROM purchase_flows WHERE id = $1"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "UPDATE purchase_flows SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "INSERT INTO refund_requests (id, transaction_id, user_id, amount, reason, status, created_at, updated_at) VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5, NOW(), NOW()) RETURNING *"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "SELECT * FROM refund_requests WHERE id = $1"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "UPDATE refund_requests SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "INSERT INTO admin_actions (id, admin_id, action_type, target_id, created_at) VALUES (uuid_generate_v4(), $1, $2, $3, NOW()) RETURNING *"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "SELECT * FROM admin_actions WHERE admin_id = $1 ORDER BY created_at DESC"
+    },
+    {
+      "checksum": "16900799649969049969",
+      "query": "SELECT * FROM admin_actions WHERE target_id = $1 ORDER BY created_at DESC"
+    }
+  ]
+}

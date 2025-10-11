@@ -10,21 +10,21 @@ pub struct OrderDetailsRequest {
 pub async fn product_list() -> impl Responder {
     match get_product_list().await {
         Ok(products_js_value) => {
-            let products_str = products_js_value.as_str().unwrap_or_default().to_string();
+            let products_str = products_js_value.as_string().unwrap_or_default();
             HttpResponse::Ok().body(products_str)
         }
-        Err(e) => HttpResponse::InternalServerError().body(format!("Failed to get product list: {:?}", e.as_str().unwrap_or_default())),
+        Err(e) => HttpResponse::InternalServerError().body(format!("Failed to get product list: {:?}", e.as_string().unwrap_or_default())),
     }
 }
 
 pub async fn order_details(path: web::Path<String>) -> impl Responder {
     let order_id = path.into_inner();
-    match get_order_details(&order_id).await {
+    match get_order_details(order_id.clone()).await {
         Ok(details_js_value) => {
-            let details_str = details_js_value.as_str().unwrap_or_default().to_string();
+            let details_str = details_js_value.as_string().unwrap_or_default();
             HttpResponse::Ok().body(details_str)
         }
-        Err(e) => HttpResponse::InternalServerError().body(format!("Failed to get order details: {:?}", e.as_str().unwrap_or_default())),
+        Err(e) => HttpResponse::InternalServerError().body(format!("Failed to get order details: {:?}", e.as_string().unwrap_or_default())),
     }
 }
 

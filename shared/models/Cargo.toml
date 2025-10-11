@@ -7,5 +7,10 @@ edition = "2021"
 serde = { version = "1.0", features = ["derive"] }
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1", features = ["serde", "v4"] }
+sqlx = { version = "0.7", features = ["macros", "postgres"], optional = true }
 
 
+
+
+[features]
+sqlx = ["sqlx/macros", "sqlx/postgres"]

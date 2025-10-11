@@ -22,9 +22,11 @@ sha2 = { version = "0.10", default-features = false }
 actix-web-httpauth = "0.6"
 futures-util = "0.3"
 shared-config = { path = "../shared/config" }
+models = { path = "../shared/models", features = ["sqlx"] }
 wasm-auth-backend = { path = "../wasm-auth-backend" }
 wasm-general-backend = { path = "../wasm-general-backend" }
 cc = "1.0.79"
+async-trait = "0.1"
 
 [dev-dependencies]
 actix-web = "4"

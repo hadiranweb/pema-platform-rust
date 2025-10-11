@@ -134,6 +134,11 @@ This section summarizes recent structural and configuration improvements:
 *   **Configuration Management**: Standardized configuration loading for the `backend-server` by implementing a shared `AppConfig` module in `shared/config`. This ensures consistent handling of database and server settings across the application. The `AppConfig` now includes a `SecurityConfig` for `jwt_secret` and `session_timeout`.
 *   **JWT and Type Handling Consistency**: Addressed inconsistencies in JWT (JSON Web Token) library usage and `user_id` type handling. The project now consistently uses the `jwt` crate with `hmac` and `sha2` for token generation and validation. `user_id` is primarily handled as `Uuid` in backend logic, with necessary conversions to `String` for JWT claims and WASM-bound functions to maintain compatibility.
 *   **Dependency and Build Fixes**: Resolved various compilation errors related to `wasm-bindgen` and `jsonwebtoken` dependencies in `wasm-auth-backend`, `wasm-general-backend`, and `backend-server`. This included updating dependency versions and correcting `JsValue` handling in backend routes.
+*   **New Wallet Creation Feature**: Implemented a comprehensive wallet creation feature, including:
+    *   **Database Schema**: Added `wallets` and `transactions` tables, along with `WALLET_STATUS` and `TRANSACTION_TYPE` ENUMs, via a new migration file (`20251011000000_create_wallet_schema.sql`).
+    *   **WASM General Backend**: Integrated wallet creation logic into `wasm-general-backend/src/service.rs` and exposed it via `create_new_wallet` function in `wasm-general-backend/src/lib.rs`.
+    *   **Backend Server API**: Created a new API endpoint (`/wallet`) in `backend-server/src/wallet/routes.rs` and `backend-server/src/wallet/handlers.rs` that leverages the WASM general backend to create new wallets.
+    *   **WASM Frontend Integration**: Added a wallet creation form to `wasm-frontend/src/pages/profile.rs` and corresponding models in `wasm-frontend/src/models/wallet.rs`, allowing users to create new wallets through the UI.
 
 ### Conclusion
 

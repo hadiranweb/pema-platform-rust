@@ -82,19 +82,29 @@ GRANT ALL ON SCHEMA public TO ${DB_USER};
 EOF
 
 log_info "Applying database migrations..."
-# Assuming migrations are in ${PROJECT_ROOT}/backend-server/migrations
 # For SQLx, typically you would run `sqlx migrate run` from the backend-server directory.
-# However, since this is a setup script, we'll execute the SQL directly.
-# This assumes the migration file is a single file or can be concatenated.
+# However, since this is a setup script, we\'ll execute the SQL directly.
+# This assumes migration files are applied in order.
 
-# Check if the migration file exists
+# Apply the initial wallet schema migration
 if [ -f "${PROJECT_ROOT}/backend-server/migrations/20251008234714_create_wallet_schema.sql" ]; then
-    sudo -i -u postgres psql -d ${DB_NAME} -f "${PROJECT_ROOT}/backend-server/migrations/20251008234714_create_wallet_schema.sql"
-    log_success "Database migrations applied."
+    log_info "Applying 20251008234714_create_wallet_schema.sql..."
+    sudo -i -u postgres psql -d ${DB_NAME} -f "${PROJECT_ROOT}/backend-server/migrations/20251008234714_create_wallet_schema.sql" || log_error "Failed to apply 20251008234714_create_wallet_schema.sql"
+    log_success "20251008234714_create_wallet_schema.sql applied."
 else
-    log_error "Migration file not found: ${PROJECT_ROOT}/backend-server/migrations/20251008234714_create_wallet_schema.sql"
+    log_info "Migration file 20251008234714_create_wallet_schema.sql not found. Skipping."
 fi
-log_success "PostgreSQL database and user configured."
+
+# Apply the new wallet schema migration
+if [ -f "${PROJECT_ROOT}/backend-server/migrations/20251011000000_create_wallet_schema.sql" ]; then
+    log_info "Applying 20251011000000_create_wallet_schema.sql..."
+    sudo -i -u postgres psql -d ${DB_NAME} -f "${PROJECT_ROOT}/backend-server/migrations/20251011000000_create_wallet_schema.sql" || log_error "Failed to apply 20251011000000_create_wallet_schema.sql"
+    log_success "20251011000000_create_wallet_schema.sql applied."
+else
+    log_error "New wallet schema migration file 20251011000000_create_wallet_schema.sql not found. This is unexpected as it should have been created."
+fi
+log_success "PostgreSQL database and user configured with migrations."
+
 
 # 8. Create frontend distribution directory
 log_info "Setting up frontend directories..."

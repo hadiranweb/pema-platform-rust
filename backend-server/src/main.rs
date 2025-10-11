@@ -3,13 +3,19 @@ use sqlx::postgres::PgPoolOptions;
 use std::io;
 use env_logger::Env;
 use log::info;
-use dotenv::dotenv;
+use dotenvy::dotenv;
+
 
 mod wallet;
 mod auth;
 use shared_config::config::AppConfig;
 mod auth_routes;
 mod general_routes;
+mod db_pool_impl;
+
+// A global static variable to hold the PgPool, accessible by WASM host functions
+// This is a common pattern for WASM host functions to access shared resources.
+
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
@@ -30,6 +36,8 @@ async fn main() -> io::Result<()> {
         .expect("Failed to create Postgres connection pool");
 
     info!("Database connection pool established.");
+
+
 
     // Run database migrations (if any)
     sqlx::migrate!().run(&pool).await.expect("Failed to run database migrations");

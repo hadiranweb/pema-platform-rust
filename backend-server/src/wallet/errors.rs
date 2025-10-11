@@ -1,4 +1,3 @@
-
 use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
 use serde::Serialize;
 use thiserror::Error;
@@ -9,8 +8,8 @@ pub enum WalletError {
     WalletNotFound(uuid::Uuid),
     #[error("Insufficient funds. Required: {required}, Available: {available}")]
     InsufficientFunds {
-        required: i64,
-        available: i64,
+        required: f64,
+        available: f64,
     },
     #[error("Transaction not found: {0}")]
     TransactionNotFound(uuid::Uuid),
@@ -40,6 +39,18 @@ pub enum WalletError {
     BalanceLimitExceeded,
     #[error("Payment gateway error: {0}")]
     PaymentGatewayError(String),
+    #[error("Invalid WalletStatus: {0}")]
+    InvalidWalletStatus(String),
+    #[error("Invalid TransactionType: {0}")]
+    InvalidTransactionType(String),
+    #[error("Invalid TransactionStatus: {0}")]
+    InvalidTransactionStatus(String),
+    #[error("Invalid PurchaseFlowStatus: {0}")]
+    InvalidPurchaseFlowStatus(String),
+    #[error("Invalid RefundStatus: {0}")]
+    InvalidRefundStatus(String),
+    #[error("Invalid AdminActionType: {0}")]
+    InvalidAdminActionType(String),
 }
 
 impl ResponseError for WalletError {
@@ -67,6 +78,12 @@ impl ResponseError for WalletError {
             WalletError::DuplicateReferenceNumber(_) => (StatusCode::CONFLICT, "DUPLICATE_REFERENCE_NUMBER"),
             WalletError::BalanceLimitExceeded => (StatusCode::BAD_REQUEST, "BALANCE_LIMIT_EXCEEDED"),
             WalletError::PaymentGatewayError(_) => (StatusCode::BAD_GATEWAY, "PAYMENT_GATEWAY_ERROR"),
+            WalletError::InvalidWalletStatus(_) => (StatusCode::BAD_REQUEST, "INVALID_WALLET_STATUS"),
+            WalletError::InvalidTransactionType(_) => (StatusCode::BAD_REQUEST, "INVALID_TRANSACTION_TYPE"),
+            WalletError::InvalidTransactionStatus(_) => (StatusCode::BAD_REQUEST, "INVALID_TRANSACTION_STATUS"),
+            WalletError::InvalidPurchaseFlowStatus(_) => (StatusCode::BAD_REQUEST, "INVALID_PURCHASE_FLOW_STATUS"),
+            WalletError::InvalidRefundStatus(_) => (StatusCode::BAD_REQUEST, "INVALID_REFUND_STATUS"),
+            WalletError::InvalidAdminActionType(_) => (StatusCode::BAD_REQUEST, "INVALID_ADMIN_ACTION_TYPE"),
         };
 
         HttpResponse::build(status).json(ErrorResponse {
@@ -107,4 +124,15 @@ impl From<serde_json::Error> for WalletError {
     }
 }
 
+impl From<std::string::ParseError> for WalletError {
+    fn from(err: std::string::ParseError) -> Self {
+        WalletError::InvalidInput(format!("Parse Error: {}", err))
+    }
+}
+
+impl From<uuid::Error> for WalletError {
+    fn from(err: uuid::Error) -> Self {
+        WalletError::InvalidInput(format!("UUID Parse Error: {}", err))
+    }
+}
 

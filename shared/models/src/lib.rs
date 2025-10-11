@@ -19,3 +19,6 @@ pub mod payment;
 
 pub mod vendor;
 
+
+pub mod wallet;
+

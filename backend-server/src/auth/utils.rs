@@ -14,7 +14,7 @@ pub struct Claims {
     pub iat: usize,
 }
 
-pub fn create_jwt(user_id: Uuid, role: String, config: &AppConfig) -> Result<String, WalletError> {
+pub fn create_jwt(user_id: Uuid, config: &AppConfig) -> Result<String, WalletError> {
     let secret = config.security.jwt_secret.as_bytes();
     let now = Utc::now();
     let expires_at = now + Duration::seconds(config.security.session_timeout as i64);

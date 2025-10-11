@@ -1,18 +1,21 @@
-
 use actix_web::{web, HttpResponse};
 use sqlx::PgPool;
 use uuid::Uuid;
-
-use crate::wallet::models::{WalletResponse, UpdateWalletRequest, CreateTransactionRequest, TransactionResponse, UpdateTransactionStatusRequest, CreatePurchaseFlowRequest, PurchaseFlowResponse, UpdatePurchaseFlowStatusRequest, CreateRefundRequest, RefundRequestResponse, UpdateRefundRequestStatus, CreateAdminActionRequest, AdminActionResponse};
 use crate::auth::middleware::AuthenticatedUser;
+
+use models;
+use models::wallet::{WalletStatus, TransactionType, TransactionStatus, PurchaseFlowStatus, RefundStatus, AdminActionType};
+use crate::wallet::models::{WalletResponse, UpdateWalletRequest, CreateTransactionRequest, TransactionResponse, UpdateTransactionStatusRequest, CreatePurchaseFlowRequest, PurchaseFlowResponse, UpdatePurchaseFlowStatusRequest, CreateRefundRequest, RefundRequestResponse, UpdateRefundRequestStatus, CreateAdminActionRequest, AdminActionResponse, CreateWalletRequest};
 use crate::wallet::service::WalletService;
 use crate::wallet::errors::WalletError;
 
-// --- Wallet Handlers ---
+pub async fn create_wallet_handler(pool: web::Data<PgPool>, auth_user: AuthenticatedUser, req: web::Json<CreateWalletRequest>) -> Result<HttpResponse, WalletError> {
+    let user_id = Uuid::parse_str(&auth_user.claims.sub)
+        .map_err(|e| WalletError::InternalError(format!("Invalid user_id UUID in claims: {}", e)))?;
 
-pub async fn create_wallet_handler(pool: web::Data<PgPool>, auth_user: AuthenticatedUser) -> Result<HttpResponse, WalletError> {
     let service = WalletService::new(pool.get_ref().clone());
-    let wallet = service.create_wallet(auth_user.claims.sub).await?;
+    let wallet = service.create_wallet(user_id, req.into_inner()).await?;
+
     Ok(HttpResponse::Created().json(WalletResponse {
         id: wallet.id,
         user_id: wallet.user_id,
@@ -23,7 +26,6 @@ pub async fn create_wallet_handler(pool: web::Data<PgPool>, auth_user: Authentic
         updated_at: wallet.updated_at,
     }))
 }
-
 pub async fn get_wallet_by_user_id_handler(pool: web::Data<PgPool>, path: web::Path<Uuid>) -> Result<HttpResponse, WalletError> {
     let user_id = path.into_inner();
     let service = WalletService::new(pool.get_ref().clone());
@@ -57,7 +59,7 @@ pub async fn get_wallet_by_id_handler(pool: web::Data<PgPool>, path: web::Path<U
 pub async fn update_wallet_status_handler(pool: web::Data<PgPool>, path: web::Path<Uuid>, req: web::Json<UpdateWalletRequest>) -> Result<HttpResponse, WalletError> {
     let wallet_id = path.into_inner();
     let service = WalletService::new(pool.get_ref().clone());
-    let wallet = service.update_wallet_status(wallet_id, req.status.clone().ok_or(WalletError::InvalidInput("Wallet status is required".to_string()))?).await?;
+    let wallet = service.update_wallet_status(wallet_id, req.status.to_string()).await?;
     Ok(HttpResponse::Ok().json(WalletResponse {
         id: wallet.id,
         user_id: wallet.user_id,
@@ -73,13 +75,7 @@ pub async fn update_wallet_status_handler(pool: web::Data<PgPool>, path: web::Pa
 
 pub async fn create_transaction_handler(pool: web::Data<PgPool>, req: web::Json<CreateTransactionRequest>) -> Result<HttpResponse, WalletError> {
     let service = WalletService::new(pool.get_ref().clone());
-    let transaction = service.create_transaction(
-        req.wallet_id,
-        req.transaction_type.clone(),
-        req.amount,
-        req.description.clone(),
-        req.reference_id,
-    ).await?;
+    let transaction = service.create_transaction(req.into_inner()).await?;
     Ok(HttpResponse::Created().json(TransactionResponse {
         id: transaction.id,
         wallet_id: transaction.wallet_id,
@@ -130,7 +126,7 @@ pub async fn get_transaction_by_id_handler(pool: web::Data<PgPool>, path: web::P
 pub async fn update_transaction_status_handler(pool: web::Data<PgPool>, path: web::Path<Uuid>, req: web::Json<UpdateTransactionStatusRequest>) -> Result<HttpResponse, WalletError> {
     let transaction_id = path.into_inner();
     let service = WalletService::new(pool.get_ref().clone());
-    let transaction = service.update_transaction_status(transaction_id, req.status.clone()).await?;
+    let transaction = service.update_transaction_status(transaction_id, req.status.to_string()).await?;
     Ok(HttpResponse::Ok().json(TransactionResponse {
         id: transaction.id,
         wallet_id: transaction.wallet_id,
@@ -148,19 +144,13 @@ pub async fn update_transaction_status_handler(pool: web::Data<PgPool>, path: we
 
 pub async fn create_purchase_flow_handler(pool: web::Data<PgPool>, req: web::Json<CreatePurchaseFlowRequest>) -> Result<HttpResponse, WalletError> {
     let service = WalletService::new(pool.get_ref().clone());
-    let purchase_flow = service.create_purchase_flow(
-        req.user_id,
-        req.wallet_id,
-        req.amount,
-        req.metadata.clone(),
-    ).await?;
+    let purchase_flow = service.create_purchase_flow(req.into_inner()).await?;
     Ok(HttpResponse::Created().json(PurchaseFlowResponse {
         id: purchase_flow.id,
         user_id: purchase_flow.user_id,
         wallet_id: purchase_flow.wallet_id,
         amount: purchase_flow.amount,
         status: purchase_flow.status,
-        metadata: purchase_flow.metadata,
         created_at: purchase_flow.created_at,
         updated_at: purchase_flow.updated_at,
     }))
@@ -176,7 +166,6 @@ pub async fn get_purchase_flow_by_id_handler(pool: web::Data<PgPool>, path: web:
         wallet_id: purchase_flow.wallet_id,
         amount: purchase_flow.amount,
         status: purchase_flow.status,
-        metadata: purchase_flow.metadata,
         created_at: purchase_flow.created_at,
         updated_at: purchase_flow.updated_at,
     }))
@@ -185,14 +174,13 @@ pub async fn get_purchase_flow_by_id_handler(pool: web::Data<PgPool>, path: web:
 pub async fn update_purchase_flow_status_handler(pool: web::Data<PgPool>, path: web::Path<Uuid>, req: web::Json<UpdatePurchaseFlowStatusRequest>) -> Result<HttpResponse, WalletError> {
     let flow_id = path.into_inner();
     let service = WalletService::new(pool.get_ref().clone());
-    let purchase_flow = service.update_purchase_flow_status(flow_id, req.status.clone()).await?;
+    let purchase_flow = service.update_purchase_flow_status(flow_id, req.status.to_string()).await?;
     Ok(HttpResponse::Ok().json(PurchaseFlowResponse {
         id: purchase_flow.id,
         user_id: purchase_flow.user_id,
         wallet_id: purchase_flow.wallet_id,
         amount: purchase_flow.amount,
         status: purchase_flow.status,
-        metadata: purchase_flow.metadata,
         created_at: purchase_flow.created_at,
         updated_at: purchase_flow.updated_at,
     }))
@@ -202,12 +190,7 @@ pub async fn update_purchase_flow_status_handler(pool: web::Data<PgPool>, path: 
 
 pub async fn create_refund_request_handler(pool: web::Data<PgPool>, req: web::Json<CreateRefundRequest>) -> Result<HttpResponse, WalletError> {
     let service = WalletService::new(pool.get_ref().clone());
-    let refund_request = service.create_refund_request(
-        req.transaction_id,
-        req.user_id,
-        req.amount,
-        req.reason.clone(),
-    ).await?;
+    let refund_request = service.create_refund_request(req.into_inner()).await?;
     Ok(HttpResponse::Created().json(RefundRequestResponse {
         id: refund_request.id,
         transaction_id: refund_request.transaction_id,
@@ -239,7 +222,7 @@ pub async fn get_refund_request_by_id_handler(pool: web::Data<PgPool>, path: web
 pub async fn update_refund_request_status_handler(pool: web::Data<PgPool>, path: web::Path<Uuid>, req: web::Json<UpdateRefundRequestStatus>) -> Result<HttpResponse, WalletError> {
     let request_id = path.into_inner();
     let service = WalletService::new(pool.get_ref().clone());
-    let refund_request = service.update_refund_request_status(request_id, req.status.clone()).await?;
+    let refund_request = service.update_refund_request_status(request_id, req.status.to_string()).await?;
     Ok(HttpResponse::Ok().json(RefundRequestResponse {
         id: refund_request.id,
         transaction_id: refund_request.transaction_id,
@@ -256,18 +239,12 @@ pub async fn update_refund_request_status_handler(pool: web::Data<PgPool>, path:
 
 pub async fn record_admin_action_handler(pool: web::Data<PgPool>, req: web::Json<CreateAdminActionRequest>) -> Result<HttpResponse, WalletError> {
     let service = WalletService::new(pool.get_ref().clone());
-    let admin_action = service.record_admin_action(
-        req.admin_id,
-        req.admin_action_type.clone(),
-        req.target_id,
-        req.details.clone(),
-    ).await?;
+    let admin_action = service.record_admin_action(req.into_inner()).await?;
     Ok(HttpResponse::Created().json(AdminActionResponse {
         id: admin_action.id,
         admin_id: admin_action.admin_id,
-        admin_action_type: admin_action.admin_action_type,
+        action_type: admin_action.action_type,
         target_id: admin_action.target_id,
-        details: admin_action.details,
         created_at: admin_action.created_at,
     }))
 }
@@ -279,9 +256,8 @@ pub async fn get_admin_actions_by_admin_id_handler(pool: web::Data<PgPool>, path
     Ok(HttpResponse::Ok().json(admin_actions.into_iter().map(|a| AdminActionResponse {
         id: a.id,
         admin_id: a.admin_id,
-        admin_action_type: a.admin_action_type,
+        action_type: a.action_type,
         target_id: a.target_id,
-        details: a.details,
         created_at: a.created_at,
     }).collect::<Vec<AdminActionResponse>>()))
 }
@@ -293,9 +269,8 @@ pub async fn get_admin_actions_by_target_id_handler(pool: web::Data<PgPool>, pat
     Ok(HttpResponse::Ok().json(admin_actions.into_iter().map(|a| AdminActionResponse {
         id: a.id,
         admin_id: a.admin_id,
-        admin_action_type: a.admin_action_type,
+        action_type: a.action_type,
         target_id: a.target_id,
-        details: a.details,
         created_at: a.created_at,
     }).collect::<Vec<AdminActionResponse>>()))
 }

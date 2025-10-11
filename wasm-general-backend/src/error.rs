@@ -1,14 +1,14 @@
-use actix_web::{http::StatusCode, HttpResponse, ResponseError};
 use serde::Serialize;
-use sqlx::Error as SqlxError;
 use std::fmt::{Display, Formatter, Result as FmtResult};
+use wasm_bindgen::JsValue;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub enum ServiceError {
     NotFound(String),
     InternalServerError(String),
     BadRequest(String),
     DuplicateEntry(String),
+    WasmError(String),
 }
 
 impl Display for ServiceError {
@@ -17,38 +17,47 @@ impl Display for ServiceError {
     }
 }
 
-impl ResponseError for ServiceError {
-    fn error_response(&self) -> HttpResponse {
-        match self {
-            ServiceError::NotFound(msg) => HttpResponse::build(StatusCode::NOT_FOUND)
-                .json(serde_json::json!({ "message": msg })),
-            ServiceError::InternalServerError(msg) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
-                .json(serde_json::json!({ "message": msg })),
-            ServiceError::BadRequest(msg) => HttpResponse::build(StatusCode::BAD_REQUEST)
-                .json(serde_json::json!({ "message": msg })),
-            ServiceError::DuplicateEntry(msg) => HttpResponse::build(StatusCode::CONFLICT)
-                .json(serde_json::json!({ "message": msg })),
+impl From<ServiceError> for JsValue {
+    fn from(error: ServiceError) -> Self {
+        JsValue::from_str(&error.to_string())
+    }
+}
+
+// This `From<String>` implementation will catch any string-based errors
+// that might be passed from the host or other parts of the WASM module.
+// It tries to categorize them into known ServiceError variants.
+impl From<String> for ServiceError {
+    fn from(err: String) -> Self {
+        if err.contains("not found") {
+            ServiceError::NotFound(err)
+        } else if err.contains("duplicate") || err.contains("unique constraint") {
+            ServiceError::DuplicateEntry(err)
+        } else if err.contains("bad request") {
+            ServiceError::BadRequest(err)
+        } else {
+            ServiceError::InternalServerError(err)
         }
     }
 }
 
-impl From<SqlxError> for ServiceError {
-    fn from(err: SqlxError) -> Self {
-        log::error!("SQLx error: {:?}", err);
-        match err {
-            SqlxError::RowNotFound => ServiceError::NotFound("Record not found".to_string()),
-            SqlxError::Database(db_err) if db_err.is_unique_violation() => {
-                ServiceError::DuplicateEntry("A record with this unique identifier already exists.".to_string())
-            }
-            _ => ServiceError::InternalServerError("Database error occurred".to_string()),
-        }
-    }
-}
-
+// Convert `std::env::VarError` to `ServiceError`
 impl From<std::env::VarError> for ServiceError {
     fn from(err: std::env::VarError) -> Self {
-        log::error!("Environment variable error: {:?}", err);
-        ServiceError::InternalServerError("Configuration error".to_string())
+        ServiceError::InternalServerError(format!("Configuration error: {}", err))
+    }
+}
+
+// Convert `serde_json::Error` to `ServiceError`
+impl From<serde_json::Error> for ServiceError {
+    fn from(err: serde_json::Error) -> Self {
+        ServiceError::InternalServerError(format!("JSON serialization/deserialization error: {}", err))
+    }
+}
+
+// Convert `JsValue` to `ServiceError` for errors coming from JavaScript
+impl From<JsValue> for ServiceError {
+    fn from(err: JsValue) -> Self {
+        ServiceError::WasmError(err.as_string().unwrap_or_else(|| "Unknown WASM error".to_string()))
     }
 }
 
