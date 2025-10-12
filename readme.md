@@ -12,7 +12,7 @@ This guide provides comprehensive instructions for setting up, deploying, and ru
 
 ### 2. Environment Configuration
 
-Correct environment configuration is critical. The project uses separate `.env` files for each service.
+Correct environment configuration is critical. The project uses separate `.env` files for each service. **There should be no `.env` files directly in the project root.**
 
 **A. Main Backend (`backend/.env`)**
 
@@ -117,7 +117,7 @@ sudo systemctl start pema-backend pema-auth
 
 **Step 5: Build Frontend**
 
-Build the frontend as previously described:
+Build the Yew WASM frontend using Trunk:
 
 ```bash
 cd frontend
