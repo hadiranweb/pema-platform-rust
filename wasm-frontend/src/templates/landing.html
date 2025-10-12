@@ -1,363 +1,0 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <!-- Galaxy Background -->
-    <div class="galaxy-bg"></div>
-    <div class="stars" id="stars"></div>
-    
-    <!-- Parallax Elements -->
-    <div class="moon" id="moon">
-        <div class="moon-logo">PEMA</div>
-    </div>
-    <div class="mountains" id="mountains"></div>
-
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="nav">
-                <div class="logo">
-                    <h2>PEMA</h2>
-                </div>
-                <div class="nav-links">
-                    <a href="#home">خانه</a>
-                    <a href="#products">محصولات</a>
-                    <a href="#about">درباره ما</a>
-                    <a href="#contact">تماس با ما</a>
-                </div>
-                <button class="login-btn" onclick="openLoginModal()">
-                    <i class="fas fa-user"></i>
-                    ورود
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <span>🚀 پلتفرم نوین تجارت الکترونیک</span>
-                </div>
-                <h1>
-                    <span class="gradient-text">PEMA</span><br>
-                    آینده خرید آنلاین
-                </h1>
-                <p>
-                    تجربه‌ای متفاوت از خرید آنلاین با هوش مصنوعی پیشرفته،
-                    <br>
-                    محصولات باکیفیت و خدمات بی‌نظیر
-                </p>
-                <div class="hero-buttons">
-                    <button class="cta-btn primary" onclick="document.getElementById('products').scrollIntoView()">
-                        <i class="fas fa-rocket"></i>
-                        شروع خرید
-                    </button>
-                    <button class="cta-btn secondary" onclick="document.getElementById('about').scrollIntoView()">
-                        <i class="fas fa-play"></i>
-                        درباره ما
-                    </button>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <div class="stat-number">10K+</div>
-                        <div class="stat-label">محصول</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">50K+</div>
-                        <div class="stat-label">مشتری</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">99%</div>
-                        <div class="stat-label">رضایت</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Products Section -->
-    <section id="products" class="products">
-        <div class="container">
-            <div class="section-header">
-                <h2>محصولات ویژه</h2>
-                <p>بهترین محصولات با کیفیت برتر و قیمت مناسب</p>
-            </div>
-            <div class="products-grid" id="products-grid">
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <span>در حال بارگذاری محصولات...</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="features-section">
-        <div class="container">
-            <div class="section-header">
-                <h2>چرا PEMA؟</h2>
-                <p>ویژگی‌هایی که ما را متمایز می‌کند</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-brain"></i>
-                    </div>
-                    <h3>هوش مصنوعی</h3>
-                    <p>پیشنهادات هوشمند بر اساس سلیقه شما</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-shipping-fast"></i>
-                    </div>
-                    <h3>تحویل سریع</h3>
-                    <p>ارسال رایگان و تحویل در کمترین زمان</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h3>امنیت بالا</h3>
-                    <p>پرداخت امن و حفاظت از اطلاعات شخصی</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-headset"></i>
-                    </div>
-                    <h3>پشتیبانی ۲۴/۷</h3>
-                    <p>پاسخگویی در تمام ساعات شبانه‌روز</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="container">
-            <div class="about-content">
-                <div class="about-text">
-                    <h2>درباره PEMA</h2>
-                    <p>
-                        پلتفرم PEMA با استفاده از جدیدترین تکنولوژی‌های دنیا و هوش مصنوعی پیشرفته،
-                        تجربه‌ای نوین از خرید آنلاین را ارائه می‌دهد. ما با تمرکز بر کیفیت محصولات
-                        و رضایت مشتریان، به دنبال ایجاد بهترین تجربه خرید برای شما هستیم.
-                    </p>
-                    <div class="about-features">
-                        <div class="about-feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>محصولات اصل و باکیفیت</span>
-                        </div>
-                        <div class="about-feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>قیمت‌های رقابتی</span>
-                        </div>
-                        <div class="about-feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>خدمات پس از فروش</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="about-image">
-                    <div class="about-card">
-                        <i class="fas fa-store"></i>
-                        <h3>فروشگاه آنلاین</h3>
-                        <p>دسترسی آسان به هزاران محصول</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="container">
-            <div class="section-header">
-                <h2>تماس با ما</h2>
-                <p>برای هرگونه سوال یا پیشنهاد با ما در ارتباط باشید</p>
-            </div>
-            <div class="contact-grid">
-                <div class="contact-card">
-                    <div class="contact-icon">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <h3>ایمیل</h3>
-                    <p>support@pema.ir</p>
-                </div>
-                <div class="contact-card">
-                    <div class="contact-icon">
-                        <i class="fas fa-phone"></i>
-                    </div>
-                    <h3>تلفن</h3>
-                    <p>021-12345678</p>
-                </div>
-                <div class="contact-card">
-                    <div class="contact-icon">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                    <h3>آدرس</h3>
-                    <p>تهران، خیابان ولیعصر، پلاک ۱۲۳</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeLoginModal()">&times;</span>
-            
-            <!-- Step 1: Email/Phone Input -->
-            <div id="step1" class="auth-step active">
-                <div class="auth-header">
-                    <h3>ورود / ثبت‌نام</h3>
-                    <p>برای ادامه، ایمیل یا شماره تلفن خود را وارد کنید</p>
-                </div>
-                
-                <!-- Social Login Options -->
-                <div class="social-login">
-                    <button class="social-btn google" onclick="loginWithGoogle()">
-                        <i class="fab fa-google"></i>
-                        ورود با گوگل
-                    </button>
-                    <button class="social-btn github" onclick="loginWithGithub()">
-                        <i class="fab fa-github"></i>
-                        ورود با گیت‌هاب
-                    </button>
-                    <button class="social-btn linkedin" onclick="loginWithLinkedin()">
-                        <i class="fab fa-linkedin"></i>
-                        ورود با لینکدین
-                    </button>
-                    <button class="social-btn meta" onclick="loginWithMeta()">
-                        <i class="fab fa-meta"></i>
-                        ورود با متا
-                    </button>
-                </div>
-                
-                <div class="divider">
-                    <span>یا</span>
-                </div>
-                
-                <form id="checkUserForm">
-                    <div class="input-group">
-                        <i class="fas fa-envelope"></i>
-                        <input type="text" id="emailOrPhone" placeholder="ایمیل یا شماره تلفن" required>
-                    </div>
-                    <button type="submit" class="auth-btn">
-                        <span>ادامه</span>
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                </form>
-            </div>
-
-            <!-- Step 2: Password Input (for existing users) -->
-            <div id="step2" class="auth-step">
-                <div class="auth-header">
-                    <h3>ورود</h3>
-                    <p id="userMessage"></p>
-                </div>
-                <form id="loginForm">
-                    <div class="input-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="password" placeholder="رمز عبور" required>
-                    </div>
-                    <button type="submit" class="auth-btn">
-                        <span>ورود</span>
-                        <i class="fas fa-sign-in-alt"></i>
-                    </button>
-                    <button type="button" class="link-btn" onclick="forgotPassword()">
-                        فراموشی رمز عبور
-                    </button>
-                </form>
-            </div>
-
-            <!-- Step 3: Verification Code -->
-            <div id="step3" class="auth-step">
-                <div class="auth-header">
-                    <h3>تایید کد</h3>
-                    <p id="codeMessage"></p>
-                </div>
-                <form id="verifyForm">
-                    <div class="input-group">
-                        <i class="fas fa-key"></i>
-                        <input type="text" id="verificationCode" placeholder="کد تایید" required>
-                    </div>
-                    <button type="submit" class="auth-btn">
-                        <span>تایید</span>
-                        <i class="fas fa-check"></i>
-                    </button>
-                </form>
-            </div>
-
-            <!-- Step 4: Registration Form -->
-            <div id="step4" class="auth-step">
-                <div class="auth-header">
-                    <h3>تکمیل ثبت‌نام</h3>
-                    <p>اطلاعات خود را تکمیل کنید</p>
-                </div>
-                <form id="registerForm">
-                    <div class="input-group">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="username" placeholder="نام کاربری" required>
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" placeholder="ایمیل" required>
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-phone"></i>
-                        <input type="tel" id="phone" placeholder="شماره تلفن" required>
-                    </div>
-                    <button type="submit" class="auth-btn">
-                        <span>ثبت‌نام</span>
-                        <i class="fas fa-user-plus"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>PEMA</h3>
-                    <p>پلتفرم نوین تجارت الکترونیک</p>
-                </div>
-                <div class="footer-section">
-                    <h4>لینک‌های مفید</h4>
-                    <ul>
-                        <li><a href="#home">خانه</a></li>
-                        <li><a href="#products">محصولات</a></li>
-                        <li><a href="#about">درباره ما</a></li>
-                        <li><a href="#contact">تماس با ما</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>شبکه‌های اجتماعی</h4>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-telegram"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 PEMA. تمامی حقوق محفوظ است.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script src="/static/js/script.js"></script>
-</body>
-</html>
