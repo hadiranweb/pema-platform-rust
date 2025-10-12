@@ -3,7 +3,11 @@ resolver = "2"
 members = [
     "backend",
     "frontend",
+    "auth-server",
     "shared/models",
+    "shared/dtos",
+    "shared/config",
     "shared/plugin-sdk",
+    "plugins/discount_calculator"
 ]
 

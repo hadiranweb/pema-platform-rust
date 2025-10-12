@@ -1,46 +1,43 @@
 [package]
-name = "pema_backend_server"
+name = "backend"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-actix-web = "4"
-actix-cors = "0.6"
+actix-web = { workspace = true }
+actix-cors = { workspace = true }
 actix-web-httpauth = "0.8"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+serde = { workspace = true }
+serde_json = { workspace = true }
 env_logger = "0.10"
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }
-chrono = { version = "0.4", features = ["serde"] }
-uuid = { version = "1.4", features = ["serde", "v4"] }
+sqlx = { workspace = true, features = ["postgres", "runtime-tokio-rustls", "uuid", "chrono", "migrate"] }
+chrono = { workspace = true }
+uuid = { workspace = true }
 models = { path = "../shared/models", features = ["sqlx"] }
-jsonwebtoken = "8"
-bcrypt = "0.15"
-validator = { version = "0.16", features = ["derive"] }
-rand = "0.8"
-derive_more = "0.99.17"
+jsonwebtoken = { workspace = true }
+argon2 = { workspace = true }
+secrecy = { workspace = true }
+validator = { workspace = true, features = ["derive"] }
+rand = { workspace = true }
+derive_more = { workspace = true }
 
 # Plugin System Dependencies
 wasmtime = "17.0"
 wasmtime-wasi = "17.0"
-anyhow = "1.0"
-tokio = { version = "1.32", features = ["full"] }
-
+anyhow = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
 pema_plugin_sdk = { path = "../shared/plugin-sdk" }
 
+# Shared crates
+dtos = { path = "../shared/dtos" }
+config = { path = "../shared/config" }
+
 [dev-dependencies]
-actix-web = { version = "4", features = ["macros"] }
+actix-web = { workspace = true, features = ["macros"] }
 
 [build-dependencies]
 sqlx-macros = "0.7"
 
-
-tracing = { version = "0.1", features = ["log", "std"] }
-
-
-tracing-subscriber = "0.3"
-
-
-
-dtos = { path = "../shared/dtos" }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
 
