@@ -14,7 +14,7 @@ dotenv = "0.15"
 sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.4", features = ["serde", "v4"] }
-pema_models = { path = "../shared/models" }
+models = { path = "../shared/models" }
 jsonwebtoken = "8"
 bcrypt = "0.15"
 validator = { version = "0.16", features = ["derive"] }
@@ -32,4 +32,10 @@ actix-web = { version = "4", features = ["macros"] }
 
 [build-dependencies]
 sqlx-macros = "0.7"
+
+
+tracing = { version = "0.1", features = ["log", "std"] }
+
+
+tracing-subscriber = "0.3"
 

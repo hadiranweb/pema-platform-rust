@@ -1,12 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
-    "wasm-frontend",
-    "wasm-auth-backend",
-    "wasm-general-backend",
-    "backend-server",
+    "backend",
+    "frontend",
     "shared/models",
-    "shared/config",
-
+    "shared/plugin-sdk",
 ]
 

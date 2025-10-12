@@ -26,3 +26,18 @@ pub struct UpdateUser {
     pub email: Option<String>,
 }
 
+
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+pub struct UserLogin {
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+pub struct UserRegister {
+    pub email: String,
+    pub username: String,
+    pub password: String,
+}
+

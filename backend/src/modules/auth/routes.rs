@@ -1,15 +1,13 @@
-use actix_web::{web, HttpResponse, Responder};
 
-async fn login() -> impl Responder {
-    HttpResponse::Ok().body("Login endpoint")
-}
+use actix_web::web;
 
-async fn register() -> impl Responder {
-    HttpResponse::Ok().body("Register endpoint")
-}
+use crate::modules::auth::handlers::{login_user, register_user};
 
-pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(web::resource("/auth/login").route(web::post().to(login)))
-       .service(web::resource("/auth/register").route(web::post().to(register)));
+pub fn init_routes(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::scope("/auth")
+            .route("/register", web::post().to(register_user))
+            .route("/login", web::post().to(login_user)),
+    );
 }
 

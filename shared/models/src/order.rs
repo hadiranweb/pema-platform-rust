@@ -7,21 +7,25 @@ use chrono::{DateTime, Utc};
 pub struct Order {
     pub id: Uuid,
     pub user_id: Uuid,
+    pub product_id: Uuid,
+    pub quantity: i32,
+    pub total_price: f64,
     pub status: String,
-    pub total_amount: f64,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct CreateOrder {
-    pub user_id: Uuid,
-    pub total_amount: f64,
+    pub product_id: Uuid,
+    pub quantity: i32,
+    pub total_price: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct UpdateOrder {
     pub status: Option<String>,
-    pub total_amount: Option<f64>,
+    pub quantity: Option<i32>,
+    pub total_price: Option<f64>,
 }
 

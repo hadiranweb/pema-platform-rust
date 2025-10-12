@@ -1,11 +1,16 @@
-use actix_web::{web, HttpResponse, Responder};
 
-async fn get_products() -> impl Responder {
-    HttpResponse::Ok().body("This will be a list of products")
-}
+use actix_web::web;
 
-pub fn config(cfg: &mut web::ServiceConfig) {
+use crate::modules::products::handlers::{create_product, delete_product, get_all_products, get_product_by_id, update_product};
+
+pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
-        web::resource("/products").route(web::get().to(get_products))
+        web::scope("/products")
+            .route("", web::get().to(get_all_products))
+            .route("", web::post().to(create_product))
+            .route("/{id}", web::get().to(get_product_by_id))
+            .route("/{id}", web::put().to(update_product))
+            .route("/{id}", web::delete().to(delete_product)),
     );
 }
+

@@ -1,1 +1,2 @@
-// pub mod wallet_page;
+pub mod wallet_page;
+
