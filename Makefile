@@ -1,49 +1,84 @@
 SHELL := /bin/bash
-.PHONY: all auth-backend general-backend frontend clean run-auth-backend run-general-backend run-backend run-frontend
+.PHONY: help setup dev build test clean migrate docker-up docker-down fmt clippy check
 
-AUTH_BACKEND_DIR := wasm-auth-backend
-GENERAL_BACKEND_DIR := wasm-general-backend
-FRONTEND_DIR := wasm-frontend
-SHARED_CONFIG_DIR := shared/config
-BACKEND_SERVER_DIR := backend-server
+AUTH_SERVER_DIR := auth-server
+BACKEND_DIR := backend
+FRONTEND_DIR := frontend
 
 BUILD_PROFILE ?= release
 
-all: auth-backend general-backend frontend
+help:
+	@echo "Available commands:"
+	@echo "  make setup        - Initial project setup (Docker Compose)"
+	@echo "  make dev          - Start development servers (backend, auth-server, frontend)"
+	@echo "  make build        - Build production artifacts (backend, auth-server, frontend)"
+	@echo "  make test         - Run all tests"
+	@echo "  make clean        - Clean all build artifacts"
+	@echo "  make migrate      - Run database migrations"
+	@echo "  make docker-up    - Start Docker services"
+	@echo "  make docker-down  - Stop Docker services"
+	@echo "  make fmt          - Format code"
+	@echo "  make clippy       - Run clippy linter"
+	@echo "  make check        - Run fmt, clippy, and tests"
 
-auth-backend:
-	@echo "Building WASM Auth Backend..."
-	cargo build --target wasm32-unknown-unknown --$(BUILD_PROFILE) --features wasm --manifest-path $(AUTH_BACKEND_DIR)/Cargo.toml
+setup:
+	@echo "🚀 Setting up PEMA Platform with Docker Compose..."
+	@echo "Ensure Docker and Docker Compose are installed."
+	@echo "Copying .env files..."
+	cp .env.example .env || true
+	cp $(BACKEND_DIR)/.env.example $(BACKEND_DIR)/.env || true
+	cp $(AUTH_SERVER_DIR)/.env.example $(AUTH_SERVER_DIR)/.env || true
+	make docker-up
+	@echo "⏳ Waiting for database..."
+	sleep 10
+	make migrate
+	@echo "✅ Setup complete!"
 
-general-backend:
-	@echo "Building WASM General Backend..."
-	cargo build --target wasm32-unknown-unknown --$(BUILD_PROFILE) --features wasm --manifest-path $(GENERAL_BACKEND_DIR)/Cargo.toml
+dev:
+	@echo "Starting development servers..."
+	(cd $(BACKEND_DIR) && cargo watch -x 'run --release' --ignore 'target') & \
+	(cd $(AUTH_SERVER_DIR) && cargo watch -x 'run --release' --ignore 'target') & \
+	(cd $(FRONTEND_DIR) && trunk serve --port 3000) & \
+	wait
 
-frontend:
-	@echo "Building WASM Frontend..."
+build:
+	@echo "Building production artifacts..."
+	@echo "Building backend..."
+	cargo build --$(BUILD_PROFILE) --manifest-path $(BACKEND_DIR)/Cargo.toml
+	@echo "Building auth-server..."
+	cargo build --$(BUILD_PROFILE) --manifest-path $(AUTH_SERVER_DIR)/Cargo.toml
+	@echo "Building frontend..."
 	cd $(FRONTEND_DIR) && trunk build --$(BUILD_PROFILE)
+
+test:
+	@echo "Running all tests..."
+	cargo test --workspace
+
+migrate:
+	@echo "Running database migrations..."
+	cargo install sqlx-cli --no-default-features --features "postgres,runtime-tokio-rustls" || true
+	sqlx migrate run --database-url $$(grep DATABASE_URL $(BACKEND_DIR)/.env | cut -d '=' -f2-)
 
 clean:
 	@echo "Cleaning all build artifacts..."
 	cargo clean
 	rm -rf $(FRONTEND_DIR)/dist
 
-run-auth-backend:
-	@echo "Starting Auth Backend Server..."
-	cd $(BACKEND_SERVER_DIR) && dotenv -e ../.env.auth -- cargo run --release
+docker-up:
+	@echo "Starting Docker services..."
+	docker compose up -d
 
-run-general-backend:
-	@echo "Starting General Backend Server..."
-	cd $(BACKEND_SERVER_DIR) && dotenv -e ../.env.api -- cargo run --release
+docker-down:
+	@echo "Stopping Docker services..."
+	docker compose down
 
-run-backend:
-	@echo "Starting backend servers..."
-	cd $(BACKEND_SERVER_DIR) && dotenv -e ../.env.auth -- cargo run --release & \
-	cd $(BACKEND_SERVER_DIR) && dotenv -e ../.env.api -- cargo run --release &
-	@echo "Backend servers running on ports 8081 and 8082"
+fmt:
+	@echo "Formatting code..."
+	cargo fmt --all
 
-run-frontend:
-	@echo "Serving PEMA Frontend..."
-	@echo "Ensure the frontend has been built using 'make frontend' first."
-	cd $(FRONTEND_DIR) && trunk serve --port 3000
+clippy:
+	@echo "Running clippy linter..."
+	cargo clippy --all-targets --all-features -- -D warnings
+
+check: fmt clippy test
 
