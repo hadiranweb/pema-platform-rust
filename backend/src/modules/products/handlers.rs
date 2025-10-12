@@ -1,5 +1,6 @@
 
 use actix_web::{web, HttpResponse, Responder};
+use actix_web::ResponseError;
 use sqlx::PgPool;
 use uuid::Uuid;
 

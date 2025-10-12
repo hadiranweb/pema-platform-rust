@@ -56,7 +56,7 @@ impl WasmPluginSandbox {
         linker.func_wrap(
             "pema_host",
             "db_execute_read_query",
-            |mut caller: Caller<PluginHostContext>, query_ptr: i32, query_len: i32| -> Result<i32> {{
+            |mut caller: Caller<PluginHostContext>, query_ptr: i32, query_len: i32| -> Result<i32> {
                 tracing::warn!("Plugin attempted to execute generic DB read query. This should be restricted to specific predefined APIs.");
                 Ok(0)
             },
@@ -65,7 +65,7 @@ impl WasmPluginSandbox {
         linker.func_wrap(
             "pema_host",
             "get_product_count_for_tenant",
-            |mut caller: Caller<’_, PluginHostContext>, tenant_id_ptr: i32, tenant_id_len: i32| -> Result<i32> {
+            |mut caller: Caller<'_, PluginHostContext>, tenant_id_ptr: i32, tenant_id_len: i32| -> Result<i32> {
                 Ok(100)
             }
         )?;

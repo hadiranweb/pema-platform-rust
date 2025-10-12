@@ -1,2 +1,3 @@
-pub use crate::shared::models::vendor::{CreateVendor, UpdateVendor, Vendor};
+pub use dtos::vendor::{CreateVendor, UpdateVendor};
+pub use models::vendor::Vendor;
 

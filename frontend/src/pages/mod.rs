@@ -7,4 +7,5 @@ pub mod products;
 pub mod profile;
 pub mod vendor;
 pub mod wallet;
+pub mod pages;
 

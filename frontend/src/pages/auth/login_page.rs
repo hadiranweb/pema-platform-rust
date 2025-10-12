@@ -1,4 +1,3 @@
-
 use yew::prelude::*;
 use yew_router::prelude::*;
 use gloo_console::log;
@@ -16,6 +15,7 @@ use yewdux::prelude::use_reducer;
 pub fn login_page() -> Html {
     let email_state = use_state(|| String::new());
     let password_state = use_state(|| String::new());
+    let otp_code_state = use_state(|| Option::<String>::None);
     let error_message_state = use_state(|| Option::<String>::None);
     let loading_state = use_state(|| false);
 
@@ -31,10 +31,17 @@ pub fn login_page() -> Html {
         password_state.set(input.value());
     });
 
+    let on_otp_code_change = Callback::from(move |e: Event| {
+        let input: HtmlInputElement = e.target_unchecked_into();
+        let value = input.value();
+        otp_code_state.set(if value.is_empty() { None } else { Some(value) });
+    });
+
     let on_submit = Callback::from(move |e: FocusEvent| {
         e.prevent_default();
         let email = (*email_state).clone();
         let password = (*password_state).clone();
+        let otp_code = (*otp_code_state).clone();
         let error_message_state = error_message_state.clone();
         let loading_state = loading_state.clone();
         let history = history.clone();
@@ -42,7 +49,7 @@ pub fn login_page() -> Html {
 
         loading_state.set(true);
         wasm_bindgen_futures::spawn_local(async move {
-            let request = LoginRequest { email: email.clone(), password };
+            let request = LoginRequest { email: email.clone(), password, otp_code };
             match AuthService::login(request).await {
                 Ok((token, user_id, username, email)) => {
                     log!("Login successful, token:", token.clone());
@@ -78,6 +85,14 @@ pub fn login_page() -> Html {
                     value={(*password_state).clone()}
                     on_change={on_password_change}
                     placeholder="Enter your password"
+                />
+                <Input
+                    label="OTP Code (Optional)"
+                    id="otp_code"
+                    type="text"
+                    value={otp_code_state.as_ref().unwrap_or(&String::new()).clone()}
+                    on_change={on_otp_code_change}
+                    placeholder="Enter OTP if enabled"
                 />
                 { if *loading_state { html! { <Spinner /> } } else { html! {} } }
                 { if let Some(msg) = &*error_message_state { html! { <p class="error-message">{ msg }</p> } } else { html! {} } }

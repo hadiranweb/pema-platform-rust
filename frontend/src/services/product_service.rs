@@ -113,17 +113,17 @@ impl ProductService {
         }
     }
 
-    pub async fn get_reviews_for_product(product_id: Uuid) -> Result<Vec<Review>, String> {
+    pub async fn get_reviews_for_product(product_id: Uuid) -> Result<Vec<Review>> {
         let response = Request::get(&format!("/api/reviews/product/{}", product_id))
             .send()
-            .await
-            .map_err(|e| format!("Network error: {}", e.to_string()))?;
+            .await?;
 
         if response.ok() {
-            response.json().await.map_err(|e| format!("Failed to parse product reviews: {}", e.to_string()))
+            let reviews: Vec<Review> = response.json().await?;
+            Ok(reviews)
         } else {
-            let error_text = response.text().await.unwrap_or_default();
-            Err(format!("Failed to fetch product reviews: {}", error_text))
+            let error_text = response.text().await?;
+            Err(anyhow::anyhow!("Failed to fetch product reviews: {}", error_text))
         }
     }
 }

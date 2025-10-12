@@ -1,2 +1,3 @@
-pub use crate::shared::models::review::{CreateReview, UpdateReview, Review};
+pub use dtos::review::{CreateReview, UpdateReview};
+pub use models::review::Review;
 

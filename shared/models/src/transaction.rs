@@ -1,4 +1,3 @@
-
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
@@ -92,23 +91,5 @@ pub struct Transaction {
     pub reference_id: Option<Uuid>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CreateTransaction {
-    pub wallet_id: Uuid,
-    pub transaction_type: TransactionType,
-    pub amount: f64,
-    pub description: Option<String>,
-    pub reference_id: Option<Uuid>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct UpdateTransaction {
-    pub transaction_type: Option<TransactionType>,
-    pub amount: Option<f64>,
-    pub status: Option<TransactionStatus>,
-    pub description: Option<String>,
-    pub reference_id: Option<Uuid>,
 }
 

@@ -57,7 +57,7 @@ where
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let (http_req, _payload) = req.into_parts();
+        let (http_req, payload) = req.into_parts();
         let auth_header = http_req.headers().get("Authorization");
 
         let secret = self.secret.clone();
@@ -72,17 +72,20 @@ where
                         match decode::<Claims>(token, &DecodingKey::from_secret(secret.as_ref()), &validation) {
                             Ok(token_data) => {
                                 http_req.extensions_mut().insert(token_data.claims);
-                                let req = ServiceRequest::from_parts(http_req, _payload).unwrap();
-                                return srv.call(req).await;
+                                let req = ServiceRequest::from_parts(http_req, payload);
+                                let res = srv.call(req).await?;
+                                return Ok(res.map_into_left_body());
                             }
                             Err(_) => {
-                                return Ok(ServiceResponse::new(http_req, HttpResponse::Unauthorized().finish()));
+                                let res = HttpResponse::Unauthorized().finish().map_into_right_body();
+                                return Ok(ServiceResponse::new(http_req, res));
                             }
                         }
                     }
                 }
             }
-            Ok(ServiceResponse::new(http_req, HttpResponse::Unauthorized().finish()))
+            let res = HttpResponse::Unauthorized().finish().map_into_right_body();
+            Ok(ServiceResponse::new(http_req, res))
         })
     }
 }

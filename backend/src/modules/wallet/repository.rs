@@ -37,6 +37,15 @@ pub async fn find_wallet_by_id(executor: &mut DbTransaction<'_, Postgres>, walle
         .ok_or_else(|| "Wallet not found".to_string())
 }
 
+pub async fn find_wallet_by_id_from_pool(pool: &PgPool, wallet_id: Uuid) -> Result<Wallet, String> {
+    sqlx::query_as::<_, Wallet>("SELECT * FROM wallets WHERE id = $1")
+        .bind(wallet_id)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| format!("Failed to fetch wallet by ID from pool: {}", e))?
+        .ok_or_else(|| "Wallet not found".to_string())
+}
+
 pub async fn update_wallet_balance(executor: &mut DbTransaction<'_, Postgres>, user_id: Uuid, amount: f64) -> Result<Wallet, String> {
     let wallet = sqlx::query_as::<_, Wallet>(
         "UPDATE wallets SET balance = balance + $1, updated_at = NOW() WHERE user_id = $2 RETURNING *"

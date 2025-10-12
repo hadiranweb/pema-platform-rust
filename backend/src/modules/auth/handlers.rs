@@ -22,8 +22,8 @@ pub async fn login_user(pool: web::Data<PgPool>, form: web::Json<LoginRequest>, 
         password: form.password.clone(),
     };
 
-    match AuthService::login_user(pool.get_ref(), user_login, config.get_ref()).await {
-        Ok(token) => HttpResponse::Ok().json(serde_json::json!({ "token": token })),
+    match AuthService::login_user(pool.get_ref(), user_login, config.get_ref(), form.otp_code.clone()).await {
+        Ok((token, user)) => HttpResponse::Ok().json(serde_json::json!({ "token": token, "user_id": user.id, "username": user.username, "email": user.email })),
         Err(e) => e.error_response(),
     }
 }
@@ -42,6 +42,15 @@ pub async fn register_user(pool: web::Data<PgPool>, form: web::Json<RegisterRequ
     match AuthService::register_user(pool.get_ref(), user_register, config.get_ref(), plugin_manager.get_ref().clone()).await {
         Ok(user) => HttpResponse::Created().json(user),
         Err(e) => e.error_response(),
+    }
+}
+
+
+
+pub async fn generate_otp(pool: web::Data<PgPool>, auth_user: crate::modules::auth::middleware::AuthenticatedUser) -> impl Responder {
+    match crate::services::otp::generate_and_store_otp(pool.get_ref(), auth_user.user_id).await {
+        Ok(otp_code) => HttpResponse::Ok().json(serde_json::json!({ "message": "OTP generated successfully", "otp_code": otp_code })),
+        Err(e) => ServiceError::InternalServerError(format!("Failed to generate OTP: {}", e)).error_response(),
     }
 }
 

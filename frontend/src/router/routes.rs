@@ -1,4 +1,3 @@
-
 use yew_router::prelude::*;
 use yew::prelude::*;
 
@@ -13,6 +12,7 @@ use crate::pages::profile::ProfilePage;
 use crate::pages::vendor::{VendorDashboardPage, VendorProductsPage, VendorOrdersPage};
 use crate::pages::wallet::WalletPage;
 use crate::pages::reviews::{ReviewListPage, ReviewFormPage};
+use crate::pages::pages::{PagesListPage, PageDetailPage};
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {
@@ -60,6 +60,10 @@ pub enum Route {
     VendorProducts,
     #[at("/vendor/orders")]
     VendorOrders,
+    #[at("/pages")]
+    PagesList,
+    #[at("/pages/:id")]
+    PageDetail { id: i32 },
     #[not_found]
     #[at("/404")]
     NotFound,
@@ -89,6 +93,8 @@ pub fn switch(routes: Route) -> Html {
         Route::VendorDashboard => html! { <VendorDashboardPage /> },
         Route::VendorProducts => html! { <VendorProductsPage /> },
         Route::VendorOrders => html! { <VendorOrdersPage /> },
+        Route::PagesList => html! { <PagesListPage /> },
+        Route::PageDetail { id } => html! { <PageDetailPage id={id} /> },
         Route::NotFound => html! { <NotFound /> },
     }
 }

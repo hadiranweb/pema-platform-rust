@@ -3,6 +3,7 @@
 // It will handle transitions between order statuses (e.g., pending, processing, shipped, delivered, cancelled).
 // This will ensure that order status changes follow a defined workflow and prevent invalid transitions.
 
+#[derive(Debug)]
 pub enum OrderStatus {
     Pending,
     Processing,

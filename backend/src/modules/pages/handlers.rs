@@ -1,6 +1,5 @@
 use actix_web::{web, HttpResponse, Responder};
 use sqlx::PgPool;
-use uuid::Uuid;
 use crate::error::ServiceError;
 use super::{service, dto};
 
@@ -15,12 +14,12 @@ pub async fn create_page(pool: web::Data<PgPool>, new_page: web::Json<dto::Creat
     Ok(HttpResponse::Created().json(page))
 }
 
-pub async fn get_page(pool: web::Data<PgPool>, page_id: web::Path<Uuid>) -> Result<HttpResponse, ServiceError> {
+pub async fn get_page(pool: web::Data<PgPool>, page_id: web::Path<i32>) -> Result<HttpResponse, ServiceError> {
     let page = service::get_page_details(&pool, page_id.into_inner()).await?;
     Ok(HttpResponse::Ok().json(page))
 }
 
-pub async fn update_page(pool: web::Data<PgPool>, page_id: web::Path<Uuid>, updated_page: web::Json<dto::UpdatePageDto>) -> Result<HttpResponse, ServiceError> {
+pub async fn update_page(pool: web::Data<PgPool>, page_id: web::Path<i32>, updated_page: web::Json<dto::UpdatePageDto>) -> Result<HttpResponse, ServiceError> {
     let page = service::update_page(
         &pool,
         page_id.into_inner(),
@@ -32,8 +31,18 @@ pub async fn update_page(pool: web::Data<PgPool>, page_id: web::Path<Uuid>, upda
     Ok(HttpResponse::Ok().json(page))
 }
 
-pub async fn delete_page(pool: web::Data<PgPool>, page_id: web::Path<Uuid>) -> Result<HttpResponse, ServiceError> {
+pub async fn delete_page(pool: web::Data<PgPool>, page_id: web::Path<i32>) -> Result<HttpResponse, ServiceError> {
     let page = service::delete_page(&pool, page_id.into_inner()).await?;
     Ok(HttpResponse::Ok().json(page))
+}
+
+pub async fn get_all_pages(pool: web::Data<PgPool>) -> Result<HttpResponse, ServiceError> {
+    let pages = service::get_all_pages(&pool).await?;
+    Ok(HttpResponse::Ok().json(pages))
+}
+
+pub async fn get_published_pages(pool: web::Data<PgPool>) -> Result<HttpResponse, ServiceError> {
+    let pages = service::get_published_pages(&pool).await?;
+    Ok(HttpResponse::Ok().json(pages))
 }
 

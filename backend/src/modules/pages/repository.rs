@@ -1,10 +1,9 @@
 use sqlx::{PgPool, Error};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 #[derive(Debug, Clone, Deserialize, Serialize, sqlx::FromRow)]
 pub struct Page {
-    pub id: Uuid,
+    pub id: i32,
     pub title: String,
     pub slug: String,
     pub content: String,
@@ -15,9 +14,8 @@ pub struct Page {
 
 pub async fn create_page(pool: &PgPool, title: String, slug: String, content: String, is_published: bool) -> Result<Page, Error> {
     let page = sqlx::query_as::<_, Page>(
-        "INSERT INTO pages (id, title, slug, content, is_published) VALUES ($1, $2, $3, $4, $5) RETURNING *"
+        "INSERT INTO pages (title, slug, content, is_published) VALUES ($1, $2, $3, $4) RETURNING *"
     )
-    .bind(Uuid::new_v4())
     .bind(title)
     .bind(slug)
     .bind(content)
@@ -27,7 +25,7 @@ pub async fn create_page(pool: &PgPool, title: String, slug: String, content: St
     Ok(page)
 }
 
-pub async fn get_page_by_id(pool: &PgPool, page_id: Uuid) -> Result<Option<Page>, Error> {
+pub async fn get_page_by_id(pool: &PgPool, page_id: i32) -> Result<Option<Page>, Error> {
     let page = sqlx::query_as::<_, Page>(
         "SELECT * FROM pages WHERE id = $1"
     )
@@ -37,49 +35,21 @@ pub async fn get_page_by_id(pool: &PgPool, page_id: Uuid) -> Result<Option<Page>
     Ok(page)
 }
 
-pub async fn update_page(pool: &PgPool, page_id: Uuid, title: Option<String>, slug: Option<String>, content: Option<String>, is_published: Option<bool>) -> Result<Option<Page>, Error> {
-    let mut query_parts = Vec::new();
-    let mut params: Vec<Box<dyn sqlx::Encode<'_, sqlx::Postgres> + Send + Sync>> = Vec::new();
-    let mut param_idx = 1;
-
-    if let Some(t) = title {
-        query_parts.push(format!("title = ${}", param_idx));
-        params.push(Box::new(t));
-        param_idx += 1;
-    }
-    if let Some(s) = slug {
-        query_parts.push(format!("slug = ${}", param_idx));
-        params.push(Box::new(s));
-        param_idx += 1;
-    }
-    if let Some(c) = content {
-        query_parts.push(format!("content = ${}", param_idx));
-        params.push(Box::new(c));
-        param_idx += 1;
-    }
-    if let Some(p) = is_published {
-        query_parts.push(format!("is_published = ${}", param_idx));
-        params.push(Box::new(p));
-        param_idx += 1;
-    }
-
-    if query_parts.is_empty() {
-        return get_page_by_id(pool, page_id).await;
-    }
-
-    let query_str = format!("UPDATE pages SET {} WHERE id = ${} RETURNING *", query_parts.join(", "), param_idx);
-    params.push(Box::new(page_id));
-
-    let mut query = sqlx::query_as::<_, Page>(&query_str);
-    for param in params {
-        query = query.bind(param);
-    }
-
-    let page = query.fetch_optional(pool).await?;
+pub async fn update_page(pool: &PgPool, page_id: i32, title: Option<String>, slug: Option<String>, content: Option<String>, is_published: Option<bool>) -> Result<Option<Page>, Error> {
+    let page = sqlx::query_as::<_, Page>(
+        "UPDATE pages SET title = COALESCE($1, title), slug = COALESCE($2, slug), content = COALESCE($3, content), is_published = COALESCE($4, is_published), updated_at = NOW() WHERE id = $5 RETURNING *"
+    )
+    .bind(title)
+    .bind(slug)
+    .bind(content)
+    .bind(is_published)
+    .bind(page_id)
+    .fetch_optional(pool)
+    .await?;
     Ok(page)
 }
 
-pub async fn delete_page(pool: &PgPool, page_id: Uuid) -> Result<Option<Page>, Error> {
+pub async fn delete_page(pool: &PgPool, page_id: i32) -> Result<Option<Page>, Error> {
     let page = sqlx::query_as::<_, Page>(
         "DELETE FROM pages WHERE id = $1 RETURNING *"
     )
@@ -87,5 +57,23 @@ pub async fn delete_page(pool: &PgPool, page_id: Uuid) -> Result<Option<Page>, E
     .fetch_optional(pool)
     .await?;
     Ok(page)
+}
+
+pub async fn get_all_pages(pool: &PgPool) -> Result<Vec<Page>, Error> {
+    let pages = sqlx::query_as::<_, Page>(
+        "SELECT * FROM pages ORDER BY created_at DESC"
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(pages)
+}
+
+pub async fn get_published_pages(pool: &PgPool) -> Result<Vec<Page>, Error> {
+    let pages = sqlx::query_as::<_, Page>(
+        "SELECT * FROM pages WHERE is_published = TRUE ORDER BY created_at DESC"
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(pages)
 }
 

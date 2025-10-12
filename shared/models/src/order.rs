@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
-
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
+#[cfg_attr(feature = "sqlx", derive(sqlx::FromRow))]
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct Order {
     pub id: Uuid,
@@ -13,19 +13,5 @@ pub struct Order {
     pub status: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-}
-
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
-pub struct CreateOrder {
-    pub product_id: Uuid,
-    pub quantity: i32,
-    pub total_price: f64,
-}
-
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
-pub struct UpdateOrder {
-    pub status: Option<String>,
-    pub quantity: Option<i32>,
-    pub total_price: Option<f64>,
 }
 

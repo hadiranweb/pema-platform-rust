@@ -37,14 +37,11 @@ impl PluginManager {
         Ok(())
     }
 
-    pub async fn execute_hook<Args, Results>(
+    pub async fn execute_hook<Args: serde::Serialize + Clone + Send + 'static, Results: serde::de::DeserializeOwned + Send + 'static>(
         &self,
         hook_type: PluginHookType,
         args: Args,
     ) -> Result<Vec<Results>, anyhow::Error>
-    where
-        Args: WasmParams + Clone + Send + 'static,
-        Results: WasmResults + Send + 'static,
     {
         let mut results = Vec::new();
         let mut active_plugins_guard = self.active_plugins.write().await;

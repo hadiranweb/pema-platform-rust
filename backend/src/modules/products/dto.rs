@@ -1,3 +1,2 @@
-
-pub use crate::shared::models::product::{CreateProduct, Product, UpdateProduct};
+pub use dtos::product::{CreateProduct, UpdateProduct};
 

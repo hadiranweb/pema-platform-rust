@@ -12,6 +12,7 @@ use pema_plugin_sdk::interface::PluginHookType;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use crate::error::ServiceError;
+use crate::services::otp;
 
 pub struct AuthService;
 
@@ -28,14 +29,19 @@ pub async fn register_user(pool: &PgPool, user_register: UserRegister, config: &
 
     }
 
-    pub async fn login_user(pool: &PgPool, user_login: UserLogin, config: &Config) -> Result<String, ServiceError> {
+    pub async fn login_user(pool: &PgPool, user_login: UserLogin, config: &Config, otp_code: Option<String>) -> Result<(String, User), ServiceError> {
         let user = repository::find_user_by_email(pool, &user_login.email).await.map_err(ServiceError::DatabaseError)?;
-
         Self::verify_password(&user_login.password, &user.password_hash).map_err(ServiceError::Unauthorized)?;
 
-        let token = Self::generate_jwt_token(&user, config).map_err(ServiceError::InternalServerError)?;
-        Ok(token)
+        if let Some(code) = otp_code {
+            let is_otp_valid = otp::verify_otp(pool, user.id, &code).await.map_err(|e| ServiceError::InternalServerError(format!("OTP verification failed: {}", e.to_string())))?;
+            if !is_otp_valid {
+                return Err(ServiceError::Unauthorized);
+            }
+        }
 
+        let token = Self::generate_jwt_token(&user, config).map_err(|e| ServiceError::InternalServerError(e.to_string()))?;
+        Ok((token, user))
     }
 
     fn hash_password(password: &str) -> Result<String, ServiceError> {
@@ -43,13 +49,13 @@ pub async fn register_user(pool: &PgPool, user_register: UserRegister, config: &
         let argon2 = Argon2::default();
         argon2.hash_password(password.as_bytes(), &salt)
             .map(|hash| hash.to_string())
-            .map_err(|e| ServiceError::InternalServerError(format!("Failed to hash password: {}", e)))
+            .map_err(|e| ServiceError::InternalServerError(e.to_string()))
     }
 
     fn verify_password(password: &str, password_hash: &str) -> Result<(), ServiceError> {
         let argon2 = Argon2::default();
         let parsed_hash = argon2::PasswordHash::new(password_hash)
-            .map_err(|e| ServiceError::InternalServerError(format!("Failed to parse password hash: {}", e)))?;
+            .map_err(|e| ServiceError::InternalServerError(e.to_string()))?;
         argon2.verify_password(password.as_bytes(), &parsed_hash)
             .map_err(|_| ServiceError::Unauthorized)
     }
@@ -61,7 +67,7 @@ pub async fn register_user(pool: &PgPool, user_register: UserRegister, config: &
             iat: chrono::Utc::now().timestamp() as usize,
         };
         encode(&Header::default(), &claims, &EncodingKey::from_secret(config.jwt_secret.as_bytes()))
-            .map_err(|e| ServiceError::InternalServerError(format!("Failed to generate JWT token: {}", e)))
+            .map_err(|e| ServiceError::InternalServerError(e.to_string()))
     }
 }
 

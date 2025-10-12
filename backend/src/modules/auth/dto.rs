@@ -1,22 +1,7 @@
 use serde::{Deserialize, Serialize};
 use validator::Validate;
+use dtos::user::{LoginRequest, RegisterRequest};
 
-#[derive(Debug, Validate, Deserialize, Serialize)]
-pub struct LoginRequest {
-    #[validate(email)]
-    pub email: String,
-    #[validate(length(min = 8, message = "Password must be at least 8 characters long"))]
-    pub password: String,
-}
-
-#[derive(Debug, Validate, Deserialize, Serialize)]
-pub struct RegisterRequest {
-    #[validate(email)]
-    pub email: String,
-    #[validate(length(min = 2, message = "Username must be at least 2 characters long"))]
-    pub username: String,
-    #[validate(length(min = 8, message = "Password must be at least 8 characters long"))]
-    pub password: String,
-}
-
+// Re-export for convenience if needed, or remove if direct usage of dtos::user is preferred
+pub use dtos::user::{LoginRequest, RegisterRequest};
 
