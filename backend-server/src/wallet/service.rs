@@ -89,13 +89,13 @@ impl WalletService {
 
         // Handle balance update based on transaction type
         let new_balance = match transaction_type {
-            TransactionType::Deposit => wallet.balance + amount,
+            TransactionType::Deposit => wallet.balance + amount as f64,
             TransactionType::Withdrawal | TransactionType::Purchase | TransactionType::Refund => {
-                if wallet.balance < amount {
+                if wallet.balance < amount as f64 {
                     tx.rollback().await.map_err(|e| WalletError::DbError(e.to_string()))?;
-                    return Err(WalletError::InsufficientFunds { required: amount, available: wallet.balance });
+                    return Err(WalletError::InsufficientFunds { required: amount, available: wallet.balance as i64 });
                 }
-                wallet.balance - amount
+                wallet.balance - amount as f64
             }
         };
 

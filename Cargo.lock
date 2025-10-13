@@ -2638,7 +2638,6 @@ dependencies = [
  "chrono",
  "config",
  "dotenv",
- "dotenvy",
  "dtos",
  "futures",
  "futures-util",
