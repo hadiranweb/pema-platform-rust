@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::models::wallet::WalletStatus;
+use models::wallet::WalletStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateWallet {

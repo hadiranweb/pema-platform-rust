@@ -2,7 +2,14 @@ use sqlx::PgPool;
 use uuid::Uuid;
 use chrono::Utc;
 use models::{vendor::{Vendor, CreateVendor, UpdateVendor}, pagination::{Pagination, PaginatedResponse}, wallet::{CreateWallet, Wallet, WalletStatus}};
-use wasm_general_backend::error::ServiceError;
+// use wasm_general_backend::error::ServiceError;
+// Define ServiceError locally for now
+#[derive(Debug)]
+pub enum ServiceError {
+    DatabaseError(String),
+    NotFound,
+    ValidationError(String),
+}
 
 #[async_trait::async_trait]
 pub trait DbPool: Send + Sync + 'static {
@@ -39,7 +46,7 @@ impl DbPool for BackendDbPool {
         .bind(Utc::now())
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| ServiceError::from(e.to_string()))?;
+        .map_err(|e| ServiceError::DatabaseError(e.to_string()))?;
 
         Ok(vendor)
     }
@@ -50,7 +57,7 @@ impl DbPool for BackendDbPool {
         let total_items: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM vendors")
             .fetch_one(&self.pool)
             .await
-            .map_err(|e| ServiceError::from(e.to_string()))?;
+            .map_err(|e| ServiceError::DatabaseError(e.to_string()))?;
 
         let vendors = sqlx::query_as::<_, Vendor>(
             "SELECT * FROM vendors ORDER BY created_at DESC LIMIT $1 OFFSET $2"
@@ -59,7 +66,7 @@ impl DbPool for BackendDbPool {
         .bind(offset as i64)
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| ServiceError::from(e.to_string()))?;
+        .map_err(|e| ServiceError::DatabaseError(e.to_string()))?;
 
         let total_pages = (total_items as f64 / pagination.limit as f64).ceil() as u32;
 
@@ -79,7 +86,7 @@ impl DbPool for BackendDbPool {
         .bind(vendor_id)
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| ServiceError::from(e.to_string()))?;
+        .map_err(|e| ServiceError::DatabaseError(e.to_string()))?;
 
         Ok(vendor)
     }
@@ -99,7 +106,7 @@ impl DbPool for BackendDbPool {
         .bind(vendor_id)
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| ServiceError::from(e.to_string()))?;
+        .map_err(|e| ServiceError::DatabaseError(e.to_string()))?;
 
         Ok(vendor)
     }
@@ -109,7 +116,7 @@ impl DbPool for BackendDbPool {
             .bind(vendor_id)
             .execute(&self.pool)
             .await
-            .map_err(|e| ServiceError::from(e.to_string()))?;
+            .map_err(|e| ServiceError::DatabaseError(e.to_string()))?;
 
         Ok(())
     }
@@ -119,14 +126,14 @@ impl DbPool for BackendDbPool {
             "INSERT INTO wallets (user_id, balance, currency, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *"
         )
         .bind(new_wallet.user_id)
-        .bind(new_wallet.initial_balance.unwrap_or(0.0))
+        .bind(new_wallet.balance)
         .bind(new_wallet.currency)
         .bind(WalletStatus::Active.to_string())
         .bind(Utc::now())
         .bind(Utc::now())
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| ServiceError::from(e.to_string()))?;
+        .map_err(|e| ServiceError::DatabaseError(e.to_string()))?;
 
         Ok(wallet)
     }

@@ -36,3 +36,7 @@ pub struct AuthResponse {
     pub email: String,
 }
 
+// Aliases for backward compatibility
+pub type LoginRequest = UserLogin;
+pub type RegisterRequest = UserRegister;
+

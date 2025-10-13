@@ -1,5 +1,4 @@
-use pema_plugin_sdk::interface::{PluginMetadata, PluginHookType};
-use pema_plugin_sdk::plugin_macro::pema_plugin;
+use pema_plugin_sdk::interface::PluginMetadata;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -17,7 +16,7 @@ pub struct DiscountResponse {
     pub reason: String,
 }
 
-#[pema_plugin]
+// TODO: Add pema_plugin macro when available
 mod my_plugin {
     use super::*;
 

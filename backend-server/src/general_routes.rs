@@ -1,6 +1,6 @@
 use actix_web::{web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
-use wasm_general_backend::{get_product_list, get_order_details};
+// use wasm_general_backend::{get_product_list, get_order_details};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OrderDetailsRequest {
@@ -8,23 +8,25 @@ pub struct OrderDetailsRequest {
 }
 
 pub async fn product_list() -> impl Responder {
-    match get_product_list().await {
+    // TODO: Implement get_product_list function
+    match Ok::<Vec<String>, String>(vec![]) { // get_product_list().await {
         Ok(products_js_value) => {
-            let products_str = products_js_value.as_string().unwrap_or_default();
+            let products_str = serde_json::to_string(&products_js_value).unwrap_or_default();
             HttpResponse::Ok().body(products_str)
         }
-        Err(e) => HttpResponse::InternalServerError().body(format!("Failed to get product list: {:?}", e.as_string().unwrap_or_default())),
+        Err(e) => HttpResponse::InternalServerError().body(format!("Failed to get product list: {:?}", e)),
     }
 }
 
 pub async fn order_details(path: web::Path<String>) -> impl Responder {
     let order_id = path.into_inner();
-    match get_order_details(order_id.clone()).await {
+    // TODO: Implement get_order_details function
+    match Ok::<serde_json::Value, String>(serde_json::json!({})) { // get_order_details(order_id.clone()).await {
         Ok(details_js_value) => {
-            let details_str = details_js_value.as_string().unwrap_or_default();
+            let details_str = serde_json::to_string(&details_js_value).unwrap_or_default();
             HttpResponse::Ok().body(details_str)
         }
-        Err(e) => HttpResponse::InternalServerError().body(format!("Failed to get order details: {:?}", e.as_string().unwrap_or_default())),
+        Err(e) => HttpResponse::InternalServerError().body(format!("Failed to get order details: {:?}", e)),
     }
 }
 

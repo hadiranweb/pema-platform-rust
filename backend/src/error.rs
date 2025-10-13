@@ -4,25 +4,25 @@ use derive_more::{Display, Error};
 
 #[derive(Debug, Display, Error)]
 pub enum ServiceError {
-    #[display(fmt = "Internal Server Error: {}", _0)]
+    #[display("Internal Server Error: {}", _0)]
     InternalServerError(String),
 
-    #[display(fmt = "Bad Request: {}", _0)]
+    #[display("Bad Request: {}", _0)]
     BadRequest(String),
 
-    #[display(fmt = "Unauthorized")]
+    #[display("Unauthorized")]
     Unauthorized,
 
-    #[display(fmt = "Forbidden")]
+    #[display("Forbidden")]
     Forbidden,
 
-    #[display(fmt = "Not Found: {}", _0)]
+    #[display("Not Found: {}", _0)]
     NotFound(String),
 
-    #[display(fmt = "Database Error: {}", _0)]
+    #[display("Database Error: {}", _0)]
     DatabaseError(String),
 
-    #[display(fmt = "Validation Error: {}", _0)]
+    #[display("Validation Error: {}", _0)]
     ValidationError(String),
 }
 
@@ -42,5 +42,5 @@ impl ResponseError for ServiceError {
 
 
 
-impl std::error::Error for ServiceError {}
+
 

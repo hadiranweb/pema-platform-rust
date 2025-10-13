@@ -52,3 +52,10 @@ pub struct Wallet {
     pub updated_at: DateTime<Utc>,
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CreateWallet {
+    pub user_id: Uuid,
+    pub balance: f64,
+    pub currency: String,
+}
+

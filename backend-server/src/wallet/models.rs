@@ -3,9 +3,11 @@ use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
 // Re-export enums and structs from shared models to avoid duplication
-pub use models::wallet::{WalletStatus, TransactionType, TransactionStatus, PurchaseFlowStatus, RefundStatus, AdminActionType, Wallet, PurchaseFlow, Transaction, RefundRequest, AdminAction};
+pub use models::wallet::{WalletStatus, Wallet, CreateWallet};
+pub use models::transaction::{TransactionType, TransactionStatus, Transaction};
 
 // --- DTOs (Data Transfer Objects) for API requests/responses ---
 
-pub use models::wallet::{CreateWalletRequest, WalletResponse, TransactionResponse, PurchaseFlowResponse, RefundRequestResponse, AdminActionResponse, UpdateWalletRequest, CreateTransactionRequest, UpdateTransactionStatusRequest, CreatePurchaseFlowRequest, UpdatePurchaseFlowStatusRequest, CreateRefundRequest, UpdateRefundRequestStatus, CreateAdminActionRequest};
+// TODO: Add these DTOs to the models crate
+// pub use models::wallet::{CreateWalletRequest, WalletResponse, TransactionResponse, PurchaseFlowResponse, RefundRequestResponse, AdminActionResponse, UpdateWalletRequest, CreateTransactionRequest, UpdateTransactionStatusRequest, CreatePurchaseFlowRequest, UpdatePurchaseFlowStatusRequest, CreateRefundRequest, UpdateRefundRequestStatus, CreateAdminActionRequest};
 

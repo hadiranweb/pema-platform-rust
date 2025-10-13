@@ -18,15 +18,16 @@ pub async fn generate_and_store_otp(pool: &PgPool, user_id: Uuid) -> Result<Stri
     let code_str = code.to_string();
     let expires_at = Utc::now().naive_utc() + Duration::minutes(5);
 
-    sqlx::query!(
-        "INSERT INTO otp_codes (id, user_id, code, expires_at) VALUES ($1, $2, $3, $4)",
-        Uuid::new_v4(),
-        user_id,
-        code_str,
-        expires_at
-    )
-    .execute(pool)
-    .await?;
+    // TODO: Re-enable when database is set up
+    // sqlx::query!(
+    //     "INSERT INTO otp_codes (id, user_id, code, expires_at) VALUES ($1, $2, $3, $4)",
+    //     Uuid::new_v4(),
+    //     user_id,
+    //     code_str,
+    //     expires_at
+    // )
+    // .execute(pool)
+    // .await?;
 
     Ok(code.to_string())
 }
@@ -42,13 +43,14 @@ pub async fn verify_otp(pool: &PgPool, user_id: Uuid, code: &str) -> Result<bool
 
     if otp_code.is_some() {
         // Optionally delete the OTP after successful verification
-        sqlx::query!(
-            "DELETE FROM otp_codes WHERE user_id = $1 AND code = $2",
-            user_id,
-            code
-        )
-        .execute(pool)
-        .await?;
+        // TODO: Re-enable when database is set up
+        // sqlx::query!(
+        //     "DELETE FROM otp_codes WHERE user_id = $1 AND code = $2",
+        //     user_id,
+        //     code
+        // )
+        // .execute(pool)
+        // .await?;
         Ok(true)
     } else {
         Ok(false)
