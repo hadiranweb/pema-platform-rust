@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: help setup dev build test clean migrate docker-up docker-down fmt clippy check
+.PHONY: help setup dev build test clean migrate docker-up docker-down fmt clippy check validate-dependabot
 
 AUTH_SERVER_DIR := auth-server
 BACKEND_DIR := backend
@@ -9,17 +9,18 @@ BUILD_PROFILE ?= release
 
 help:
 	@echo "Available commands:"
-	@echo "  make setup        - Initial project setup (Docker Compose)"
-	@echo "  make dev          - Start development servers (backend, auth-server, frontend)"
-	@echo "  make build        - Build production artifacts (backend, auth-server, frontend)"
-	@echo "  make test         - Run all tests"
-	@echo "  make clean        - Clean all build artifacts"
-	@echo "  make migrate      - Run database migrations"
-	@echo "  make docker-up    - Start Docker services"
-	@echo "  make docker-down  - Stop Docker services"
-	@echo "  make fmt          - Format code"
-	@echo "  make clippy       - Run clippy linter"
-	@echo "  make check        - Run fmt, clippy, and tests"
+	@echo "  make setup               - Initial project setup (Docker Compose)"
+	@echo "  make dev                 - Start development servers (backend, auth-server, frontend)"
+	@echo "  make build               - Build production artifacts (backend, auth-server, frontend)"
+	@echo "  make test                - Run all tests"
+	@echo "  make clean               - Clean all build artifacts"
+	@echo "  make migrate             - Run database migrations"
+	@echo "  make docker-up           - Start Docker services"
+	@echo "  make docker-down         - Stop Docker services"
+	@echo "  make fmt                 - Format code"
+	@echo "  make clippy              - Run clippy linter"
+	@echo "  make check               - Run fmt, clippy, and tests"
+	@echo "  make validate-dependabot - Validate Dependabot configuration"
 
 setup:
 	@echo "🚀 Setting up PEMA Platform with Docker Compose..."
@@ -81,4 +82,8 @@ clippy:
 	cargo clippy --all-targets --all-features -- -D warnings
 
 check: fmt clippy test
+
+validate-dependabot:
+	@echo "🤖 Validating Dependabot configuration..."
+	@./scripts/validate-dependabot.sh
 

@@ -2,66 +2,118 @@ name: Dependabot Auto-Merge
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: write
   pull-requests: write
+  checks: read
 
 jobs:
   dependabot-auto-merge:
     name: Auto-merge Dependabot PRs
     runs-on: ubuntu-latest
     
-    # Only run on Dependabot PRs
-    if: github.actor == 'dependabot[bot]'
+    # Only run on Dependabot PRs that are not draft
+    if: github.actor == 'dependabot[bot]' && !github.event.pull_request.draft
     
     steps:
     - name: Dependabot metadata
       id: metadata
-      uses: dependabot/fetch-metadata@v1
+      uses: dependabot/fetch-metadata@v2
       with:
         github-token: "${{ secrets.GITHUB_TOKEN }}"
 
-    - name: Wait for CI to complete
-      uses: lewagon/wait-on-check-action@v1.3.4
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
-        check-name: 'Test Suite'
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        wait-interval: 30
-        allowed-conclusions: success
-
-    - name: Wait for Build to complete
-      uses: lewagon/wait-on-check-action@v1.3.4
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
-        check-name: 'Build Check'
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        wait-interval: 30
-        allowed-conclusions: success
-
-    - name: Auto-merge patch and minor updates
-      if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+    - name: Log dependency information
       run: |
-        echo "Auto-merging ${{ steps.metadata.outputs.update-type }} update for ${{ steps.metadata.outputs.dependency-names }}"
+        echo "🔍 Dependency Update Details:"
+        echo "  - Dependencies: ${{ steps.metadata.outputs.dependency-names }}"
+        echo "  - Update Type: ${{ steps.metadata.outputs.update-type }}"
+        echo "  - Package Ecosystem: ${{ steps.metadata.outputs.package-ecosystem }}"
+        echo "  - Previous Version: ${{ steps.metadata.outputs.previous-version }}"
+        echo "  - New Version: ${{ steps.metadata.outputs.new-version }}"
+
+    - name: Wait for all CI checks to complete
+      uses: lewagon/wait-on-check-action@v1.3.4
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        check-regexp: '^(Test Suite|Build Check)$'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        wait-interval: 30
+        allowed-conclusions: success
+        verbose: true
+
+    - name: Auto-approve safe updates
+      if: |
+        steps.metadata.outputs.update-type == 'version-update:semver-patch' || 
+        steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
+        contains(steps.metadata.outputs.dependency-names, 'github-actions')
+      run: |
+        echo "✅ Auto-approving safe update: ${{ steps.metadata.outputs.update-type }}"
+        gh pr review --approve "$PR_URL" --body "🤖 Auto-approved by Dependabot workflow - ${{ steps.metadata.outputs.update-type }} update for ${{ steps.metadata.outputs.dependency-names }}"
+      env:
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Auto-merge safe updates
+      if: |
+        steps.metadata.outputs.update-type == 'version-update:semver-patch' || 
+        steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
+        contains(steps.metadata.outputs.dependency-names, 'github-actions')
+      run: |
+        echo "🚀 Auto-merging ${{ steps.metadata.outputs.update-type }} update for ${{ steps.metadata.outputs.dependency-names }}"
         gh pr merge --auto --squash "$PR_URL"
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Comment on major updates
+    - name: Handle major updates
       if: steps.metadata.outputs.update-type == 'version-update:semver-major'
       run: |
-        gh pr comment "$PR_URL" --body "🚨 This is a **major version update** for ${{ steps.metadata.outputs.dependency-names }}. Please review manually before merging."
+        echo "⚠️ Major version update detected - requiring manual review"
+        gh pr comment "$PR_URL" --body "🚨 **Major Version Update Detected**
+        
+        This PR updates ${{ steps.metadata.outputs.dependency-names }} from ${{ steps.metadata.outputs.previous-version }} to ${{ steps.metadata.outputs.new-version }}.
+        
+        **⚠️ Manual review required** - Major version updates may contain breaking changes.
+        
+        Please review the changelog and test thoroughly before merging:
+        - Check for breaking changes in the dependency
+        - Run additional tests if needed
+        - Verify compatibility with existing code
+        
+        Once reviewed, you can merge this PR manually."
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Auto-approve patch and minor updates
-      if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+    - name: Handle security updates
+      if: steps.metadata.outputs.alert-state == 'FIXED'
       run: |
-        gh pr review --approve "$PR_URL"
+        echo "🔒 Security vulnerability fix detected - auto-merging"
+        gh pr review --approve "$PR_URL" --body "🔒 Auto-approved security vulnerability fix"
+        gh pr merge --auto --squash "$PR_URL"
+      env:
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Add success comment
+      if: |
+        (steps.metadata.outputs.update-type == 'version-update:semver-patch' || 
+         steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
+         contains(steps.metadata.outputs.dependency-names, 'github-actions') ||
+         steps.metadata.outputs.alert-state == 'FIXED') &&
+        success()
+      run: |
+        gh pr comment "$PR_URL" --body "✅ **Auto-merge successful!**
+        
+        This ${{ steps.metadata.outputs.update-type }} update has been automatically merged after all tests passed.
+        
+        📦 **Updated dependencies:**
+        ${{ steps.metadata.outputs.dependency-names }}
+        
+        🔄 **Version change:**
+        ${{ steps.metadata.outputs.previous-version }} → ${{ steps.metadata.outputs.new-version }}"
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

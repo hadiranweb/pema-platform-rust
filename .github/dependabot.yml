@@ -7,6 +7,7 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "09:00"
+      timezone: "UTC"
     open-pull-requests-limit: 10
     reviewers:
       - "hadiranweb"
@@ -18,6 +19,33 @@ updates:
     labels:
       - "dependencies"
       - "rust"
+      - "auto-merge-candidate"
+    # Group related dependencies together
+    groups:
+      tokio:
+        patterns:
+          - "tokio*"
+      actix:
+        patterns:
+          - "actix*"
+      serde:
+        patterns:
+          - "serde*"
+      sqlx:
+        patterns:
+          - "sqlx*"
+      tracing:
+        patterns:
+          - "tracing*"
+      uuid:
+        patterns:
+          - "uuid*"
+      chrono:
+        patterns:
+          - "chrono*"
+    # Allow automatic security updates
+    allow:
+      - dependency-type: "all"
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
@@ -26,6 +54,7 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "09:00"
+      timezone: "UTC"
     open-pull-requests-limit: 5
     reviewers:
       - "hadiranweb"
@@ -37,3 +66,34 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
+      - "auto-merge-candidate"
+    # Group GitHub Actions updates
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # Enable security updates (daily check)
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "security"
+      include: "scope"
+    labels:
+      - "security"
+      - "dependencies"
+      - "rust"
+      - "auto-merge-candidate"
+    # Only security updates for this configuration
+    allow:
+      - dependency-type: "all"
+    # Prioritize security updates
+    reviewers:
+      - "hadiranweb"
+    assignees:
+      - "hadiranweb"
