@@ -37,9 +37,11 @@ setup:
 	@echo "Setting up environment..."
 	cp .env.example .env || true
 	make db-up
-	@echo "⏳ Waiting for database..."
-	sleep 10
-	make migrate
+	@echo "⏳ Please ensure PostgreSQL is running and configured..."
+	@echo "Create database and user manually if needed:"
+	@echo "  sudo -u postgres createdb pema_platform"
+	@echo "  sudo -u postgres createuser pema_user"
+	@echo "Then run: make migrate"
 	@echo "✅ Setup complete!"
 
 dev:
@@ -86,11 +88,14 @@ clean:
 
 db-up:
 	@echo "🐘 Starting PostgreSQL database..."
-	docker-compose -f docker-compose.db.yml up -d
+	@echo "Please ensure PostgreSQL is installed and running:"
+	@echo "  sudo systemctl start postgresql"
+	@echo "  sudo systemctl enable postgresql"
+	@sudo systemctl start postgresql || echo "PostgreSQL service start failed - please install PostgreSQL first"
 
 db-down:
 	@echo "🛑 Stopping PostgreSQL database..."
-	docker-compose -f docker-compose.db.yml down
+	@sudo systemctl stop postgresql || echo "PostgreSQL service stop failed"
 
 deploy: build
 	@echo "🚀 Deploying PEMA Platform..."

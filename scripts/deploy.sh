@@ -48,21 +48,27 @@ check_root() {
 check_requirements() {
     log "Checking system requirements..."
     
-    # Check if Docker is installed
-    if ! command -v docker &> /dev/null; then
-        error "Docker is not installed. Please install Docker first."
+    # Check if Rust is installed
+    if ! command -v cargo &> /dev/null; then
+        error "Rust/Cargo is not installed. Please install Rust first."
     fi
     
-    # Check if Docker Compose is installed
-    if ! command -v docker-compose &> /dev/null; then
-        error "Docker Compose is not installed. Please install Docker Compose first."
+    # Check if PostgreSQL is installed and running
+    if ! command -v psql &> /dev/null; then
+        error "PostgreSQL is not installed. Please install PostgreSQL first."
     fi
     
-    # Check if PostgreSQL is accessible
-    if ! docker-compose -f docker-compose.db.yml ps | grep -q "Up"; then
-        warning "PostgreSQL container is not running. Starting it..."
-        docker-compose -f docker-compose.db.yml up -d
-        sleep 10
+    # Check if PostgreSQL service is running
+    if ! systemctl is-active --quiet postgresql; then
+        warning "PostgreSQL service is not running. Starting it..."
+        systemctl start postgresql
+        sleep 5
+    fi
+    
+    # Check if wasm-pack is installed
+    if ! command -v wasm-pack &> /dev/null; then
+        log "Installing wasm-pack..."
+        curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
     fi
     
     success "System requirements check passed"
@@ -94,28 +100,38 @@ stop_service() {
     fi
 }
 
-# Deploy application
+# Build and deploy application
 deploy_application() {
-    log "Deploying $PLATFORM_NAME..."
+    log "Building and deploying $PLATFORM_NAME..."
     
     # Create deployment directory
     mkdir -p "$DEPLOY_DIR"
     
+    # Build the project
+    log "Building Rust project..."
+    export SQLX_OFFLINE=true
+    cargo build --release --workspace
+    
     # Copy built artifacts
-    if [ -f "./target/release/backend-server" ]; then
-        cp "./target/release/backend-server" "$DEPLOY_DIR/"
+    if [ -f "./target/release/pema-backend-server" ]; then
+        cp "./target/release/pema-backend-server" "$DEPLOY_DIR/backend-server"
         chmod +x "$DEPLOY_DIR/backend-server"
         success "Platform binary deployed"
     else
-        error "Platform binary not found. Run 'make build' first."
+        error "Platform binary not found. Build failed."
     fi
     
-    # Copy WASM frontend
-    if [ -d "./wasm-frontend/dist" ]; then
-        cp -r "./wasm-frontend/dist" "$DEPLOY_DIR/frontend"
-        success "WASM frontend deployed"
-    else
-        error "WASM frontend not found. Run 'make wasm-frontend' first."
+    # Build and copy WASM frontend if exists
+    if [ -d "./wasm-frontend" ]; then
+        log "Building WASM frontend..."
+        cd wasm-frontend
+        wasm-pack build --target web --out-dir dist
+        cd ..
+        
+        if [ -d "./wasm-frontend/dist" ]; then
+            cp -r "./wasm-frontend/dist" "$DEPLOY_DIR/frontend"
+            success "WASM frontend deployed"
+        fi
     fi
     
     # Copy plugins
@@ -124,9 +140,20 @@ deploy_application() {
         success "Plugins deployed"
     fi
     
-    # Copy configuration
-    cp ".env" "$DEPLOY_DIR/"
-    cp "docker-compose.db.yml" "$DEPLOY_DIR/"
+    # Create .env file if it doesn't exist
+    if [ ! -f ".env" ]; then
+        log "Creating default .env file..."
+        cat > "$DEPLOY_DIR/.env" << EOF
+DATABASE_URL=postgresql://pema_user:pema_password@localhost/pema_platform
+JWT_SECRET=your-jwt-secret-key-change-this-in-production
+RUST_LOG=info
+SERVER_HOST=0.0.0.0
+SERVER_PORT=8000
+CORS_ALLOWED_ORIGINS=*
+EOF
+    else
+        cp ".env" "$DEPLOY_DIR/"
+    fi
     
     success "Application deployed to $DEPLOY_DIR"
 }
@@ -228,7 +255,7 @@ server {
     
     # API proxy to backend
     location /api/ {
-        proxy_pass http://127.0.0.1:8080/;
+        proxy_pass http://127.0.0.1:8000/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -239,12 +266,9 @@ server {
         proxy_cache_bypass \$http_upgrade;
     }
     
-    # WebSocket support
-    location /ws/ {
-        proxy_pass http://127.0.0.1:8080/ws/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
+    # Direct backend access (for development)
+    location /health {
+        proxy_pass http://127.0.0.1:8000/health;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -280,17 +304,24 @@ health_check() {
     fi
     
     # Check if port is listening
-    if netstat -tuln | grep -q ":8080"; then
-        success "✅ Port 8080 is listening"
+    if netstat -tuln | grep -q ":8000"; then
+        success "✅ Port 8000 is listening"
     else
-        error "❌ Port 8080 is not listening"
+        error "❌ Port 8000 is not listening"
     fi
     
     # Check database connection
-    if docker-compose -f "$DEPLOY_DIR/docker-compose.db.yml" ps | grep -q "Up"; then
+    if systemctl is-active --quiet postgresql; then
         success "✅ Database is running"
     else
         error "❌ Database is not running"
+    fi
+    
+    # Test API endpoint
+    if curl -s http://localhost:8000/health > /dev/null; then
+        success "✅ API health check passed"
+    else
+        warning "⚠️ API health check failed (service may still be starting)"
     fi
 }
 

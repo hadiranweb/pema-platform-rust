@@ -11,7 +11,7 @@ This guide will help you set up the PEMA Platform with all its dependencies and 
 
 2. **Follow the interactive prompts** to configure:
    - Server settings (host, port, domain)
-   - Database configuration (Docker or manual PostgreSQL)
+   - Database configuration (PostgreSQL)
    - Security settings (JWT secret, session timeout)
    - Environment settings (development/production)
 
@@ -23,26 +23,32 @@ This guide will help you set up the PEMA Platform with all its dependencies and 
 ## Prerequisites
 
 - **Rust** (latest stable) - Install from [rustup.rs](https://rustup.rs/)
-- **Docker** (optional, for database) - Install from [docker.com](https://www.docker.com/)
-- **PostgreSQL** (if not using Docker) - Install from [postgresql.org](https://www.postgresql.org/)
+- **PostgreSQL** - Install from [postgresql.org](https://www.postgresql.org/)
 - **Node.js** (optional, for frontend development)
 
 ## Setup Options
 
 ### Database Setup
 
-The setup script offers two database options:
+The platform uses PostgreSQL as the database:
 
-#### Option 1: Docker PostgreSQL (Recommended)
-- ✅ Automatic setup and configuration
-- ✅ Isolated environment
-- ✅ Easy backup and restore
-- ✅ Consistent across different systems
+#### PostgreSQL Setup
+- ⚙️ Install PostgreSQL on your system
+- ⚙️ Create database and user manually
+- ⚙️ Configure connection in .env file
 
-#### Option 2: Manual PostgreSQL
-- ⚙️ Requires manual PostgreSQL installation
-- ⚙️ Manual database and user creation
-- ⚙️ System-specific configuration
+**Installation Commands:**
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+
+# Create database and user
+sudo -u postgres createdb pema_platform
+sudo -u postgres createuser pema_user
+sudo -u postgres psql -c "ALTER USER pema_user WITH PASSWORD 'pema_password';"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE pema_platform TO pema_user;"
+```
 
 ### Environment Configuration
 
@@ -69,8 +75,8 @@ Contains all configuration settings:
 - Security settings
 - Application settings
 
-### `docker-compose.db.yml` - Database Container
-Docker Compose configuration for PostgreSQL database.
+### `migrations/` - Database Migrations
+SQL migration files for database schema setup.
 
 ### `migrations/001_initial.sql` - Database Schema
 Initial database schema with:
@@ -101,7 +107,7 @@ Starts the backend server in development mode.
 ```bash
 ./cleanup.sh
 ```
-Removes build artifacts and Docker containers.
+Removes build artifacts and temporary files.
 
 ## Manual Setup (Alternative)
 
@@ -116,20 +122,17 @@ cp .env.example .env
 
 ### 2. Database Setup
 
-#### With Docker:
+#### PostgreSQL Setup:
 ```bash
-docker run --name pema_postgres \
-  -e POSTGRES_DB=pema_db \
-  -e POSTGRES_USER=pema_user \
-  -e POSTGRES_PASSWORD=your_password \
-  -p 5432:5432 \
-  -d postgres:15
-```
+# Install PostgreSQL
+sudo apt update
+sudo apt install postgresql postgresql-contrib
 
-#### Manual PostgreSQL:
-```bash
-sudo -u postgres psql -c "CREATE USER pema_user WITH PASSWORD 'your_password';"
-sudo -u postgres psql -c "CREATE DATABASE pema_db OWNER pema_user;"
+# Create database and user
+sudo -u postgres createdb pema_platform
+sudo -u postgres createuser pema_user
+sudo -u postgres psql -c "ALTER USER pema_user WITH PASSWORD 'pema_password';"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE pema_platform TO pema_user;"
 ```
 
 ### 3. Install Dependencies
@@ -172,10 +175,10 @@ cargo run --package pema-backend-server
 - Change `SERVER_PORT` in `.env`
 - Kill existing processes: `lsof -ti:8080 | xargs kill`
 
-#### Docker Issues
-- Ensure Docker is running
-- Check container status: `docker ps`
-- View container logs: `docker logs pema_postgres`
+#### Database Issues
+- Ensure PostgreSQL is running: `sudo systemctl status postgresql`
+- Check database connection: `psql -h localhost -U pema_user -d pema_platform`
+- View PostgreSQL logs: `sudo journalctl -u postgresql`
 
 ### SQLx Compile-Time Verification
 
