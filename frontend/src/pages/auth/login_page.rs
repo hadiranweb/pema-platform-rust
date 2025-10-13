@@ -18,21 +18,22 @@ pub fn login_page() -> Html {
     let otp_code_state = use_state(|| Option::<String>::None);
     let error_message_state = use_state(|| Option::<String>::None);
     let loading_state = use_state(|| false);
+    let dispatch = use_reducer::<AuthStore>().1;
 
     let history = use_history().unwrap();
 
-    let on_email_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_email_change = Callback::from(move |value: String| {
+        
         email_state.set(input.value());
     });
 
-    let on_password_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_password_change = Callback::from(move |value: String| {
+        
         password_state.set(input.value());
     });
 
-    let on_otp_code_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_otp_code_change = Callback::from(move |value: String| {
+        
         let value = input.value();
         otp_code_state.set(if value.is_empty() { None } else { Some(value) });
     });
@@ -45,7 +46,7 @@ pub fn login_page() -> Html {
         let error_message_state = error_message_state.clone();
         let loading_state = loading_state.clone();
         let history = history.clone();
-        let dispatch = use_reducer_dispatch::<AuthStore>();
+        let dispatch = dispatch.clone();
 
         loading_state.set(true);
         wasm_bindgen_futures::spawn_local(async move {

@@ -10,7 +10,7 @@ use crate::components::common::spinner::Spinner;
 use crate::router::routes::AppRoute;
 use crate::services::auth_service::{AuthService, RegisterRequest};
 use crate::state::auth::{AuthStore, Action as AuthAction};
-use yewdux::prelude::use_reducer_dispatch;
+use yewdux::prelude::use_reducer;
 
 #[function_component(RegisterPage)]
 pub fn register_page() -> Html {
@@ -19,21 +19,22 @@ pub fn register_page() -> Html {
     let password_state = use_state(|| String::new());
     let error_message_state = use_state(|| Option::<String>::None);
     let loading_state = use_state(|| false);
+    let dispatch = use_reducer::<AuthStore>().1;
 
     let history = use_history().unwrap();
 
-    let on_email_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_email_change = Callback::from(move |value: String| {
+        
         email_state.set(input.value());
     });
 
-    let on_username_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_username_change = Callback::from(move |value: String| {
+        
         username_state.set(input.value());
     });
 
-    let on_password_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_password_change = Callback::from(move |value: String| {
+        
         password_state.set(input.value());
     });
 
@@ -45,7 +46,7 @@ pub fn register_page() -> Html {
         let error_message_state = error_message_state.clone();
         let loading_state = loading_state.clone();
         let history = history.clone();
-        let dispatch = use_reducer_dispatch::<AuthStore>();
+        let dispatch = dispatch.clone();
 
         loading_state.set(true);
         wasm_bindgen_futures::spawn_local(async move {

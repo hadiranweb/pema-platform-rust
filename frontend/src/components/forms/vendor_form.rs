@@ -22,13 +22,13 @@ pub fn vendor_form(props: &VendorFormProps) -> Html {
     let loading_state = use_state(|| false);
     let error_message_state = use_state(|| Option::<String>::None);
 
-    let on_name_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_name_change = Callback::from(move |value: String| {
+        
         name_state.set(input.value());
     });
 
-    let on_description_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_description_change = Callback::from(move |value: String| {
+        
         description_state.set(input.value());
     });
 

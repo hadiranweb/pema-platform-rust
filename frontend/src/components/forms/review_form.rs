@@ -23,18 +23,18 @@ pub fn review_form(props: &ReviewFormProps) -> Html {
     let loading_state = use_state(|| false);
     let error_message_state = use_state(|| Option::<String>::None);
 
-    let on_product_id_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_product_id_change = Callback::from(move |value: String| {
+        
         product_id_state.set(input.value());
     });
 
-    let on_rating_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_rating_change = Callback::from(move |value: String| {
+        
         rating_state.set(input.value());
     });
 
-    let on_comment_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_comment_change = Callback::from(move |value: String| {
+        
         comment_state.set(input.value());
     });
 

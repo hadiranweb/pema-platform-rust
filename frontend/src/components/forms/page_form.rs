@@ -24,23 +24,23 @@ pub fn page_form(props: &PageFormProps) -> Html {
     let loading_state = use_state(|| false);
     let error_message_state = use_state(|| Option::<String>::None);
 
-    let on_title_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_title_change = Callback::from(move |value: String| {
+        
         title_state.set(input.value());
     });
 
-    let on_content_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_content_change = Callback::from(move |value: String| {
+        
         content_state.set(input.value());
     });
 
-    let on_slug_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_slug_change = Callback::from(move |value: String| {
+        
         slug_state.set(input.value());
     });
 
-    let on_is_published_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
+    let on_is_published_change = Callback::from(move |value: String| {
+        
         is_published_state.set(input.checked());
     });
 

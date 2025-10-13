@@ -61,24 +61,20 @@ pub fn wallet_page() -> Html {
         || ()
     }, fetch_wallet_data.clone());
 
-    let on_deposit_amount_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
-        deposit_amount_state.set(input.value());
+    let on_deposit_amount_change = Callback::from(move |value: String| {
+        deposit_amount_state.set(value);
     });
 
-    let on_withdraw_amount_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
-        withdraw_amount_state.set(input.value());
+    let on_withdraw_amount_change = Callback::from(move |value: String| {
+        withdraw_amount_state.set(value);
     });
 
-    let on_transfer_amount_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
-        transfer_amount_state.set(input.value());
+    let on_transfer_amount_change = Callback::from(move |value: String| {
+        transfer_amount_state.set(value);
     });
 
-    let on_transfer_recipient_id_change = Callback::from(move |e: Event| {
-        let input: HtmlInputElement = e.target_unchecked_into();
-        transfer_recipient_id_state.set(input.value());
+    let on_transfer_recipient_id_change = Callback::from(move |value: String| {
+        transfer_recipient_id_state.set(value);
     });
 
     let handle_deposit = { 
