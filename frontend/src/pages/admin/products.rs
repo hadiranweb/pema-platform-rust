@@ -141,7 +141,7 @@ pub fn admin_products_page() -> Html {
                         html! { <p>{ "Loading products..." }</p> }
                     }
                 }
-            }
+            </div>
         </div>
     }
 }
