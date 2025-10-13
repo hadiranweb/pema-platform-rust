@@ -25,17 +25,17 @@ pub fn review_form(props: &ReviewFormProps) -> Html {
 
     let on_product_id_change = Callback::from(move |value: String| {
         
-        product_id_state.set(input.value());
+        product_id_state.set(value);
     });
 
     let on_rating_change = Callback::from(move |value: String| {
         
-        rating_state.set(input.value());
+        rating_state.set(value);
     });
 
     let on_comment_change = Callback::from(move |value: String| {
         
-        comment_state.set(input.value());
+        comment_state.set(value);
     });
 
     let on_submit = { 

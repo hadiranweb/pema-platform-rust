@@ -1,5 +1,5 @@
 use gloo_net::http::Request;
-use crate::shared::models::page::Page;
+use crate::models::models::page::Page;
 use anyhow::Error;
 use yew::use_context;
 use crate::config::FrontendConfig;

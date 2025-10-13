@@ -4,9 +4,9 @@ use sqlx::PgPool;
 use argon2::{password_hash::{rand_core::OsRng, SaltString}, Argon2, PasswordHasher, PasswordVerifier};
 use jsonwebtoken::{encode, EncodingKey, Header};
 
-use crate::shared::models::user::{User, UserLogin, UserRegister};
+use models::user::User;
 use crate::modules::auth::repository;
-use crate::shared::config::config::Config;
+use dtos::user::{LoginRequest, RegisterRequest};
 use crate::core::plugins::manager::PluginManager;
 use pema_plugin_sdk::interface::PluginHookType;
 use std::sync::Arc;

@@ -15,3 +15,19 @@ pub struct Order {
     pub updated_at: DateTime<Utc>,
 }
 
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct CreateOrder {
+    pub user_id: Uuid,
+    pub product_id: Uuid,
+    pub quantity: i32,
+    pub total_price: f64,
+    pub status: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct UpdateOrder {
+    pub quantity: Option<i32>,
+    pub total_price: Option<f64>,
+    pub status: Option<String>,
+}
+

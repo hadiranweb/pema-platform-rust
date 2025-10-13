@@ -1,6 +1,6 @@
 use sqlx::PgPool;
 use uuid::Uuid;
-use crate::shared::models::order::{CreateOrder, Order, UpdateOrder};
+use models::order::{CreateOrder, Order, UpdateOrder};
 use crate::modules::orders::repository;
 use crate::core::plugins::manager::PluginManager;
 use pema_plugin_sdk::interface::PluginHookType;

@@ -24,12 +24,12 @@ pub fn login_page() -> Html {
 
     let on_email_change = Callback::from(move |value: String| {
         
-        email_state.set(input.value());
+        email_state.set(value);
     });
 
     let on_password_change = Callback::from(move |value: String| {
         
-        password_state.set(input.value());
+        password_state.set(value);
     });
 
     let on_otp_code_change = Callback::from(move |value: String| {

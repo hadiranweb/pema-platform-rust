@@ -24,12 +24,12 @@ pub fn vendor_form(props: &VendorFormProps) -> Html {
 
     let on_name_change = Callback::from(move |value: String| {
         
-        name_state.set(input.value());
+        name_state.set(value);
     });
 
     let on_description_change = Callback::from(move |value: String| {
         
-        description_state.set(input.value());
+        description_state.set(value);
     });
 
     let on_submit = { 

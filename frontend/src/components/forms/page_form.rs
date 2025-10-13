@@ -26,17 +26,17 @@ pub fn page_form(props: &PageFormProps) -> Html {
 
     let on_title_change = Callback::from(move |value: String| {
         
-        title_state.set(input.value());
+        title_state.set(value);
     });
 
     let on_content_change = Callback::from(move |value: String| {
         
-        content_state.set(input.value());
+        content_state.set(value);
     });
 
     let on_slug_change = Callback::from(move |value: String| {
         
-        slug_state.set(input.value());
+        slug_state.set(value);
     });
 
     let on_is_published_change = Callback::from(move |value: String| {

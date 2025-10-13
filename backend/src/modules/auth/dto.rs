@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use validator::Validate;
-use dtos::user::{LoginRequest, RegisterRequest};
 
-// Re-export for convenience if needed, or remove if direct usage of dtos::user is preferred
+// Re-export for convenience
 pub use dtos::user::{LoginRequest, RegisterRequest};
 

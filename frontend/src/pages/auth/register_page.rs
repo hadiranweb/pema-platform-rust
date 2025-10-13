@@ -25,17 +25,17 @@ pub fn register_page() -> Html {
 
     let on_email_change = Callback::from(move |value: String| {
         
-        email_state.set(input.value());
+        email_state.set(value);
     });
 
     let on_username_change = Callback::from(move |value: String| {
         
-        username_state.set(input.value());
+        username_state.set(value);
     });
 
     let on_password_change = Callback::from(move |value: String| {
         
-        password_state.set(input.value());
+        password_state.set(value);
     });
 
     let on_submit = Callback::from(move |e: FocusEvent| {

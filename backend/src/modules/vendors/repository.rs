@@ -2,7 +2,7 @@
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
-use crate::shared::models::vendor::{CreateVendor, UpdateVendor, Vendor};
+use models::vendor::{CreateVendor, UpdateVendor, Vendor};
 
 pub async fn create_vendor(pool: &PgPool, create_vendor: CreateVendor) -> Result<Vendor, String> {
     let vendor = sqlx::query_as::<_, Vendor>(

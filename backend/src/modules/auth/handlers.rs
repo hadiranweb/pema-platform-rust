@@ -5,14 +5,13 @@ use validator::Validate;
 
 use crate::modules::auth::dto::{LoginRequest, RegisterRequest};
 use crate::modules::auth::service::AuthService;
-use crate::shared::config::config::Config;
 use crate::core::plugins::manager::PluginManager;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use crate::shared::models::user::{UserLogin, UserRegister};
+use models::user::User;
 use crate::error::ServiceError;
 
-pub async fn login_user(pool: web::Data<PgPool>, form: web::Json<LoginRequest>, config: web::Data<Config>) -> impl Responder {
+pub async fn login_user(pool: web::Data<PgPool>, form: web::Json<LoginRequest>) -> impl Responder {
     if let Err(errors) = form.validate() {
         return HttpResponse::BadRequest().json(errors);
     }
@@ -28,7 +27,7 @@ pub async fn login_user(pool: web::Data<PgPool>, form: web::Json<LoginRequest>, 
     }
 }
 
-pub async fn register_user(pool: web::Data<PgPool>, form: web::Json<RegisterRequest>, config: web::Data<Config>, plugin_manager: web::Data<Arc<PluginManager>>) -> impl Responder {
+pub async fn register_user(pool: web::Data<PgPool>, form: web::Json<RegisterRequest>, config: web::Data<crate::config::settings::Settings>, plugin_manager: web::Data<Arc<PluginManager>>) -> impl Responder {
     if let Err(errors) = form.validate() {
         return HttpResponse::BadRequest().json(errors);
     }

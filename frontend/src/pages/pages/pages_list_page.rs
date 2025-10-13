@@ -3,7 +3,7 @@ use yew_router::prelude::*;
 use crate::router::Route;
 use crate::components::common::spinner::Spinner;
 use crate::services::api_client::fetch_pages;
-use crate::shared::models::page::Page;
+use crate::models::models::page::Page;
 
 #[function_component(PagesListPage)]
 pub fn pages_list_page() -> Html {

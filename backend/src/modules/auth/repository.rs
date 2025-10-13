@@ -2,9 +2,10 @@
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
-use crate::shared::models::user::{User, UserRegister};
+use models::user::User;
+use dtos::user::RegisterRequest;
 
-pub async fn create_user(pool: &PgPool, user_register: UserRegister, password_hash: String) -> Result<User, String> {
+pub async fn create_user(pool: &PgPool, user_register: RegisterRequest, password_hash: String) -> Result<User, String> {
     let user = sqlx::query_as::<_, User>(
         "INSERT INTO users (id, username, email, password_hash) VALUES ($1, $2, $3, $4) RETURNING *"
     )
