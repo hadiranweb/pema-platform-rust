@@ -1,6 +1,4 @@
-use jwt::{SignWithKey, VerifyWithKey};
-use hmac::{Hmac, Mac};
-use sha2::Sha256;
+use jsonwebtoken::{encode, decode, Header, Algorithm, Validation, EncodingKey, DecodingKey};
 use serde::{Deserialize, Serialize};
 use chrono::{Duration, Utc};
 use uuid::Uuid;
@@ -15,29 +13,26 @@ pub struct Claims {
 }
 
 pub fn create_jwt(user_id: Uuid, config: &AppConfig) -> Result<String, WalletError> {
-    let secret = config.security.jwt_secret.as_bytes();
     let now = Utc::now();
     let expires_at = now + Duration::seconds(config.security.session_timeout as i64);
     let claims = Claims {
-        sub: user_id.to_string(), // Convert Uuid to String for JWT claims
+        sub: user_id.to_string(),
         iat: now.timestamp() as usize,
         exp: expires_at.timestamp() as usize,
     };
-    let key: Hmac<Sha256> = Hmac::new_from_slice(secret)
-        .map_err(|e| WalletError::InternalError(format!("Failed to create key: {}", e)))?;
-    let token = claims
-        .sign_with_key(&key)
+    
+    let encoding_key = EncodingKey::from_secret(config.security.jwt_secret.as_bytes());
+    let token = encode(&Header::default(), &claims, &encoding_key)
         .map_err(|e| WalletError::InternalError(format!("Failed to generate token: {}", e)))?;
     Ok(token)
 }
 
 pub fn validate_jwt(token: &str, config: &AppConfig) -> Result<Claims, WalletError> {
-    let secret = config.security.jwt_secret.as_bytes();
-    let key: Hmac<Sha256> = Hmac::new_from_slice(secret)
-        .map_err(|e| WalletError::InternalError(format!("Failed to create key: {}", e)))?;
-    let claims: Claims = token
-        .verify_with_key(&key)
+    let decoding_key = DecodingKey::from_secret(config.security.jwt_secret.as_bytes());
+    let validation = Validation::new(Algorithm::HS256);
+    
+    let token_data = decode::<Claims>(token, &decoding_key, &validation)
         .map_err(|e| WalletError::UnauthorizedAdminAction(format!("Failed to validate token: {}", e)))?;
-    Ok(claims)
+    Ok(token_data.claims)
 }
 

@@ -7,7 +7,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-pema_plugin_sdk = { path = "../../shared/plugin-sdk" }
-serde = { workspace = true }
-
+plugin-sdk = { path = "../../shared/plugin-sdk" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 

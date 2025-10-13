@@ -1,55 +1,74 @@
 SHELL := /bin/bash
-.PHONY: help setup dev build test clean migrate docker-up docker-down fmt clippy check validate-dependabot
+.PHONY: help setup dev build test clean migrate db-up db-down fmt clippy check platform plugins wasm-frontend deploy
 
-AUTH_SERVER_DIR := auth-server
-BACKEND_DIR := backend
-FRONTEND_DIR := frontend
+# Plugin-Based Architecture Configuration
+PLATFORM_DIR := backend-server
+WASM_FRONTEND_DIR := wasm-frontend
+PLUGINS_DIR := plugins
 
 BUILD_PROFILE ?= release
 
 help:
-	@echo "Available commands:"
-	@echo "  make setup               - Initial project setup (Docker Compose)"
-	@echo "  make dev                 - Start development servers (backend, auth-server, frontend)"
-	@echo "  make build               - Build production artifacts (backend, auth-server, frontend)"
+	@echo "🏗️  PEMA Platform - Plugin-Based Architecture"
+	@echo "=============================================="
+	@echo "  make setup               - Setup development environment"
+	@echo "  make dev                 - Start platform in development mode"
+	@echo "  make dev-frontend        - Start WASM frontend in development mode"
+	@echo "  make build               - Build all components (platform + plugins + frontend)"
+	@echo "  make platform            - Build core platform only"
+	@echo "  make plugins             - Build all plugins"
+	@echo "  make wasm-frontend       - Build WASM frontend"
 	@echo "  make test                - Run all tests"
 	@echo "  make clean               - Clean all build artifacts"
 	@echo "  make migrate             - Run database migrations"
-	@echo "  make docker-up           - Start Docker services"
-	@echo "  make docker-down         - Stop Docker services"
+	@echo "  make db-up               - Start PostgreSQL database"
+	@echo "  make db-down             - Stop PostgreSQL database"
 	@echo "  make fmt                 - Format code"
 	@echo "  make clippy              - Run clippy linter"
 	@echo "  make check               - Run fmt, clippy, and tests"
-	@echo "  make validate-dependabot - Validate Dependabot configuration"
+	@echo "  make deploy              - Deploy to production"
 
 setup:
-	@echo "🚀 Setting up PEMA Platform with Docker Compose..."
-	@echo "Ensure Docker and Docker Compose are installed."
-	@echo "Copying .env files..."
+	@echo "🚀 Setting up PEMA Platform..."
+	@echo "Installing Rust WASM target and tools..."
+	rustup target add wasm32-unknown-unknown
+	cargo install trunk wasm-bindgen-cli || true
+	cargo install sqlx-cli --no-default-features --features "postgres,runtime-tokio-rustls" || true
+	@echo "Setting up environment..."
 	cp .env.example .env || true
-	cp $(BACKEND_DIR)/.env.example $(BACKEND_DIR)/.env || true
-	cp $(AUTH_SERVER_DIR)/.env.example $(AUTH_SERVER_DIR)/.env || true
-	make docker-up
+	make db-up
 	@echo "⏳ Waiting for database..."
 	sleep 10
 	make migrate
 	@echo "✅ Setup complete!"
 
 dev:
-	@echo "Starting development servers..."
-	(cd $(BACKEND_DIR) && cargo watch -x 'run --release' --ignore 'target') & \
-	(cd $(AUTH_SERVER_DIR) && cargo watch -x 'run --release' --ignore 'target') & \
-	(cd $(FRONTEND_DIR) && trunk serve --port 3000) & \
-	wait
+	@echo "🚀 Starting PEMA Platform in development mode..."
+	cargo run --bin backend-server
 
-build:
-	@echo "Building production artifacts..."
-	@echo "Building backend..."
-	cargo build --$(BUILD_PROFILE) --manifest-path $(BACKEND_DIR)/Cargo.toml
-	@echo "Building auth-server..."
-	cargo build --$(BUILD_PROFILE) --manifest-path $(AUTH_SERVER_DIR)/Cargo.toml
-	@echo "Building frontend..."
-	cd $(FRONTEND_DIR) && trunk build --$(BUILD_PROFILE)
+dev-frontend:
+	@echo "🌐 Starting WASM Frontend in development mode..."
+	cd $(WASM_FRONTEND_DIR) && trunk serve --port 3000
+
+build: platform plugins wasm-frontend
+
+platform:
+	@echo "🏗️  Building PEMA Core Platform..."
+	cargo build --$(BUILD_PROFILE) --bin backend-server
+
+plugins:
+	@echo "🔌 Building Plugins..."
+	@for plugin in $(PLUGINS_DIR)/*/; do \
+		if [ -f "$$plugin/Cargo.toml" ]; then \
+			echo "Building plugin: $$plugin"; \
+			cd "$$plugin" && cargo build --$(BUILD_PROFILE) --target wasm32-unknown-unknown; \
+			cd ../..; \
+		fi \
+	done
+
+wasm-frontend:
+	@echo "🌐 Building WASM Frontend..."
+	cd $(WASM_FRONTEND_DIR) && trunk build --$(BUILD_PROFILE)
 
 test:
 	@echo "Running all tests..."
@@ -57,21 +76,25 @@ test:
 
 migrate:
 	@echo "Running database migrations..."
-	cargo install sqlx-cli --no-default-features --features "postgres,runtime-tokio-rustls" || true
-	sqlx migrate run --database-url $$(grep DATABASE_URL $(BACKEND_DIR)/.env | cut -d '=' -f2-)
+	sqlx migrate run --database-url $$(grep DATABASE_URL .env | cut -d '=' -f2-)
 
 clean:
-	@echo "Cleaning all build artifacts..."
+	@echo "🧹 Cleaning all build artifacts..."
 	cargo clean
-	rm -rf $(FRONTEND_DIR)/dist
+	rm -rf $(WASM_FRONTEND_DIR)/dist
+	find $(PLUGINS_DIR) -name target -type d -exec rm -rf {} + 2>/dev/null || true
 
-docker-up:
-	@echo "Starting Docker services..."
-	docker compose up -d
+db-up:
+	@echo "🐘 Starting PostgreSQL database..."
+	docker-compose -f docker-compose.db.yml up -d
 
-docker-down:
-	@echo "Stopping Docker services..."
-	docker compose down
+db-down:
+	@echo "🛑 Stopping PostgreSQL database..."
+	docker-compose -f docker-compose.db.yml down
+
+deploy: build
+	@echo "🚀 Deploying PEMA Platform..."
+	@./scripts/deploy.sh
 
 fmt:
 	@echo "Formatting code..."
@@ -83,7 +106,5 @@ clippy:
 
 check: fmt clippy test
 
-validate-dependabot:
-	@echo "🤖 Validating Dependabot configuration..."
-	@./scripts/validate-dependabot.sh
+
 

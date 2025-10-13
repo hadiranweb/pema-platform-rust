@@ -28,8 +28,8 @@ impl fmt::Display for PluginHookType {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DiscountRequest {
-    pub user_id: Uuid,
-    pub product_id: Uuid,
+    pub user_id: String,
+    pub product_id: String,
     pub original_price: f64,
     pub quantity: i32,
 }
