@@ -12,8 +12,10 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 gloo-net = { workspace = true }
 web-sys = { workspace = true }
+uuid = { workspace = true, features = ["v4", "js"] }
 
 # Shared crates
+models = { path = "../shared/models" }
 
 
 [dev-dependencies]

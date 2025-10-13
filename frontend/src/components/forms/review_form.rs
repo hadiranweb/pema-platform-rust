@@ -117,7 +117,7 @@ pub fn review_form(props: &ReviewFormProps) -> Html {
                 <Input
                     label="Product ID"
                     id="product-id"
-                    type="text"
+                    input_type="text"
                     value={(*product_id_state).clone()}
                     on_change={on_product_id_change}
                     placeholder="Product ID"
@@ -126,7 +126,7 @@ pub fn review_form(props: &ReviewFormProps) -> Html {
                 <Input
                     label="Rating (1-5)"
                     id="rating"
-                    type="number"
+                    input_type="number"
                     value={(*rating_state).clone()}
                     on_change={on_rating_change}
                     placeholder="Rating"
@@ -136,15 +136,15 @@ pub fn review_form(props: &ReviewFormProps) -> Html {
                 <Input
                     label="Comment"
                     id="comment"
-                    type="text"
+                    input_type="text"
                     value={(*comment_state).clone()}
                     on_change={on_comment_change}
                     placeholder="Your review comment"
                 />
                 { if *loading_state { html! { <Spinner /> } } else { html! {} } }
                 { if let Some(msg) = &*error_message_state { html! { <p class="error-message">{ msg }</p> } } else { html! {} } }
-                <Button label={ if props.review.is_some() { "Save Changes" } else { "Submit Review" } } button_type="submit" />
-                <Button label="Cancel" button_type="button" onclick={on_cancel} />
+                <Button label={ if props.review.is_some() { "Save Changes" } else { "Submit Review" } } button_input_type="submit" />
+                <Button label="Cancel" button_input_type="button" onclick={on_cancel} />
             </form>
         </div>
     }

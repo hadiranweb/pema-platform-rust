@@ -15,6 +15,10 @@ pub struct InputProps {
     pub placeholder: String,
     #[prop_or_default]
     pub class: String,
+    #[prop_or_default]
+    pub id: String,
+    #[prop_or_default]
+    pub step: String,
     #[prop_or(false)]
     pub required: bool,
 }
@@ -39,6 +43,8 @@ pub fn input(props: &InputProps) -> Html {
                 placeholder={props.placeholder.clone()}
                 required={props.required}
                 class="form-control"
+                id={props.id.clone()}
+                step={if props.step.is_empty() { None } else { Some(props.step.clone()) }}
             />
         </div>
     }

@@ -7,7 +7,7 @@ use crate::shared::models::page::Page;
 
 #[function_component(PagesListPage)]
 pub fn pages_list_page() -> Html {
-    let pages = use_state(|| None);
+    let pages = use_state(|| None::<Vec<models::page::Page>>);
     let error = use_state(|| None);
     let loading = use_state(|| true);
 
@@ -15,7 +15,7 @@ pub fn pages_list_page() -> Html {
         let pages = pages.clone();
         let error = error.clone();
         let loading = loading.clone();
-        use_effect_with_deps(move |_| {
+        use_effect_with((), move |_| {
             wasm_bindgen_futures::spawn_local(async move {
                 match fetch_pages().await {
                     Ok(fetched_pages) => {
@@ -28,7 +28,7 @@ pub fn pages_list_page() -> Html {
                 loading.set(false);
             });
             || ()
-        }, ());
+        });
     }
 
     if *loading {

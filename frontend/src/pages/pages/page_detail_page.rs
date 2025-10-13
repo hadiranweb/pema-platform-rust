@@ -21,7 +21,7 @@ pub fn page_detail_page(props: &PageDetailProps) -> Html {
         let error = error.clone();
         let loading = loading.clone();
         let page_id = props.id;
-        use_effect_with_deps(move |_| {
+        use_effect_with((), move |_| {
             wasm_bindgen_futures::spawn_local(async move {
                 match fetch_page_by_id(page_id).await {
                     Ok(fetched_page) => {
@@ -34,7 +34,7 @@ pub fn page_detail_page(props: &PageDetailProps) -> Html {
                 loading.set(false);
             });
             || ()
-        }, page_id);
+        });
     }
 
     if *loading {

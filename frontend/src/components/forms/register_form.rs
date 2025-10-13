@@ -34,7 +34,7 @@ pub fn register_form() -> Html {
         <form onsubmit={on_submit}>
             <Input
                 label="Email"
-                input_type="email"
+                input_input_type="email"
                 value={email.to_string()}
                 onchange={on_email_change}
                 placeholder="Enter your email"
@@ -42,7 +42,7 @@ pub fn register_form() -> Html {
             />
             <Input
                 label="Password"
-                input_type="password"
+                input_input_type="password"
                 value={password.to_string()}
                 onchange={on_password_change}
                 placeholder="Enter your password"
@@ -50,7 +50,7 @@ pub fn register_form() -> Html {
             />
             <Input
                 label="Confirm Password"
-                input_type="password"
+                input_input_type="password"
                 value={confirm_password.to_string()}
                 onchange={on_confirm_password_change}
                 placeholder="Confirm your password"

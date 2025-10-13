@@ -28,7 +28,7 @@ pub fn order_form() -> Html {
         <form onsubmit={on_submit}>
             <Input
                 label="Product ID"
-                input_type="text"
+                input_input_type="text"
                 value={product_id.to_string()}
                 onchange={on_product_id_change}
                 placeholder="Enter product ID"
@@ -36,7 +36,7 @@ pub fn order_form() -> Html {
             />
             <Input
                 label="Quantity"
-                input_type="number"
+                input_input_type="number"
                 value={quantity.to_string()}
                 onchange={on_quantity_change}
                 placeholder="Enter quantity"

@@ -39,7 +39,7 @@ pub enum Route {
     #[at("/reviews")]
     Reviews,
     #[at("/reviews/new")]
-    ReviewForm { id: Option<String> },
+    ReviewForm,
     #[at("/reviews/edit/:id")]
     ReviewEdit { id: String },
     #[at("/admin/dashboard")]
@@ -82,7 +82,7 @@ pub fn switch(routes: Route) -> Html {
         Route::OrderDetail { id } => html! { <OrderDetailPage id={id} /> },
         Route::Wallet => html! { <WalletPage /> },
         Route::Reviews => html! { <ReviewListPage /> },
-        Route::ReviewForm { id } => html! { <ReviewFormPage id={id} /> },
+        Route::ReviewForm => html! { <ReviewFormPage /> },
         Route::ReviewEdit { id } => html! { <ReviewFormPage id={Some(id)} /> },
         Route::AdminDashboard => html! { <AdminDashboardPage /> },
         Route::AdminUsers => html! { <AdminUsersPage /> },

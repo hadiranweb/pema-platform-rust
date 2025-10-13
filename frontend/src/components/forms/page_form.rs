@@ -110,7 +110,7 @@ pub fn page_form(props: &PageFormProps) -> Html {
                 <Input
                     label="Title"
                     id="page-title"
-                    type="text"
+                    input_type="text"
                     value={(*title_state).clone()}
                     on_change={on_title_change}
                     placeholder="Page Title"
@@ -118,7 +118,7 @@ pub fn page_form(props: &PageFormProps) -> Html {
                 <Input
                     label="Content"
                     id="page-content"
-                    type="text"
+                    input_type="text"
                     value={(*content_state).clone()}
                     on_change={on_content_change}
                     placeholder="Page Content"
@@ -126,14 +126,14 @@ pub fn page_form(props: &PageFormProps) -> Html {
                 <Input
                     label="Slug"
                     id="page-slug"
-                    type="text"
+                    input_type="text"
                     value={(*slug_state).clone()}
                     on_change={on_slug_change}
                     placeholder="Page Slug"
                 />
                 <label for="is-published">
                     <input
-                        type="checkbox"
+                        input_type="checkbox"
                         id="is-published"
                         checked={*is_published_state}
                         onchange={on_is_published_change}
@@ -142,8 +142,8 @@ pub fn page_form(props: &PageFormProps) -> Html {
                 </label>
                 { if *loading_state { html! { <Spinner /> } } else { html! {} } }
                 { if let Some(msg) = &*error_message_state { html! { <p class="error-message">{ msg }</p> } } else { html! {} } }
-                <Button label={ if props.page.is_some() { "Save Changes" } else { "Add Page" } } button_type="submit" />
-                <Button label="Cancel" button_type="button" onclick={on_cancel} />
+                <Button label={ if props.page.is_some() { "Save Changes" } else { "Add Page" } } button_input_type="submit" />
+                <Button label="Cancel" button_input_type="button" onclick={on_cancel} />
             </form>
         </div>
     }

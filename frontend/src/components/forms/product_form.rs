@@ -34,7 +34,7 @@ pub fn product_form() -> Html {
         <form onsubmit={on_submit}>
             <Input
                 label="Product Name"
-                input_type="text"
+                input_input_type="text"
                 value={name.to_string()}
                 onchange={on_name_change}
                 placeholder="Enter product name"
@@ -42,7 +42,7 @@ pub fn product_form() -> Html {
             />
             <Input
                 label="Description"
-                input_type="text"
+                input_input_type="text"
                 value={description.to_string()}
                 onchange={on_description_change}
                 placeholder="Enter product description"
@@ -50,7 +50,7 @@ pub fn product_form() -> Html {
             />
             <Input
                 label="Price"
-                input_type="number"
+                input_input_type="number"
                 value={price.to_string()}
                 onchange={on_price_change}
                 placeholder="Enter product price"

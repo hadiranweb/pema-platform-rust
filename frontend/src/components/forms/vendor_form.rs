@@ -90,7 +90,7 @@ pub fn vendor_form(props: &VendorFormProps) -> Html {
                 <Input
                     label="Name"
                     id="vendor-name"
-                    type="text"
+                    input_type="text"
                     value={(*name_state).clone()}
                     on_change={on_name_change}
                     placeholder="Vendor Name"
@@ -98,15 +98,15 @@ pub fn vendor_form(props: &VendorFormProps) -> Html {
                 <Input
                     label="Description"
                     id="vendor-description"
-                    type="text"
+                    input_type="text"
                     value={(*description_state).clone()}
                     on_change={on_description_change}
                     placeholder="Vendor Description"
                 />
                 { if *loading_state { html! { <Spinner /> } } else { html! {} } }
                 { if let Some(msg) = &*error_message_state { html! { <p class="error-message">{ msg }</p> } } else { html! {} } }
-                <Button label={ if props.vendor.is_some() { "Save Changes" } else { "Add Vendor" } } button_type="submit" />
-                <Button label="Cancel" button_type="button" onclick={on_cancel} />
+                <Button label={ if props.vendor.is_some() { "Save Changes" } else { "Add Vendor" } } button_input_type="submit" />
+                <Button label="Cancel" button_input_type="button" onclick={on_cancel} />
             </form>
         </div>
     }

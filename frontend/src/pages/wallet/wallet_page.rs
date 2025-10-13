@@ -148,7 +148,7 @@ pub fn wallet_page() -> Html {
         let transfer_recipient_id_state = transfer_recipient_id_state.clone();
         let fetch_wallet_data = fetch_wallet_data.clone();
         let error_state = error_state.clone();
-        Callback::from(move |e: MouseEvent| {
+        Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
             let amount_str = (*transfer_amount_state).clone();
             let recipient_id_str = (*transfer_recipient_id_state).clone();
@@ -157,7 +157,7 @@ pub fn wallet_page() -> Html {
             wasm_bindgen_futures::spawn_local(async move {
                 match amount_str.parse::<f64>() {
                     Ok(amount) => {
-                        match recipient_id_str.parse::<uuid::Uuid>() {
+                        match recipient_id_str.parse::<::uuid::Uuid>() {
                             Ok(recipient_wallet_id) => {
                                 let request = TransferRequest { recipient_wallet_id, amount };
                                 match WalletService::transfer_funds(request).await {
@@ -202,46 +202,46 @@ pub fn wallet_page() -> Html {
                 <form onsubmit={handle_deposit}>
                     <Input
                         id="deposit-amount"
-                        type="number"
+                        input_type="number"
                         value={(*deposit_amount_state).clone()}
-                        on_change={on_deposit_amount_change}
+                        onchange={on_deposit_amount_change}
                         placeholder="Amount"
                         step="0.01"
                     />
-                    <Button label="Deposit" button_type="submit" />
+                    <Button label="Deposit" button_input_type="submit" />
                 </form>
 
                 <h3>{ "Withdraw Funds" }</h3>
                 <form onsubmit={handle_withdraw}>
                     <Input
                         id="withdraw-amount"
-                        type="number"
+                        input_type="number"
                         value={(*withdraw_amount_state).clone()}
-                        on_change={on_withdraw_amount_change}
+                        onchange={on_withdraw_amount_change}
                         placeholder="Amount"
                         step="0.01"
                     />
-                    <Button label="Withdraw" button_type="submit" />
+                    <Button label="Withdraw" button_input_type="submit" />
                 </form>
 
                 <h3>{ "Transfer Funds" }</h3>
                 <form onsubmit={handle_transfer}>
                     <Input
                         id="transfer-recipient-id"
-                        type="text"
+                        input_input_type="text"
                         value={(*transfer_recipient_id_state).clone()}
-                        on_change={on_transfer_recipient_id_change}
+                        onchange={on_transfer_recipient_id_change}
                         placeholder="Recipient Wallet ID"
                     />
                     <Input
                         id="transfer-amount"
-                        type="number"
+                        input_input_type="number"
                         value={(*transfer_amount_state).clone()}
-                        on_change={on_transfer_amount_change}
+                        onchange={on_transfer_amount_change}
                         placeholder="Amount"
                         step="0.01"
                     />
-                    <Button label="Transfer" button_type="submit" />
+                    <Button label="Transfer" button_input_type="submit" />
                 </form>
             </div>
 
