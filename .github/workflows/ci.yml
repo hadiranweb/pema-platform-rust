@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, mine ]
+  pull_request:
+    branches: [ main, mine ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: pema_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
+    - name: Install sqlx-cli
+      run: cargo install sqlx-cli --no-default-features --features "postgres,runtime-tokio-rustls"
+
+    - name: Setup environment files
+      run: |
+        cp .env.example .env
+        cp backend/.env.example backend/.env || echo "backend/.env.example not found, skipping"
+        cp auth-server/.env.example auth-server/.env || echo "auth-server/.env.example not found, skipping"
+
+    - name: Run database migrations
+      run: |
+        export DATABASE_URL="postgres://postgres:postgres@localhost:5432/pema_test"
+        sqlx migrate run --source backend-server/migrations || echo "No migrations found"
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/pema_test
+
+    - name: Check formatting
+      run: cargo fmt --all -- --check
+
+    - name: Run clippy
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Run tests
+      run: cargo test --workspace --verbose
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/pema_test
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-build-
+          ${{ runner.os }}-cargo-
+
+    - name: Build workspace
+      run: cargo build --workspace --verbose
