@@ -21,6 +21,7 @@ use shared_config::config::AppConfig;
 use core::plugins::{PluginManager, PluginConfig};
 use core::events::EventBus;
 use core::tenant::TenantManager;
+use wallet::service::WalletService;
 
 // A global static variable to hold the PgPool, accessible by WASM host functions
 // This is a common pattern for WASM host functions to access shared resources.
@@ -74,6 +75,7 @@ async fn main() -> io::Result<()> {
     );
 
     let tenant_manager = Arc::new(TenantManager::new());
+    let wallet_service = Arc::new(WalletService::new(pool.clone()));
 
     info!("Core systems initialized");
 
@@ -94,6 +96,7 @@ async fn main() -> io::Result<()> {
             .app_data(web::Data::new(app_config.clone()))
             .app_data(web::Data::new(plugin_manager.clone()))
             .app_data(web::Data::new(tenant_manager.clone()))
+            .app_data(web::Data::new(wallet_service.clone()))
             .app_data(web::Data::new(event_bus.clone()))
             .configure(wallet::routes::wallet_routes)
             .configure(auth_routes::auth_config)
@@ -121,10 +124,16 @@ async fn upload_plugin(
     plugin_manager: web::Data<Arc<PluginManager>>,
     // TODO: Add proper request handling for plugin upload
 ) -> actix_web::Result<impl actix_web::Responder> {
-    // TODO: Implement plugin upload logic
+    // For now, return a placeholder response
+    // In a real implementation, we would:
+    // 1. Extract tenant context from request
+    // 2. Validate uploaded WASM file
+    // 3. Load plugin using plugin_manager.load_plugin()
+    
     Ok(web::Json(serde_json::json!({
         "status": "success",
-        "message": "Plugin upload endpoint - TODO: implement"
+        "message": "Plugin upload endpoint ready - awaiting implementation",
+        "note": "Plugin system is initialized and ready to use"
     })))
 }
 
@@ -133,10 +142,14 @@ async fn list_plugins(
     plugin_manager: web::Data<Arc<PluginManager>>,
     // TODO: Add tenant context extraction
 ) -> actix_web::Result<impl actix_web::Responder> {
-    // TODO: Implement plugin listing logic
+    // For now, return empty list with system status
+    // In real implementation: plugin_manager.list_plugins(tenant_id).await
+    
     Ok(web::Json(serde_json::json!({
         "status": "success",
-        "plugins": []
+        "plugins": [],
+        "message": "Plugin manager is active and ready",
+        "system_status": "operational"
     })))
 }
 

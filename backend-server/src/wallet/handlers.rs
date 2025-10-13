@@ -4,9 +4,13 @@
 use actix_web::{web, HttpResponse, Result};
 use sqlx::PgPool;
 use uuid::Uuid;
+use std::sync::Arc;
+use serde::{Deserialize, Serialize};
 
 use crate::auth::middleware::AuthenticatedUser;
 use crate::wallet::errors::WalletError;
+use crate::wallet::service::WalletService;
+use models::transaction::TransactionType;
 
 // Minimal health check handler
 pub async fn wallet_health_handler() -> Result<HttpResponse, WalletError> {
@@ -16,36 +20,82 @@ pub async fn wallet_health_handler() -> Result<HttpResponse, WalletError> {
     })))
 }
 
-// Placeholder handlers - TODO: Implement when DTOs are ready
+#[derive(Deserialize)]
+pub struct CreateWalletRequest {
+    pub user_id: Uuid,
+}
+
+#[derive(Deserialize)]
+pub struct CreateTransactionRequest {
+    pub wallet_id: Uuid,
+    pub transaction_type: TransactionType,
+    pub amount: i64,
+    pub description: Option<String>,
+}
+
+// Implement wallet creation handler
 pub async fn create_wallet_handler(
-    _pool: web::Data<PgPool>, 
-    _auth_user: AuthenticatedUser, 
-    _req: web::Json<serde_json::Value>
+    wallet_service: web::Data<Arc<WalletService>>, 
+    req: web::Json<CreateWalletRequest>
 ) -> Result<HttpResponse, WalletError> {
-    Ok(HttpResponse::NotImplemented().json(serde_json::json!({
-        "error": "Handler not implemented yet",
-        "message": "Wallet creation will be implemented when DTOs are ready"
-    })))
+    match wallet_service.create_wallet(req.user_id).await {
+        Ok(wallet) => Ok(HttpResponse::Ok().json(serde_json::json!({
+            "success": true,
+            "data": wallet
+        }))),
+        Err(e) => Ok(HttpResponse::BadRequest().json(serde_json::json!({
+            "success": false,
+            "error": e.to_string()
+        })))
+    }
 }
 
 pub async fn get_wallet_by_id_handler(
-    _pool: web::Data<PgPool>, 
-    _path: web::Path<Uuid>
+    wallet_service: web::Data<Arc<WalletService>>, 
+    path: web::Path<Uuid>
 ) -> Result<HttpResponse, WalletError> {
-    Ok(HttpResponse::NotImplemented().json(serde_json::json!({
-        "error": "Handler not implemented yet",
-        "message": "Wallet retrieval will be implemented when DTOs are ready"
-    })))
+    let wallet_id = path.into_inner();
+    
+    match wallet_service.get_wallet_by_id(wallet_id).await {
+        Ok(wallet) => Ok(HttpResponse::Ok().json(serde_json::json!({
+            "success": true,
+            "data": wallet
+        }))),
+        Err(WalletError::WalletNotFound(_)) => {
+            Ok(HttpResponse::NotFound().json(serde_json::json!({
+                "success": false,
+                "error": "Wallet not found"
+            })))
+        },
+        Err(e) => Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+            "success": false,
+            "error": e.to_string()
+        })))
+    }
 }
 
 pub async fn get_wallets_by_user_id_handler(
-    _pool: web::Data<PgPool>, 
-    _path: web::Path<Uuid>
+    wallet_service: web::Data<Arc<WalletService>>, 
+    path: web::Path<Uuid>
 ) -> Result<HttpResponse, WalletError> {
-    Ok(HttpResponse::NotImplemented().json(serde_json::json!({
-        "error": "Handler not implemented yet",
-        "message": "User wallets retrieval will be implemented when DTOs are ready"
-    })))
+    let user_id = path.into_inner();
+    
+    match wallet_service.get_wallet_by_user_id(user_id).await {
+        Ok(wallet) => Ok(HttpResponse::Ok().json(serde_json::json!({
+            "success": true,
+            "data": wallet
+        }))),
+        Err(WalletError::WalletNotFound(_)) => {
+            Ok(HttpResponse::NotFound().json(serde_json::json!({
+                "success": false,
+                "error": "Wallet not found for user"
+            })))
+        },
+        Err(e) => Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+            "success": false,
+            "error": e.to_string()
+        })))
+    }
 }
 
 pub async fn update_wallet_status_handler(
