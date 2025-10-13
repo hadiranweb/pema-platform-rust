@@ -2,7 +2,7 @@ use actix_web::{web, App, HttpServer, middleware::Logger};
 use actix_cors::Cors;
 use sqlx::postgres::PgPoolOptions;
 use std::{io, sync::Arc};
-use tracing::{info, error};
+use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use dotenv::dotenv;
 
@@ -73,7 +73,7 @@ async fn main() -> io::Result<()> {
             .expect("Failed to initialize plugin manager")
     );
 
-    let tenant_manager = Arc::new(TenantManager::new(pool.clone()));
+    let tenant_manager = Arc::new(TenantManager::new());
 
     info!("Core systems initialized");
 

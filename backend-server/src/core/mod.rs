@@ -2,6 +2,7 @@ pub mod plugins;
 pub mod tenant;
 pub mod events;
 
-pub use plugins::*;
-pub use tenant::*;
-pub use events::*;
+// Re-export core modules
+pub use plugins::manager::PluginManager;
+pub use tenant::manager::TenantManager;
+pub use events::bus::EventBus;
