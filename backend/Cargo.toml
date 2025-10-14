@@ -1,0 +1,43 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = { workspace = true }
+actix-cors = { workspace = true }
+actix-web-httpauth = "0.8"
+serde = { workspace = true }
+serde_json = { workspace = true }
+env_logger = "0.10"
+sqlx = { workspace = true, features = ["postgres", "runtime-tokio-rustls", "uuid", "chrono", "migrate"] }
+chrono = { workspace = true }
+uuid = { workspace = true }
+models = { path = "../shared/models", features = ["sqlx"] }
+jsonwebtoken = { workspace = true }
+argon2 = { workspace = true }
+secrecy = { workspace = true }
+validator = { workspace = true, features = ["derive"] }
+rand = { workspace = true }
+derive_more = { workspace = true }
+
+# Plugin System Dependencies
+wasmtime = "17.0"
+wasmtime-wasi = "17.0"
+anyhow = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+pema_plugin_sdk = { path = "../shared/plugin-sdk" }
+
+# Shared crates
+dtos = { path = "../shared/dtos" }
+config = { path = "../shared/config" }
+
+[dev-dependencies]
+actix-web = { workspace = true, features = ["macros"] }
+
+[build-dependencies]
+sqlx-macros = "0.7"
+
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
