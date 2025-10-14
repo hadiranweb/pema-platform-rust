@@ -85,7 +85,7 @@ impl I18n {
     pub fn t_with_params(&self, key: &str, params: &HashMap<&str, &str>) -> String {
         let mut text = self.t(key);
         for (k, v) in params {
-            let placeholder = format!("{{{}}}", k);
+            let placeholder = format!("{{}}", k);
             text = text.replace(&placeholder, v);
         }
         text
