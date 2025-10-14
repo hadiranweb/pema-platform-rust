@@ -4,73 +4,32 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# Web framework
-actix-web = { workspace = true }
-actix-cors = { workspace = true }
-actix-rt = { workspace = true }
-
-# Serialization
-serde = { workspace = true }
-serde_json = { workspace = true }
-
-# Database
-sqlx = { workspace = true, features = ["postgres", "runtime-tokio-rustls", "uuid", "chrono", "json", "migrate"] }
-
-# Async runtime
-tokio = { workspace = true }
-
-# Date/Time
-chrono = { workspace = true }
-uuid = { workspace = true }
-
-# Error handling
-thiserror = { workspace = true }
-anyhow = { workspace = true }
-
-# WASM runtime for plugins
-wasmtime = "25.0"
-
-# Logging
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
-tracing-actix-web = { workspace = true }
-
-# Configuration
-dotenv = { workspace = true }
-config = { workspace = true }
-
-# Authentication
-jsonwebtoken = { workspace = true }
-argon2 = { workspace = true }
-
-# Validation
-validator = { workspace = true }
-
-# Additional
-futures = { workspace = true }
-futures-util = "0.3"
-async-trait = "0.1"
-actix-web-httpauth = "0.8"
+actix-web = "4"
+actix-cors = "0.6"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "uuid", "chrono", "json"] }
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros", "time"] }
+uuid = { version = "1.0", features = ["serde", "v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+log = "0.4"
+env_logger = "0.10"
+thiserror = "1.0"
+dotenvy = "0.15"
+jwt = "0.16"
 hmac = "0.12"
 sha2 = "0.10"
-log = "0.4"
-
-# Shared crates
+actix-web-httpauth = "0.6"
+futures-util = "0.3"
 shared-config = { path = "../shared/config" }
-models = { path = "../shared/models", features = ["sqlx"] }
-dtos = { path = "../shared/dtos" }
-plugin-sdk = { path = "../shared/plugin-sdk" }
 
 [dev-dependencies]
-actix-web = { workspace = true }
-sqlx = { workspace = true, features = ["postgres", "runtime-tokio-rustls", "uuid", "chrono", "json"] }
-tokio = { workspace = true, features = ["rt-multi-thread", "macros", "time"] }
-uuid = { workspace = true }
-chrono = { workspace = true }
-
-[package.metadata.sqlx]
-offline = false
-serde = { workspace = true }
-serde_json = { workspace = true }
+actix-web = "4"
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "uuid", "chrono", "json"] }
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros", "time"] }
+uuid = { version = "1.0", features = ["serde", "v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 dotenvy = "0.15"
 

@@ -1,19 +1,9 @@
 /target
-target/
 /config.toml
 /.env
 /pema.db
 
+
 .env.auth
 .env.api
-
-# Build artifacts
-*.rlib
-*.rmeta
-*.so
-*.d
-
-# Temporary files
-*.tmp
-*.temp
 

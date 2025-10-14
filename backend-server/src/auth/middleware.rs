@@ -39,7 +39,9 @@ pub async fn validate_admin_jwt_from_bearer(req: ServiceRequest, bearer: BearerA
     let config = req.app_data::<web::Data<AppConfig>>().expect("AppConfig not found").clone();
     match validate_jwt(bearer.token(), &config) {
         Ok(claims) => {
-
+            if claims.role != "admin" {
+                return Err(Error::from(WalletError::UnauthorizedAdminAction("Admin role required".to_string())));
+            }
             req.extensions_mut().insert(claims);
             Ok(req)
         },

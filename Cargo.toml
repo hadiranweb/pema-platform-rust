@@ -1,74 +1,12 @@
 [workspace]
 resolver = "2"
 members = [
-    "backend-server",
     "wasm-frontend",
+    "wasm-auth-backend",
+    "wasm-general-backend",
+    "backend-server",
     "shared/models",
-    "shared/dtos", 
     "shared/config",
-    "shared/plugin-sdk",
-    "plugins/discount_calculator"
+    "auth-server",
 ]
-
-[workspace.dependencies]
-# Web framework
-actix-web = "4.9"
-actix-cors = "0.7"
-actix-rt = "2.10"
-
-# Serialization
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-
-# Database
-sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "migrate"] }
-
-# Async runtime
-tokio = { version = "1.40", features = ["full"] }
-
-# Date/Time
-chrono = { version = "0.4", features = ["serde"] }
-
-# UUID
-uuid = { version = "1.10", features = ["serde", "v4"] }
-
-# JWT
-jsonwebtoken = "9.3"
-
-# Password hashing
-argon2 = "0.5"
-
-# Security
-secrecy = "0.10"
-
-# Validation
-validator = { version = "0.18", features = ["derive"] }
-
-# Random
-rand = "0.8"
-
-# Error handling
-anyhow = "1.0"
-thiserror = "1.0"
-
-# Derive macros
-derive_more = { version = "1.0", features = ["full"] }
-
-# Logging/Tracing
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-tracing-actix-web = "0.7"
-
-# Additional dependencies
-dotenv = "0.15"
-futures = "0.3"
-config = "0.14"
-reqwest = { version = "0.12", features = ["json"] }
-
-# Frontend (Yew)
-yew = "0.21"
-yew-router = "0.18"
-wasm-bindgen = "0.2"
-gloo-net = "0.6"
-web-sys = "0.3"
 

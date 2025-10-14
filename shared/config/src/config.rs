@@ -13,16 +13,9 @@ pub struct ServerConfig {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct SecurityConfig {
-    pub jwt_secret: String,
-    pub session_timeout: u64,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct AppConfig {
     pub database: DatabaseConfig,
     pub server: ServerConfig,
-    pub security: SecurityConfig,
 }
 
 impl AppConfig {
@@ -37,10 +30,6 @@ impl AppConfig {
             server: ServerConfig {
                 host: std::env::var("SERVER_HOST").unwrap_or_else(|_| "127.0.0.1".to_string()),
                 port: std::env::var("SERVER_PORT").map(|s| s.parse().unwrap_or(8080)).unwrap_or(8080),
-            },
-            security: SecurityConfig {
-                jwt_secret: std::env::var("JWT_SECRET").unwrap_or_else(|_| "supersecretjwtkey".to_string()),
-                session_timeout: std::env::var("SESSION_TIMEOUT").map(|s| s.parse().unwrap_or(86400)).unwrap_or(86400),
             },
         }
     }

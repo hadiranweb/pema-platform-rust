@@ -1,168 +1,141 @@
-# PEMA Platform Setup and Deployment Guide
+## PEMA Platform Setup Guide
 
-This guide provides comprehensive instructions for setting up, deploying, and running the PEMA Platform. The architecture is designed to be modular, with a separate, dedicated service for authentication.
+This guide provides instructions for setting up the PEMA Platform on your server. It includes an automated setup script for server configurations and detailed steps for building and running the application.
 
 ### 1. Project Architecture Overview
 
-*   **`backend/`**: The main backend server (Actix-web) responsible for core business logic, product management, orders, etc.
-*   **`auth-server/`**: A **separate, standalone authentication server** responsible for user registration, login, and JWT token management. **This is the default and recommended setup.**
-*   **`frontend/`**: The Yew-based WebAssembly (WASM) frontend application.
-*   **`shared/`**: Shared Rust crates for models, DTOs, and configuration.
-*   **`migrations/`**: SQL database migrations.
+Understanding the project structure is crucial for a smooth setup:
 
-### 2. Environment Configuration
+*   **`backend-server/`**: This is the **main traditional Rust backend** (Actix-web server). It is responsible for loading the application configuration, serving the main API endpoints, and integrating with the WASM backend libraries.
+*   **`wasm-auth-backend/`**: This is a **WASM library** for authentication logic. It is *not* a standalone server but is integrated into the `backend-server/`.
+*   **`wasm-general-backend/`**: This is a **WASM library** for general business logic. It is *not* a standalone server but is integrated into the `backend-server/`.
+*   **`wasm-frontend/`**: This is the Yew-based WebAssembly (WASM) frontend application.
+*   **`shared/`**: Contains shared modules, including the `config` module used by backend components.
 
-Correct environment configuration is critical. The project uses separate `.env` files for each service. **There should be no `.env` files directly in the project root.**
+### 2. Initial Server Setup with `setup_server.sh`
 
-**A. Main Backend (`backend/.env`)**
+To automate the installation of Nginx, PostgreSQL, Certbot, and UFW, and to configure them for your domain `pemalune.ir` and server IP `37.32.4.142`, use the provided `setup_server.sh` script.
 
-Copy the example file and configure it:
+**Before running the script:**
+*   Ensure your server is a fresh Ubuntu/Debian installation.
+*   Make sure your domain `pemalune.ir` is pointing to your server's IP `37.32.4.142`.
+*   **Important:** Edit the `setup_server.sh` script to replace `your_email@example.com` with your actual email address for Certbot registration.
 
-```bash
-cp backend/.env.example backend/.env
-```
+1.  **Clone the project (if you haven't already):**
 
-**Key variables for `backend/.env`:**
+    ```bash
+    git clone https://github.com/hadiranweb/pema-platform-rust.git
+    cd pema-platform-rust
+    ```
 
-*   `DATABASE_URL`: The connection string for your PostgreSQL database.
-*   `SERVER_PORT`: The port the main backend will run on (e.g., `8000`).
-*   `AUTH_SERVER_URL`: **Crucially, this must point to your running authentication service** (e.g., `http://127.0.0.1:8081`). The main backend delegates authentication tasks to this service.
+2.  **Make the setup script executable and run it:**
 
-**B. Authentication Server (`auth-server/.env`)**
+    ```bash
+    chmod +x setup_server.sh
+    sudo ./setup_server.sh
+    ```
 
-Copy the example file and configure it:
+    This script will:
+    *   Update system packages.
+    *   Install and configure Nginx.
+    *   Install and configure PostgreSQL, creating the `pema_user` and `pema_db` with password `F8s77@98`.
+    *   Install Certbot and obtain SSL certificates for `pemalune.ir` and `www.pemalune.ir`.
+    *   Configure UFW (firewall) to allow SSH and Nginx traffic.
+    *   Create and configure the `backend-server/.env` file with `SERVER_HOST=127.0.0.1`, `SERVER_PORT=8080`, `DOMAIN=pemalune.ir`, `BASE_URL=https://pemalune.ir`, and the database credentials. It will also generate a random `JWT_SECRET`.
 
-```bash
-cp auth-server/.env.example auth-server/.env
-```
+### 3. Rust Toolchain and Project Build
 
-**Key variables for `auth-server/.env`:**
+After the server setup is complete, install the Rust toolchain and build the project components.
 
-*   `DATABASE_URL`: The same database connection string used by the main backend.
-*   `SERVER_PORT`: The port the authentication server will run on (e.g., `8081`). This must be different from the main backend's port.
-*   `JWT_SECRET`: A strong, unique secret key used to sign JWTs. **This should not be shared with the main backend.**
-*   `FRONTEND_URL`: The public URL of your frontend, for CORS configuration.
+1.  **Install Rust Toolchain (if not already installed by the script):**
 
-### 3. Deployment Steps
+    ```bash
+    curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    source $HOME/.cargo/env
+    rustup target add wasm32-unknown-unknown
+    cargo install trunk
+    ```
 
-**Step 1: Prerequisites**
+2.  **Build All Components:**
 
-Ensure `Rust`, `Cargo`, `Node.js`, `Trunk`, `PostgreSQL`, and `Nginx` are installed as detailed in the previous guide.
+    From the repository root (`/home/ubuntu/pema-platform-rust/`), use the `Makefile` to build all parts of the application:
 
-**Step 2: Clone Repository & Setup Database**
+    ```bash
+    make all
+    ```
 
-Clone the repository and run the database migrations as previously described.
+    This command will:
+    *   Build `wasm-auth-backend` (WASM library).
+    *   Build `wasm-general-backend` (WASM library).
+    *   Build `wasm-frontend` (generating static files in `wasm-frontend/dist/`).
+    *   Build `backend-server` (executable in `backend-server/target/release/pema-backend`).
 
-**Step 3: Build Both Services**
+### 4. Systemd Service Setup for `backend-server`
 
-Build both the main backend and the authentication server in release mode:
+To ensure your main `backend-server` runs continuously and automatically, set it up as a `systemd` service.
 
-```bash
-# Build the main backend
-cargo build --release --manifest-path backend/Cargo.toml
+1.  **Create a systemd service file:**
 
-# Build the authentication server
-cargo build --release --manifest-path auth-server/Cargo.toml
-```
+    ```bash
+    sudo nano /etc/systemd/system/pema-backend.service
+    ```
 
-**Step 4: Run Services with `systemd`**
+2.  **Add the following content:**
 
-Create two separate `systemd` services to manage both processes.
+    Copy and paste the content below into the `pema-backend.service` file. **Do not change anything.**
 
-**A. Main Backend Service (`/etc/systemd/system/pema-backend.service`)**
+    ```ini
+    [Unit]
+    Description=PEMA Platform Backend Server
+    After=network.target postgresql.service
 
-```ini
-[Unit]
-Description=PEMA Platform - Main Backend
-After=network.target
+    [Service]
+    Type=simple
+    User=ubuntu # This uses your current user. Adjust if you have a dedicated user.
+    WorkingDirectory=/home/ubuntu/pema-platform-rust/backend-server
+    ExecStart=/home/ubuntu/pema-platform-rust/backend-server/target/release/pema-backend
+    Restart=always
+    RestartSec=10
+    Environment="RUST_LOG=info"
 
-[Service]
-User=www-data
-Group=www-data
-WorkingDirectory=/opt/pema-platform-rust/backend
-EnvironmentFile=/opt/pema-platform-rust/backend/.env
-ExecStart=/opt/pema-platform-rust/target/release/backend
-Restart=always
+    [Install]
+    WantedBy=multi-user.target
+    ```
 
-[Install]
-WantedBy=multi-user.target
-```
+3.  **Reload systemd, enable, and start the service:**
 
-**B. Authentication Service (`/etc/systemd/system/pema-auth.service`)**
+    ```bash
+    sudo systemctl daemon-reload
+    sudo systemctl enable pema-backend
+    sudo systemctl start pema-backend
+    ```
 
-```ini
-[Unit]
-Description=PEMA Platform - Auth Server
-After=network.target
+4.  **Check service status and logs:**
 
-[Service]
-User=www-data
-Group=www-data
-WorkingDirectory=/opt/pema-platform-rust/auth-server
-EnvironmentFile=/opt/pema-platform-rust/auth-server/.env
-ExecStart=/opt/pema-platform-rust/target/release/auth-server
-Restart=always
+    ```bash
+    sudo systemctl status pema-backend
+    journalctl -u pema-backend -f # View live logs
+    ```
 
-[Install]
-WantedBy=multi-user.target
-```
+### 5. Troubleshooting
 
-**Enable and start both services:**
+*   **Nginx `502 Bad Gateway`**: This usually means Nginx cannot connect to your backend server. Check:
+    *   Is `pema-backend.service` running (`sudo systemctl status pema-backend`)?
+    *   Are there any firewall rules blocking Nginx from connecting to the backend? (The `setup_server.sh` script configures UFW to allow Nginx traffic).
+*   **File Permissions**: Ensure the user running the `pema-backend.service` has read/write permissions to necessary directories (e.g., `wasm-frontend/dist`).
+*   **Logs**: Always check `journalctl -u <service_name> -f` for detailed error messages from your services.
 
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable pema-backend pema-auth
-sudo systemctl start pema-backend pema-auth
-```
+### 6. Recent Changes and Fixes
 
-**Step 5: Build Frontend**
+This section summarizes recent structural and configuration improvements:
 
-Build the Yew WASM frontend using Trunk:
+*   **Directory Structure Consolidation**: Removed a redundant nested `pema-platform-rust` directory and its contents, including an unnecessary `installer` component. The project now uses a flat, consolidated structure at the root level.
+*   **Configuration Management**: Standardized configuration loading for the `backend-server` by implementing a shared `AppConfig` module in `shared/config`. This ensures consistent handling of database and server settings across the application.
+*   **Dependency and Build Fixes**: Resolved various compilation errors related to `wasm-bindgen` and `jsonwebtoken` dependencies in `wasm-auth-backend`, `wasm-general-backend`, and `backend-server`. This included updating dependency versions and correcting `JsValue` handling in backend routes.
 
-```bash
-cd frontend
-trunk build --release
-```
+### Conclusion
 
-**Step 6: Update Nginx Configuration**
+By following this guide and using the `setup_server.sh` script, your PEMA Platform will be fully installed and configured. Nginx serves your frontend efficiently and securely via `https://pemalune.ir`, acting as a reverse proxy to your `backend-server` which listens internally. Mobile applications can connect to `https://pemalune.ir/api/` and `https://pemalune.ir/auth/`.
 
-Your Nginx configuration must be updated to route requests to the correct service. Requests to `/api/` go to the main backend, and requests to `/auth/` go to the authentication server.
+Your PEMA Platform is now ready for production use!
 
-```nginx
-server {
-    listen 443 ssl;
-    server_name yourdomain.com;
-
-    # SSL Config...
-    ssl_certificate /path/to/your/fullchain.pem;
-    ssl_certificate_key /path/to/your/privkey.pem;
-
-    # Frontend Files
-    location / {
-        root /opt/pema-platform-rust/frontend/dist;
-        try_files $uri $uri/ /index.html;
-    }
-
-    # Route to Main Backend
-    location /api/ {
-        proxy_pass http://127.0.0.1:8000; # Port from backend/.env
-        proxy_set_header Host $host;
-        # Other headers...
-    }
-
-    # Route to Authentication Server
-    location /auth/ {
-        proxy_pass http://127.0.0.1:8081; # Port from auth-server/.env
-        proxy_set_header Host $host;
-        # Other headers...
-    }
-}
-```
-
-**Restart Nginx:**
-
-```bash
-sudo systemctl restart nginx
-```
-
-This corrected setup ensures proper separation of concerns, with a dedicated authentication service as the default, and provides clear instructions for environment configuration and deployment.

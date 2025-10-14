@@ -89,21 +89,21 @@ impl WalletService {
 
         // Handle balance update based on transaction type
         let new_balance = match transaction_type {
-            TransactionType::Deposit | TransactionType::TransferIn => wallet.balance + amount as f64,
-            TransactionType::Withdrawal | TransactionType::Purchase | TransactionType::Refund | TransactionType::TransferOut => {
-                if wallet.balance < amount as f64 {
+            TransactionType::Deposit => wallet.balance + amount,
+            TransactionType::Withdrawal | TransactionType::Purchase | TransactionType::Refund => {
+                if wallet.balance < amount {
                     tx.rollback().await.map_err(|e| WalletError::DbError(e.to_string()))?;
-                    return Err(WalletError::InsufficientFunds { required: amount, available: wallet.balance as i64 });
+                    return Err(WalletError::InsufficientFunds { required: amount, available: wallet.balance });
                 }
-                wallet.balance - amount as f64
+                wallet.balance - amount
             }
         };
 
-        sqlx::query(
-            "UPDATE wallets SET balance = $1, updated_at = NOW() WHERE id = $2"
+        sqlx::query!(
+            "UPDATE wallets SET balance = $1, updated_at = NOW() WHERE id = $2",
+            new_balance,
+            wallet_id
         )
-        .bind(new_balance)
-        .bind(wallet_id)
         .execute(&mut *tx)
         .await
         .map_err(|e| WalletError::DbError(e.to_string()))?;
@@ -177,7 +177,7 @@ impl WalletService {
         .bind(user_id)
         .bind(wallet_id)
         .bind(amount)
-        .bind(PurchaseFlowStatus::Pending.to_string())
+        .bind(PurchaseFlowStatus::Initiated)
         .bind(metadata)
         .fetch_one(&self.pool)
         .await
@@ -201,7 +201,7 @@ impl WalletService {
         let purchase_flow = sqlx::query_as::<_, PurchaseFlow>(
             "UPDATE purchase_flows SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *"
         )
-        .bind(status.to_string())
+        .bind(status)
         .bind(flow_id)
         .fetch_one(&self.pool)
         .await
@@ -226,7 +226,7 @@ impl WalletService {
         .bind(user_id)
         .bind(amount)
         .bind(reason)
-        .bind(RefundStatus::Pending.to_string())
+        .bind(RefundStatus::Pending)
         .fetch_one(&self.pool)
         .await
         .map_err(|e| WalletError::DbError(e.to_string()))?;
@@ -249,7 +249,7 @@ impl WalletService {
         let refund_request = sqlx::query_as::<_, RefundRequest>(
             "UPDATE refund_requests SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *"
         )
-        .bind(status.to_string())
+        .bind(status)
         .bind(request_id)
         .fetch_one(&self.pool)
         .await
@@ -271,13 +271,13 @@ impl WalletService {
             "INSERT INTO admin_actions (admin_id, action_type, target_id, details) VALUES ($1, $2, $3, $4) RETURNING *"
         )
         .bind(admin_id)
-        .bind(action_type.to_string())
+        .bind(action_type)
         .bind(target_id)
         .bind(details)
         .fetch_one(&self.pool)
         .await
         .map_err(|e| WalletError::DbError(e.to_string()))?;
-        info!("Admin {} performed action {:?} on target {}.", admin_id, admin_action.action_type, target_id);
+        info!("Admin {} performed action {:?} on target {}.", admin_id, admin_action.admin_action_type, target_id);
         Ok(admin_action)
     }
 

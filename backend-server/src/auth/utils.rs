@@ -1,7 +1,8 @@
-use jsonwebtoken::{encode, decode, Header, Algorithm, Validation, EncodingKey, DecodingKey};
+use jwt::{SignWithKey, VerifyWithKey};
+use hmac::{Hmac, Mac};
+use sha2::Sha256;
 use serde::{Deserialize, Serialize};
 use chrono::{Duration, Utc};
-use uuid::Uuid;
 use shared_config::config::AppConfig;
 use crate::wallet::errors::WalletError;
 
@@ -12,27 +13,30 @@ pub struct Claims {
     pub iat: usize,
 }
 
-pub fn create_jwt(user_id: Uuid, config: &AppConfig) -> Result<String, WalletError> {
+pub fn create_jwt(user_id: String, role: String, config: &AppConfig) -> Result<String, WalletError> {
+    let secret = config.security.jwt_secret.as_bytes();
     let now = Utc::now();
     let expires_at = now + Duration::seconds(config.security.session_timeout as i64);
     let claims = Claims {
-        sub: user_id.to_string(),
+        sub: user_id,
         iat: now.timestamp() as usize,
         exp: expires_at.timestamp() as usize,
     };
-    
-    let encoding_key = EncodingKey::from_secret(config.security.jwt_secret.as_bytes());
-    let token = encode(&Header::default(), &claims, &encoding_key)
+    let key: Hmac<Sha256> = Hmac::new_from_slice(secret)
+        .map_err(|e| WalletError::InternalError(format!("Failed to create key: {}", e)))?;
+    let token = claims
+        .sign_with_key(&key)
         .map_err(|e| WalletError::InternalError(format!("Failed to generate token: {}", e)))?;
     Ok(token)
 }
 
 pub fn validate_jwt(token: &str, config: &AppConfig) -> Result<Claims, WalletError> {
-    let decoding_key = DecodingKey::from_secret(config.security.jwt_secret.as_bytes());
-    let validation = Validation::new(Algorithm::HS256);
-    
-    let token_data = decode::<Claims>(token, &decoding_key, &validation)
+    let secret = config.security.jwt_secret.as_bytes();
+    let key: Hmac<Sha256> = Hmac::new_from_slice(secret)
+        .map_err(|e| WalletError::InternalError(format!("Failed to create key: {}", e)))?;
+    let claims: Claims = token
+        .verify_with_key(&key)
         .map_err(|e| WalletError::UnauthorizedAdminAction(format!("Failed to validate token: {}", e)))?;
-    Ok(token_data.claims)
+    Ok(claims)
 }
 
