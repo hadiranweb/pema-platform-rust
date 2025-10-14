@@ -26,11 +26,11 @@ wasmtime = "17.0"
 wasmtime-wasi = "17.0"
 anyhow = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
-pema_plugin_sdk = { path = "../shared/plugin-sdk" }
+plugin-sdk = { path = "../shared/plugin-sdk" }
 
 # Shared crates
 dtos = { path = "../shared/dtos" }
-config = { path = "../shared/config" }
+shared-config = { path = "../shared/config" }
 
 [dev-dependencies]
 actix-web = { workspace = true, features = ["macros"] }

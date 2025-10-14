@@ -16,7 +16,7 @@ web-sys = { workspace = true }
 # Shared crates
 models = { path = "../shared/models" }
 dtos = { path = "../shared/dtos" }
-config = { path = "../shared/config" }
+shared-config = { path = "../shared/config" }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

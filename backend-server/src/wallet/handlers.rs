@@ -3,7 +3,7 @@ use actix_web::{web, HttpResponse};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::wallet::models::{WalletResponse, UpdateWalletRequest, CreateTransactionRequest, TransactionResponse, UpdateTransactionStatusRequest, CreatePurchaseFlowRequest, PurchaseFlowResponse, UpdatePurchaseFlowStatusRequest, CreateRefundRequest, RefundRequestResponse, UpdateRefundRequestStatus, CreateAdminActionRequest, AdminActionResponse};
+use crate::wallet::models::{WalletResponse, UpdateWalletRequest, CreateTransactionRequest, TransactionResponse, UpdateTransactionStatusRequest, CreatePurchaseFlowRequest, PurchaseFlowResponse, UpdatePurchaseFlowStatusRequest, CreateRefundRequest, RefundRequestResponse, UpdateRefundRequestStatus, CreateAdminActionRequest, AdminActionResponse, WalletStatus, TransactionType, TransactionStatus, PurchaseFlowStatus, RefundStatus, AdminActionType};
 use crate::auth::middleware::AuthenticatedUser;
 use crate::wallet::service::WalletService;
 use crate::wallet::errors::WalletError;
@@ -12,7 +12,9 @@ use crate::wallet::errors::WalletError;
 
 pub async fn create_wallet_handler(pool: web::Data<PgPool>, auth_user: AuthenticatedUser) -> Result<HttpResponse, WalletError> {
     let service = WalletService::new(pool.get_ref().clone());
-    let wallet = service.create_wallet(auth_user.claims.sub).await?;
+    let user_id = uuid::Uuid::parse_str(&auth_user.claims.sub)
+        .map_err(|_| WalletError::InvalidInput("Invalid user ID format".to_string()))?;
+    let wallet = service.create_wallet(user_id).await?;
     Ok(HttpResponse::Created().json(WalletResponse {
         id: wallet.id,
         user_id: wallet.user_id,
@@ -57,7 +59,9 @@ pub async fn get_wallet_by_id_handler(pool: web::Data<PgPool>, path: web::Path<U
 pub async fn update_wallet_status_handler(pool: web::Data<PgPool>, path: web::Path<Uuid>, req: web::Json<UpdateWalletRequest>) -> Result<HttpResponse, WalletError> {
     let wallet_id = path.into_inner();
     let service = WalletService::new(pool.get_ref().clone());
-    let wallet = service.update_wallet_status(wallet_id, req.status.clone().ok_or(WalletError::InvalidInput("Wallet status is required".to_string()))?).await?;
+    let status_str = req.status.clone().ok_or(WalletError::InvalidInput("Wallet status is required".to_string()))?;
+    let status = WalletStatus::from_str(&status_str).map_err(|_| WalletError::InvalidInput("Invalid wallet status".to_string()))?;
+    let wallet = service.update_wallet_status(wallet_id, status).await?;
     Ok(HttpResponse::Ok().json(WalletResponse {
         id: wallet.id,
         user_id: wallet.user_id,
@@ -73,9 +77,10 @@ pub async fn update_wallet_status_handler(pool: web::Data<PgPool>, path: web::Pa
 
 pub async fn create_transaction_handler(pool: web::Data<PgPool>, req: web::Json<CreateTransactionRequest>) -> Result<HttpResponse, WalletError> {
     let service = WalletService::new(pool.get_ref().clone());
+    let transaction_type = TransactionType::from_str(&req.transaction_type).map_err(|_| WalletError::InvalidInput("Invalid transaction type".to_string()))?;
     let transaction = service.create_transaction(
         req.wallet_id,
-        req.transaction_type.clone(),
+        transaction_type,
         req.amount,
         req.description.clone(),
         req.reference_id,
@@ -130,7 +135,8 @@ pub async fn get_transaction_by_id_handler(pool: web::Data<PgPool>, path: web::P
 pub async fn update_transaction_status_handler(pool: web::Data<PgPool>, path: web::Path<Uuid>, req: web::Json<UpdateTransactionStatusRequest>) -> Result<HttpResponse, WalletError> {
     let transaction_id = path.into_inner();
     let service = WalletService::new(pool.get_ref().clone());
-    let transaction = service.update_transaction_status(transaction_id, req.status.clone()).await?;
+    let status = TransactionStatus::from_str(&req.status).map_err(|_| WalletError::InvalidInput("Invalid transaction status".to_string()))?;
+    let transaction = service.update_transaction_status(transaction_id, status).await?;
     Ok(HttpResponse::Ok().json(TransactionResponse {
         id: transaction.id,
         wallet_id: transaction.wallet_id,
@@ -185,7 +191,8 @@ pub async fn get_purchase_flow_by_id_handler(pool: web::Data<PgPool>, path: web:
 pub async fn update_purchase_flow_status_handler(pool: web::Data<PgPool>, path: web::Path<Uuid>, req: web::Json<UpdatePurchaseFlowStatusRequest>) -> Result<HttpResponse, WalletError> {
     let flow_id = path.into_inner();
     let service = WalletService::new(pool.get_ref().clone());
-    let purchase_flow = service.update_purchase_flow_status(flow_id, req.status.clone()).await?;
+    let status = PurchaseFlowStatus::from_str(&req.status).map_err(|_| WalletError::InvalidInput("Invalid purchase flow status".to_string()))?;
+    let purchase_flow = service.update_purchase_flow_status(flow_id, status).await?;
     Ok(HttpResponse::Ok().json(PurchaseFlowResponse {
         id: purchase_flow.id,
         user_id: purchase_flow.user_id,
@@ -239,7 +246,8 @@ pub async fn get_refund_request_by_id_handler(pool: web::Data<PgPool>, path: web
 pub async fn update_refund_request_status_handler(pool: web::Data<PgPool>, path: web::Path<Uuid>, req: web::Json<UpdateRefundRequestStatus>) -> Result<HttpResponse, WalletError> {
     let request_id = path.into_inner();
     let service = WalletService::new(pool.get_ref().clone());
-    let refund_request = service.update_refund_request_status(request_id, req.status.clone()).await?;
+    let status = RefundStatus::from_str(&req.status).map_err(|_| WalletError::InvalidInput("Invalid refund status".to_string()))?;
+    let refund_request = service.update_refund_request_status(request_id, status).await?;
     Ok(HttpResponse::Ok().json(RefundRequestResponse {
         id: refund_request.id,
         transaction_id: refund_request.transaction_id,
@@ -256,9 +264,10 @@ pub async fn update_refund_request_status_handler(pool: web::Data<PgPool>, path:
 
 pub async fn record_admin_action_handler(pool: web::Data<PgPool>, req: web::Json<CreateAdminActionRequest>) -> Result<HttpResponse, WalletError> {
     let service = WalletService::new(pool.get_ref().clone());
+    let action_type = AdminActionType::from_str(&req.admin_action_type).map_err(|_| WalletError::InvalidInput("Invalid admin action type".to_string()))?;
     let admin_action = service.record_admin_action(
         req.admin_id,
-        req.admin_action_type.clone(),
+        action_type,
         req.target_id,
         req.details.clone(),
     ).await?;

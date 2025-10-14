@@ -11,6 +11,7 @@ pub struct Claims {
     pub sub: String,
     pub exp: usize,
     pub iat: usize,
+    pub role: String,
 }
 
 pub fn create_jwt(user_id: String, role: String, config: &AppConfig) -> Result<String, WalletError> {
@@ -21,6 +22,7 @@ pub fn create_jwt(user_id: String, role: String, config: &AppConfig) -> Result<S
         sub: user_id,
         iat: now.timestamp() as usize,
         exp: expires_at.timestamp() as usize,
+        role,
     };
     let key: Hmac<Sha256> = Hmac::new_from_slice(secret)
         .map_err(|e| WalletError::InternalError(format!("Failed to create key: {}", e)))?;

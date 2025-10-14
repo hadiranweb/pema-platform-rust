@@ -3,7 +3,7 @@ use sqlx::postgres::PgPoolOptions;
 use std::io;
 use env_logger::Env;
 use log::info;
-use dotenv::dotenv;
+use dotenvy::dotenv;
 
 mod wallet;
 mod auth;
