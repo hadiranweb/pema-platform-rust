@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
+
+#[cfg(feature = "sqlx")]
 use sqlx::FromRow;
 
-#[derive(Debug, Deserialize, Serialize, FromRow, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[cfg_attr(feature = "sqlx", derive(FromRow))]
 pub struct Page {
     pub id: i32,
     pub title: String,

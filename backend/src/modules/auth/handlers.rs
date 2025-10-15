@@ -1,15 +1,15 @@
 
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder, ResponseError};
 use sqlx::PgPool;
 use validator::Validate;
 
 use crate::modules::auth::dto::{LoginRequest, RegisterRequest};
 use crate::modules::auth::service::AuthService;
-use crate::shared::config::config::Config;
+use shared_config::Config;
 use crate::core::plugins::manager::PluginManager;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use crate::shared::models::user::{UserLogin, UserRegister};
+use models::user::{UserLogin, UserRegister};
 use crate::error::ServiceError;
 
 pub async fn login_user(pool: web::Data<PgPool>, form: web::Json<LoginRequest>, config: web::Data<Config>) -> impl Responder {

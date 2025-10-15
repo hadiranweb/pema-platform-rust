@@ -28,26 +28,6 @@ pub struct TransferRequest {
     pub amount: f64,
 }
 
-// If the backend needs to convert from its own validated DTOs to the shared DTOs, 
-// these `From` implementations would be useful. Otherwise, the backend can directly use `dtos::wallet::CreateWallet`
-// if the validation is moved to the shared DTOs.
-// For now, keeping the validation in the backend's DTOs and providing conversion.
-impl From<CreateWallet> for DtosCreateWallet {
-    fn from(dto: CreateWallet) -> Self {
-        Self {
-            user_id: dto.user_id,
-            balance: dto.balance,
-            currency: dto.currency,
-        }
-    }
-}
-
-impl From<UpdateWallet> for DtosUpdateWallet {
-    fn from(dto: UpdateWallet) -> Self {
-        Self {
-            balance: dto.balance,
-            status: dto.status,
-        }
-    }
-}
+// Note: Direct conversion implementations removed due to orphan rule.
+// Use manual conversion or consider moving validation to shared DTOs.
 

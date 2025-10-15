@@ -2,7 +2,7 @@
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
-use crate::shared::models::product::{CreateProduct, Product, UpdateProduct};
+use models::product::{CreateProduct, Product, UpdateProduct};
 
 pub async fn create_product(pool: &PgPool, create_product: CreateProduct, vendor_id: Uuid) -> Result<Product, String> {
     let product = sqlx::query_as::<_, Product>(

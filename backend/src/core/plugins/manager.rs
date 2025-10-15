@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use tokio::sync::RwLock;
 use uuid::Uuid;
-use pema_plugin_sdk::interface::{PluginMetadata, PluginHookType};
+use plugin_sdk::interface::{PluginMetadata, PluginHookType};
 use crate::core::plugins::sandbox::WasmPluginSandbox;
 use anyhow::Result;
 use std::sync::Arc;

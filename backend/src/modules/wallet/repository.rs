@@ -2,8 +2,8 @@
 use sqlx::{PgPool, Postgres, Transaction as DbTransaction};
 use uuid::Uuid;
 
-use crate::shared::models::wallet::{CreateWallet, UpdateWallet, Wallet};
-use crate::shared::models::transaction::{CreateTransaction, Transaction};
+use models::wallet::{CreateWallet, UpdateWallet, Wallet};
+use models::transaction::{CreateTransaction, Transaction};
 
 // Wallet Operations
 pub async fn create_wallet(pool: &PgPool, create_wallet: CreateWallet) -> Result<Wallet, String> {
@@ -94,7 +94,7 @@ pub async fn create_transaction(executor: &mut DbTransaction<'_, Postgres>, crea
     .bind(create_transaction.wallet_id)
     .bind(create_transaction.transaction_type)
     .bind(create_transaction.amount)
-    .bind(crate::shared::models::transaction::TransactionStatus::Completed) // Default to completed for now
+    .bind(models::transaction::TransactionStatus::Completed) // Default to completed for now
     .bind(create_transaction.description)
     .bind(create_transaction.reference_id)
     .fetch_one(executor)

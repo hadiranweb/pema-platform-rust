@@ -5,9 +5,9 @@ use chrono::{DateTime, Utc};
 use std::fmt::{self, Display};
 use std::str::FromStr;
 
-#[cfg_attr(not(target_arch = "wasm32"), derive(sqlx::Type))]
+#[cfg_attr(feature = "sqlx", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(not(target_arch = "wasm32"), sqlx(type_name = "wallet_status", rename_all = "PascalCase"))]
+#[cfg_attr(feature = "sqlx", sqlx(type_name = "wallet_status", rename_all = "PascalCase"))]
 pub enum WalletStatus {
     Active,
     Inactive,
@@ -40,7 +40,7 @@ impl FromStr for WalletStatus {
     }
 }
 
-#[cfg_attr(not(target_arch = "wasm32"), derive(sqlx::FromRow))]
+#[cfg_attr(feature = "sqlx", derive(sqlx::FromRow))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Wallet {
     pub id: Uuid,

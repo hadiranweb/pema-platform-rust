@@ -1,9 +1,9 @@
 use sqlx::PgPool;
 use uuid::Uuid;
-use crate::shared::models::order::{CreateOrder, Order, UpdateOrder};
+use models::order::{CreateOrder, Order, UpdateOrder};
 use crate::modules::orders::repository;
 use crate::core::plugins::manager::PluginManager;
-use pema_plugin_sdk::interface::PluginHookType;
+use plugin_sdk::interface::PluginHookType;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use crate::error::ServiceError;
@@ -13,7 +13,7 @@ pub struct OrderService;
 impl OrderService {
     pub async fn create_order(pool: &PgPool, mut create_order: CreateOrder, user_id: Uuid, plugin_manager: Arc<PluginManager>) -> Result<Order, ServiceError> {
         // Prepare DiscountRequest
-        let discount_request = pema_plugin_sdk::interface::DiscountRequest {
+        let discount_request = plugin_sdk::interface::DiscountRequest {
             user_id,
             product_id: create_order.product_id,
             original_price: create_order.total_price,
@@ -21,7 +21,7 @@ impl OrderService {
         };
 
         // Execute CalculateDiscount plugin hook
-        let discount_responses = plugin_manager.execute_hook::<pema_plugin_sdk::interface::DiscountRequest, pema_plugin_sdk::interface::DiscountResponse>(PluginHookType::CalculateDiscount, discount_request).await;
+        let discount_responses = plugin_manager.execute_hook::<plugin_sdk::interface::DiscountRequest, plugin_sdk::interface::DiscountResponse>(PluginHookType::CalculateDiscount, discount_request).await;
 
         // Apply the first valid discount, if any
         if let Ok(responses) = discount_responses {

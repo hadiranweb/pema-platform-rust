@@ -5,7 +5,7 @@ use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::shared::config::config::Config;
+use shared_config::Config;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {

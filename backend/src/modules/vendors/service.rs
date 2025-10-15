@@ -1,6 +1,6 @@
 use sqlx::PgPool;
 use uuid::Uuid;
-use crate::shared::models::vendor::{CreateVendor, UpdateVendor, Vendor};
+use models::vendor::{CreateVendor, UpdateVendor, Vendor};
 use crate::modules::vendors::repository;
 use crate::error::ServiceError;
 

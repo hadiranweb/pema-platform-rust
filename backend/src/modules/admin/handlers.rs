@@ -5,9 +5,9 @@ use uuid::Uuid;
 
 use crate::modules::admin::dto::{AdminUserUpdateDto, AdminProductUpdateDto, AdminOrderUpdateDto, AdminVendorUpdateDto, AdminPageUpdateDto};
 use crate::modules::admin::service::AdminService;
-use crate::shared::models::product::CreateProduct;
-use crate::shared::models::vendor::CreateVendor;
-use crate::shared::models::page::CreatePage;
+use models::product::CreateProduct;
+use models::vendor::CreateVendor;
+use models::page::CreatePage;
 
 // User Management Handlers
 pub async fn get_all_users(pool: web::Data<PgPool>) -> impl Responder {

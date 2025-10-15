@@ -1,6 +1,6 @@
 use sqlx::PgPool;
 use uuid::Uuid;
-use crate::shared::models::review::{CreateReview, UpdateReview, Review};
+use models::review::{CreateReview, UpdateReview, Review};
 use crate::modules::reviews::repository;
 use crate::error::ServiceError;
 

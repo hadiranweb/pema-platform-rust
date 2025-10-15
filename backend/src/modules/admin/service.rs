@@ -2,11 +2,11 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::shared::models::user::User;
-use crate::shared::models::product::{Product, CreateProduct, UpdateProduct};
-use crate::shared::models::order::{Order, CreateOrder, UpdateOrder};
-use crate::shared::models::vendor::{Vendor, CreateVendor, UpdateVendor};
-use crate::shared::models::page::{Page, CreatePage, UpdatePage};
+use models::user::User;
+use models::product::{Product, CreateProduct, UpdateProduct};
+use models::order::{Order, CreateOrder, UpdateOrder};
+use models::vendor::{Vendor, CreateVendor, UpdateVendor};
+use models::page::{Page, CreatePage, UpdatePage};
 
 use crate::modules::admin::repository;
 use crate::modules::admin::dto::{AdminUserUpdateDto, AdminProductUpdateDto, AdminOrderUpdateDto, AdminVendorUpdateDto, AdminPageUpdateDto};

@@ -65,7 +65,7 @@ pub fn vendor_orders_page() -> Html {
                         html! { <p>{ "Loading orders..." }</p> }
                     }
                 }
-            }
+            </div>
         </div>
     }
 }

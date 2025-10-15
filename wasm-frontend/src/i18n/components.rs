@@ -58,15 +58,17 @@ pub struct TransProps {
 #[function_component(Trans)]
 pub fn trans(props: &TransProps) -> Html {
     let key_string = props.key.to_string();
+    let params_owned: HashMap<String, String> = props.params.clone();
     
-    let translation_output = if props.params.is_empty() {
-        use_translation(key_string.clone())
+    // Always call hooks at the top level
+    let simple_translation = use_translation(key_string.clone());
+    let param_translation = use_translation_params(key_string.clone(), params_owned.clone());
+    
+    let translation = if props.params.is_empty() {
+        simple_translation.to_string()
     } else {
-        let params_owned: HashMap<String, String> = props.params.clone();
-        use_translation_params(key_string.clone(), params_owned)
+        param_translation.to_string()
     };
-    
-    let translation = translation_output.to_string();
 
     html! {
         <span class="i18n-trans">{ translation }</span>

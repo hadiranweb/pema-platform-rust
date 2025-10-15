@@ -7,7 +7,7 @@ use tracing;
 
 
 
-use pema_plugin_sdk::interface::{PluginInterface, PluginMetadata};
+use plugin_sdk::interface::{PluginInterface, PluginMetadata};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 

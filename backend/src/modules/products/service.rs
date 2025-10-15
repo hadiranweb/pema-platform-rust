@@ -2,10 +2,10 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::shared::models::product::{CreateProduct, Product, UpdateProduct};
+use models::product::{CreateProduct, Product, UpdateProduct};
 use crate::modules::products::repository;
 use crate::core::plugins::manager::PluginManager;
-use pema_plugin_sdk::interface::PluginHookType;
+use plugin_sdk::interface::PluginHookType;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use crate::error::ServiceError;

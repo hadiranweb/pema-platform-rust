@@ -1,7 +1,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::shared::models::review::{CreateReview, UpdateReview, Review};
+use models::review::{CreateReview, UpdateReview, Review};
 
 pub async fn create_review(pool: &PgPool, create_review: CreateReview) -> Result<Review, String> {
     sqlx::query_as::<_, Review>(

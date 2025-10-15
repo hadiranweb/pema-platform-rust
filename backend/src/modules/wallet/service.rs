@@ -1,8 +1,8 @@
 use sqlx::{PgPool, Transaction as DbTransaction};
 use uuid::Uuid;
 
-use crate::shared::models::wallet::{CreateWallet, UpdateWallet, Wallet};
-use crate::shared::models::transaction::{CreateTransaction, Transaction, TransactionType};
+use models::wallet::{CreateWallet, UpdateWallet, Wallet};
+use models::transaction::{CreateTransaction, Transaction, TransactionType};
 use crate::modules::wallet::repository;
 use crate::modules::wallet::dto::{DepositRequest, WithdrawRequest, TransferRequest};
 use crate::error::ServiceError;

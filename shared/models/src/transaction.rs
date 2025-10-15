@@ -4,9 +4,9 @@ use chrono::{DateTime, Utc};
 use std::fmt::{self, Display};
 use std::str::FromStr;
 
-#[cfg_attr(not(target_arch = "wasm32"), derive(sqlx::Type))]
+#[cfg_attr(feature = "sqlx", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(not(target_arch = "wasm32"), sqlx(type_name = "transaction_type", rename_all = "PascalCase"))]
+#[cfg_attr(feature = "sqlx", sqlx(type_name = "transaction_type", rename_all = "PascalCase"))]
 pub enum TransactionType {
     Deposit,
     Withdrawal,
@@ -45,9 +45,9 @@ impl FromStr for TransactionType {
     }
 }
 
-#[cfg_attr(not(target_arch = "wasm32"), derive(sqlx::Type))]
+#[cfg_attr(feature = "sqlx", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(not(target_arch = "wasm32"), sqlx(type_name = "transaction_status", rename_all = "PascalCase"))]
+#[cfg_attr(feature = "sqlx", sqlx(type_name = "transaction_status", rename_all = "PascalCase"))]
 pub enum TransactionStatus {
     Pending,
     Completed,
@@ -80,7 +80,8 @@ impl FromStr for TransactionStatus {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "sqlx", derive(sqlx::FromRow))]
 pub struct Transaction {
     pub id: Uuid,
     pub wallet_id: Uuid,

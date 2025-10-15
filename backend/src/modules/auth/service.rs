@@ -4,11 +4,11 @@ use sqlx::PgPool;
 use argon2::{password_hash::{rand_core::OsRng, SaltString}, Argon2, PasswordHasher, PasswordVerifier};
 use jsonwebtoken::{encode, EncodingKey, Header};
 
-use crate::shared::models::user::{User, UserLogin, UserRegister};
+use models::user::{User, UserLogin, UserRegister};
 use crate::modules::auth::repository;
-use crate::shared::config::config::Config;
+use shared_config::Config;
 use crate::core::plugins::manager::PluginManager;
-use pema_plugin_sdk::interface::PluginHookType;
+use plugin_sdk::interface::PluginHookType;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use crate::error::ServiceError;
@@ -18,7 +18,7 @@ pub struct AuthService;
 
 impl AuthService {
 pub async fn register_user(pool: &PgPool, user_register: UserRegister, config: &Config, plugin_manager: Arc<PluginManager>) -> Result<User, ServiceError> {
-        let password_hash = Self::hash_password(&user_register.password).map_err(ServiceError::BadRequest)?;
+        let password_hash = Self::hash_password(&user_register.password).map_err(|e| ServiceError::BadRequest(e))?;
         let user = repository::create_user(pool, user_register.clone(), password_hash).await.map_err(ServiceError::DatabaseError)?;
 
         // Execute OnUserRegistered plugin hook
@@ -31,7 +31,7 @@ pub async fn register_user(pool: &PgPool, user_register: UserRegister, config: &
 
     pub async fn login_user(pool: &PgPool, user_login: UserLogin, config: &Config, otp_code: Option<String>) -> Result<(String, User), ServiceError> {
         let user = repository::find_user_by_email(pool, &user_login.email).await.map_err(ServiceError::DatabaseError)?;
-        Self::verify_password(&user_login.password, &user.password_hash).map_err(ServiceError::Unauthorized)?;
+        Self::verify_password(&user_login.password, &user.password_hash).map_err(|_| ServiceError::Unauthorized)?;
 
         if let Some(code) = otp_code {
             let is_otp_valid = otp::verify_otp(pool, user.id, &code).await.map_err(|e| ServiceError::InternalServerError(format!("OTP verification failed: {}", e.to_string())))?;

@@ -2,7 +2,7 @@
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
-use crate::shared::models::user::{User, UserRegister};
+use models::user::{User, UserRegister};
 
 pub async fn create_user(pool: &PgPool, user_register: UserRegister, password_hash: String) -> Result<User, String> {
     let user = sqlx::query_as::<_, User>(

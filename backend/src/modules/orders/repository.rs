@@ -2,7 +2,7 @@
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
-use crate::shared::models::order::{CreateOrder, Order, UpdateOrder};
+use models::order::{CreateOrder, Order, UpdateOrder};
 
 pub async fn create_order(pool: &PgPool, create_order: CreateOrder, user_id: Uuid) -> Result<Order, String> {
     let order = sqlx::query_as::<_, Order>(

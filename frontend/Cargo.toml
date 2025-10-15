@@ -14,7 +14,7 @@ gloo-net = { workspace = true }
 web-sys = { workspace = true }
 
 # Shared crates
-models = { path = "../shared/models" }
+models = { path = "../shared/models", default-features = false }
 dtos = { path = "../shared/dtos" }
 shared-config = { path = "../shared/config" }
 

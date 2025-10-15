@@ -109,7 +109,9 @@ pub fn admin_products_page() -> Html {
                         on_cancel={on_form_cancel.clone()}
                     />
                 }
-            } else { html! {} } }
+            } else { 
+                html! {} 
+            } }
 
             { if *loading_state { html! { <Spinner /> } } else { html! {} } }
             { if let Some(err) = &*error_state { html! { <ErrorDisplay message={err.clone()} /> } } else { html! {} } }
@@ -141,7 +143,6 @@ pub fn admin_products_page() -> Html {
                         html! { <p>{ "Loading products..." }</p> }
                     }
                 }
-            }
         </div>
     }
 }

@@ -2,13 +2,16 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
+
+#[cfg(feature = "sqlx")]
 use sqlx::FromRow;
 
 // ============================================
 // Core Event Type
 // ============================================
 
-#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "sqlx", derive(FromRow))]
 pub struct Event {
     pub id: Uuid,
     pub event_type: String,
@@ -16,8 +19,14 @@ pub struct Event {
     pub aggregate_id: Uuid,
     pub aggregate_type: String,
     pub version: i32,
+    #[cfg(feature = "sqlx")]
     pub payload: sqlx::types::Json<Value>,
+    #[cfg(not(feature = "sqlx"))]
+    pub payload: Value,
+    #[cfg(feature = "sqlx")]
     pub metadata: Option<sqlx::types::Json<Value>>,
+    #[cfg(not(feature = "sqlx"))]
+    pub metadata: Option<Value>,
     pub user_id: Option<Uuid>,
     pub occurred_at: DateTime<Utc>,
     pub processed_at: Option<DateTime<Utc>>,
@@ -38,7 +47,10 @@ impl Event {
             aggregate_id,
             aggregate_type,
             version: 1,
+            #[cfg(feature = "sqlx")]
             payload: sqlx::types::Json(payload),
+            #[cfg(not(feature = "sqlx"))]
+            payload,
             metadata: None,
             user_id: None,
             occurred_at: Utc::now(),
@@ -52,7 +64,14 @@ impl Event {
     }
 
     pub fn with_metadata(mut self, metadata: Value) -> Self {
-        self.metadata = Some(sqlx::types::Json(metadata));
+        #[cfg(feature = "sqlx")]
+        {
+            self.metadata = Some(sqlx::types::Json(metadata));
+        }
+        #[cfg(not(feature = "sqlx"))]
+        {
+            self.metadata = Some(metadata);
+        }
         self
     }
 }
@@ -100,7 +119,8 @@ pub mod events {
 // Event Processing Log
 // ============================================
 
-#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "sqlx", derive(FromRow))]
 pub struct EventProcessingLog {
     pub id: Uuid,
     pub event_id: Uuid,
@@ -115,7 +135,8 @@ pub struct EventProcessingLog {
 // Dead Letter Queue Entry
 // ============================================
 
-#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "sqlx", derive(FromRow))]
 pub struct DeadLetterQueueEntry {
     pub id: Uuid,
     pub event_id: Uuid,
