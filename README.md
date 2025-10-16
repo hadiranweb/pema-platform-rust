@@ -1,6 +1,31 @@
-# PEMA Platform - Comprehensive Rust E-commerce Platform
+# 🛍️ PEMA Platform - پلتفرم جامع تجارت الکترونیک
 
-A comprehensive, multi-architecture e-commerce platform built with Rust, featuring multiple backend services, frontend applications, and advanced technologies merged from all development branches.
+<div align="center">
+
+![Rust](https://img.shields.io/badge/rust-%23000000.svg?style=for-the-badge&logo=rust&logoColor=white)
+![WebAssembly](https://img.shields.io/badge/WebAssembly-654FF0?style=for-the-badge&logo=WebAssembly&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/postgresql-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+
+[![CI/CD](https://github.com/hadiranweb/pema-platform-rust/workflows/CI%2FCD/badge.svg)](https://github.com/hadiranweb/pema-platform-rust/actions)
+[![Security](https://img.shields.io/badge/security-audited-green.svg)](https://github.com/hadiranweb/pema-platform-rust/security)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+</div>
+
+یک پلتفرم جامع و پیشرفته تجارت الکترونیک ساخته شده با Rust، شامل سرویس‌های متعدد backend، اپلیکیشن‌های frontend، و فناوری‌های پیشرفته که از تمام شاخه‌های توسعه ادغام شده است.
+
+## ✨ ویژگی‌های کلیدی
+
+- 🚀 **عملکرد بالا**: ساخته شده با Rust برای حداکثر سرعت و ایمنی
+- 🔒 **امنیت پیشرفته**: سیستم احراز هویت قوی با JWT و رمزنگاری
+- 🌐 **WebAssembly**: اجزای WASM برای عملکرد بهینه در مرورگر
+- 🔌 **معماری Plugin**: سیستم قابل گسترش برای منطق تجاری سفارشی
+- 📱 **Responsive Design**: رابط کاربری مدرن و سازگار با موبایل
+- 🌍 **چندزبانه**: پشتیبانی از فارسی و انگلیسی
+- 💳 **پرداخت یکپارچه**: سیستم کیف پول و درگاه‌های پرداخت ایرانی
+- 📊 **مانیتورینگ**: داشبورد جامع مانیتورینگ و آنالیتیکس
 
 ## 🏗️ Architecture Overview
 

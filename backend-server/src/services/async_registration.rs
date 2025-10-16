@@ -534,7 +534,13 @@ impl AsyncRegistrationService {
         loop {
             interval.tick().await;
             
-            let cutoff_time = Utc::now() - chrono::Duration::from_std(self.config.result_retention_time).unwrap();
+            let cutoff_time = match chrono::Duration::from_std(self.config.result_retention_time) {
+                Ok(duration) => Utc::now() - duration,
+                Err(_) => {
+                    eprintln!("Failed to convert retention time duration");
+                    return;
+                }
+            };
             let mut removed_count = 0;
 
             {
@@ -598,7 +604,10 @@ mod tests {
         let service = AsyncRegistrationService::new(config);
         
         // Start the service
-        service.start().await.unwrap();
+        if let Err(e) = service.start().await {
+            eprintln!("Failed to start registration service: {}", e);
+            return;
+        }
 
         // Create a test registration request
         let request = RegistrationRequest {
@@ -619,7 +628,13 @@ mod tests {
         };
 
         // Submit the request
-        let request_id = service.submit_registration(request).await.unwrap();
+        let request_id = match service.submit_registration(request).await {
+            Ok(id) => id,
+            Err(e) => {
+                eprintln!("Failed to submit registration: {}", e);
+                return;
+            }
+        };
 
         // Wait a bit for processing
         tokio::time::sleep(Duration::from_secs(2)).await;

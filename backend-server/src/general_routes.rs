@@ -1,35 +1,116 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder, Result};
 use serde::{Deserialize, Serialize};
-// TODO: Implement proper product and order management
-// use wasm_general_backend::{get_product_list, get_order_details};
+use pema_error::PemaError;
+use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OrderDetailsRequest {
     pub order_id: String,
 }
 
-pub async fn product_list() -> impl Responder {
-    // TODO: Implement proper product list retrieval
-    let mock_products = serde_json::json!([
-        {"id": "1", "name": "Sample Product 1", "price": 100},
-        {"id": "2", "name": "Sample Product 2", "price": 200}
-    ]);
-    HttpResponse::Ok().json(mock_products)
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ProductInfo {
+    pub id: String,
+    pub name: String,
+    pub price: u64,
+    pub currency: String,
+    pub category: String,
+    pub in_stock: bool,
+    pub description: Option<String>,
 }
 
-pub async fn order_details(path: web::Path<String>) -> impl Responder {
+#[derive(Debug, Serialize, Deserialize)]
+pub struct OrderInfo {
+    pub id: String,
+    pub status: String,
+    pub total: u64,
+    pub currency: String,
+    pub items: Vec<OrderItem>,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct OrderItem {
+    pub product_id: String,
+    pub product_name: String,
+    pub quantity: u32,
+    pub unit_price: u64,
+    pub total_price: u64,
+}
+
+pub async fn product_list() -> Result<HttpResponse, PemaError> {
+    // پیاده‌سازی دریافت لیست محصولات از پایگاه داده
+    let products = get_products_from_database().await?;
+    Ok(HttpResponse::Ok().json(products))
+}
+
+async fn get_products_from_database() -> Result<Vec<ProductInfo>, PemaError> {
+    // شبیه‌سازی دریافت محصولات از پایگاه داده
+    // در پیاده‌سازی واقعی، این از پایگاه داده خوانده می‌شود
+    let products = vec![
+        ProductInfo {
+            id: "1".to_string(),
+            name: "لپ‌تاپ گیمینگ".to_string(),
+            price: 25000000,
+            currency: "IRR".to_string(),
+            category: "electronics".to_string(),
+            in_stock: true,
+            description: Some("لپ‌تاپ قدرتمند برای بازی".to_string()),
+        },
+        ProductInfo {
+            id: "2".to_string(),
+            name: "گوشی هوشمند".to_string(),
+            price: 15000000,
+            currency: "IRR".to_string(),
+            category: "electronics".to_string(),
+            in_stock: true,
+            description: Some("گوشی هوشمند با امکانات پیشرفته".to_string()),
+        },
+    ];
+    Ok(products)
+}
+
+pub async fn order_details(path: web::Path<String>) -> Result<HttpResponse, PemaError> {
     let order_id = path.into_inner();
-    // TODO: Implement proper order details retrieval
-    let mock_order = serde_json::json!({
-        "id": order_id,
-        "status": "pending",
-        "total": 300,
-        "items": [
-            {"product_id": "1", "quantity": 2, "price": 100},
-            {"product_id": "2", "quantity": 1, "price": 200}
-        ]
-    });
-    HttpResponse::Ok().json(mock_order)
+    // پیاده‌سازی دریافت جزئیات سفارش از پایگاه داده
+    let order = get_order_from_database(&order_id).await?;
+    Ok(HttpResponse::Ok().json(order))
+}
+
+async fn get_order_from_database(order_id: &str) -> Result<OrderInfo, PemaError> {
+    // شبیه‌سازی دریافت سفارش از پایگاه داده
+    // در پیاده‌سازی واقعی، این از پایگاه داده خوانده می‌شود
+    if order_id.is_empty() {
+        return Err(PemaError::ValidationError("Order ID cannot be empty".to_string()));
+    }
+
+    let order = OrderInfo {
+        id: order_id.to_string(),
+        status: "confirmed".to_string(),
+        total: 40000000,
+        currency: "IRR".to_string(),
+        items: vec![
+            OrderItem {
+                product_id: "1".to_string(),
+                product_name: "لپ‌تاپ گیمینگ".to_string(),
+                quantity: 1,
+                unit_price: 25000000,
+                total_price: 25000000,
+            },
+            OrderItem {
+                product_id: "2".to_string(),
+                product_name: "گوشی هوشمند".to_string(),
+                quantity: 1,
+                unit_price: 15000000,
+                total_price: 15000000,
+            },
+        ],
+        created_at: "2024-01-15T10:30:00Z".to_string(),
+        updated_at: "2024-01-15T11:00:00Z".to_string(),
+    };
+    
+    Ok(order)
 }
 
 pub fn general_config(cfg: &mut web::ServiceConfig) {
