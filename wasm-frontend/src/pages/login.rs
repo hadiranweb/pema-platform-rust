@@ -1,7 +1,7 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
 use crate::AppRoute;
-use crate::components::{Button, Input, Card};
+use crate::components::{Button, Input, Card, AnimatedSkyBackground, PemaMoon};
 use crate::services::auth::AuthService;
 use crate::models::auth::LoginRequest;
 
@@ -60,34 +60,90 @@ pub fn login() -> Html {
         });
     });
 
+    let on_register_click = {
+        let navigator = navigator.clone();
+        Callback::from(move |_| {
+            navigator.push(&AppRoute::Register);
+        })
+    };
+
+    let on_forgot_password = {
+        Callback::from(move |_| {
+            // TODO: Implement forgot password functionality
+            web_sys::window()
+                .unwrap()
+                .alert_with_message("قابلیت بازیابی رمز عبور به زودی اضافه خواهد شد")
+                .unwrap();
+        })
+    };
+
     html! {
         <div class="login-page">
-            <Card title="ورود به پنل مدیریت" class="login-card">
-                <form onsubmit={on_submit}>
-                    <Input
-                        label="ایمیل"
-                        input_type="email"
-                        placeholder="ایمیل خود را وارد کنید"
-                        value={(*email).clone()}
-                        onchange={on_email_change}
-                        required=true
-                    />
-                    <Input
-                        label="رمز عبور"
-                        input_type="password"
-                        placeholder="رمز عبور خود را وارد کنید"
-                        value={(*password).clone()}
-                        onchange={on_password_change}
-                        required=true
-                    />
-                    if let Some(err) = error.as_ref() {
-                        <p class="error-message">{err}</p>
-                    }
-                    <Button button_type="submit" variant="primary" class="login-button">
-                        {"ورود"}
-                    </Button>
-                </form>
-            </Card>
+            <AnimatedSkyBackground />
+            <PemaMoon class="login-moon" />
+            
+            <div class="login-container">
+                <Card title="ورود به پلتفرم پما" class="login-card enhanced-login-card">
+                    <div class="login-header">
+                        <h1 class="login-title">{"ورود به حساب کاربری"}</h1>
+                        <p class="login-subtitle">{"به پلتفرم سرمایه‌گذاری هوشمند خوش آمدید"}</p>
+                    </div>
+                    
+                    <form onsubmit={on_submit} class="login-form">
+                        <Input
+                            label="ایمیل"
+                            input_type="email"
+                            placeholder="ایمیل خود را وارد کنید"
+                            value={(*email).clone()}
+                            onchange={on_email_change}
+                            required=true
+                            class="login-input"
+                        />
+                        <Input
+                            label="رمز عبور"
+                            input_type="password"
+                            placeholder="رمز عبور خود را وارد کنید"
+                            value={(*password).clone()}
+                            onchange={on_password_change}
+                            required=true
+                            class="login-input"
+                        />
+                        
+                        <div class="login-options">
+                            <button 
+                                type="button" 
+                                class="forgot-password-link" 
+                                onclick={on_forgot_password}
+                            >
+                                {"رمز عبور را فراموش کرده‌اید؟"}
+                            </button>
+                        </div>
+                        
+                        if let Some(err) = error.as_ref() {
+                            <div class="error-message login-error">
+                                {err}
+                            </div>
+                        }
+                        
+                        <Button button_type="submit" variant="primary" size="large" class="login-button">
+                            {"ورود"}
+                        </Button>
+                    </form>
+                    
+                    <div class="login-footer">
+                        <p class="register-link">
+                            {"حساب کاربری ندارید؟ "}
+                            <button 
+                                type="button" 
+                                class="link-button" 
+                                onclick={on_register_click}
+                            >
+                                {"ثبت‌نام کنید"}
+                            </button>
+                        </p>
+                    </div>
+                </Card>
+            </div>
         </div>
     }
 }

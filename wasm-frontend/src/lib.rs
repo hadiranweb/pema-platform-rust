@@ -22,6 +22,10 @@ pub enum AppRoute {
     Home,
     #[at("/login")]
     Login,
+    #[at("/register")]
+    Register,
+    #[at("/onboarding")]
+    Onboarding,
     #[at("/dashboard")]
     AdminDashboard,
     #[at("/products")]
@@ -96,13 +100,15 @@ fn app_router() -> Html {
             <main class="main-content">
                 { match route {
                     AppRoute::Home => html! { <pages::home::Home /> },
+                    AppRoute::Login => html! { <pages::login::Login /> },
+                    AppRoute::Register => html! { <pages::register::Register /> },
+                    AppRoute::Onboarding => html! { <pages::onboarding::Onboarding /> },
                     AppRoute::AdminDashboard => html! { <pages::dashboard::Dashboard on_route_change={handle_route_change.clone()} /> },
                     AppRoute::Products => html! { <pages::products::Products /> },
                     AppRoute::Orders => html! { <pages::orders::Orders /> },
                     AppRoute::Inventory => html! { <pages::inventory::Inventory /> },
                     AppRoute::Vendors => html! { <pages::vendors::Vendors /> },
                     AppRoute::Profile => html! { <pages::profile::Profile /> },
-                    AppRoute::Login => html! { <pages::login::Login /> },
                     AppRoute::NotFound => html! { <pages::not_found::NotFound /> },
                 }}
             </main>

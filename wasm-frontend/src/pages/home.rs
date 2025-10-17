@@ -1,7 +1,7 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
 use crate::AppRoute;
-use crate::components::{Button, Card};
+use crate::components::{Button, Card, AnimatedSkyBackground, PemaMoon};
 
 #[function_component(Home)]
 pub fn home() -> Html {
@@ -10,7 +10,7 @@ pub fn home() -> Html {
     let on_get_started = {
         let navigator = navigator.clone();
         Callback::from(move |_| {
-            navigator.push(&AppRoute::Login);
+            navigator.push(&AppRoute::Onboarding);
         })
     };
 
@@ -23,18 +23,21 @@ pub fn home() -> Html {
 
     html! {
         <div class="home-page">
-            <section class="hero">
+            <AnimatedSkyBackground />
+            <PemaMoon class="home-moon" />
+            
+            <section class="hero enhanced-hero">
                 <div class="hero-content">
-                    <h1 class="hero-title">{"پلتفرم پما"}</h1>
-                    <h2 class="hero-subtitle">{"سرمایه‌گذاری هوشمند در نقره‌های ارزشمند"}</h2>
-                    <p class="hero-description">
+                    <h1 class="hero-title typing-animation">{"پلتفرم پما"}</h1>
+                    <h2 class="hero-subtitle fade-in-up">{"سرمایه‌گذاری هوشمند در نقره‌های ارزشمند"}</h2>
+                    <p class="hero-description fade-in-up">
                         {"با استفاده از فناوری Rust و هوش مصنوعی Manus AI، در دنیای نقره‌های گردآفرید سرمایه‌گذاری کنید"}
                     </p>
-                    <div class="hero-actions">
-                        <Button onclick={on_get_started.clone()} variant="primary" size="large">
+                    <div class="hero-actions fade-in-up">
+                        <Button onclick={on_get_started.clone()} variant="primary" size="large" class="cta-primary">
                             {"شروع کنید"}
                         </Button>
-                        <Button onclick={on_view_products} variant="secondary" size="large">
+                        <Button onclick={on_view_products} variant="secondary" size="large" class="cta-secondary">
                             {"مشاهده محصولات"}
                         </Button>
                     </div>

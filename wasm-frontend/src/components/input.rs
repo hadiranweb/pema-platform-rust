@@ -19,6 +19,8 @@ pub struct InputProps {
     pub disabled: bool,
     #[prop_or_default]
     pub required: bool,
+    #[prop_or_default]
+    pub class: String,
 }
 
 #[function_component(Input)]
@@ -32,9 +34,10 @@ pub fn input(props: &InputProps) -> Html {
     };
 
     let input_class = format!(
-        "input {}{}",
+        "input {}{} {}",
         if props.error.is_some() { "input-error " } else { "" },
-        if props.disabled { "input-disabled" } else { "" }
+        if props.disabled { "input-disabled " } else { "" },
+        props.class
     );
 
     html! {

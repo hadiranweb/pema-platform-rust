@@ -8,6 +8,13 @@ pub struct LoginRequest {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct RegisterRequest {
+    pub email: String,
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AuthResponse {
     pub user: User,
     pub token: String,
