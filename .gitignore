@@ -7,3 +7,7 @@
 .env.auth
 .env.api
 
+# Log files
+*.log
+server.log
+
