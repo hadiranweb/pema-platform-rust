@@ -2,11 +2,9 @@
 resolver = "2"
 members = [
     # Frontend Applications
-    "frontend",
     "wasm-frontend",
     
     # Backend Services
-    "backend",
     "backend-server",
     "auth-server",
     "wasm-auth-backend",
