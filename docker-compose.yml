@@ -1,5 +1,3 @@
-version: '3.8'
-
 # پلتفرم PEMA - Docker Compose Configuration
 # این فایل تمام سرویس‌های مورد نیاز پلتفرم را تعریف می‌کند
 

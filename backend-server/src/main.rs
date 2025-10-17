@@ -7,6 +7,7 @@ use dotenvy::dotenv;
 
 mod wallet;
 mod auth;
+mod error;
 use shared_config::config::AppConfig;
 mod auth_routes;
 mod general_routes;

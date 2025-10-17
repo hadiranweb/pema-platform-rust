@@ -1,7 +1,6 @@
-use actix_web::{web, HttpResponse, Responder, Result};
+use actix_web::{web, HttpResponse, Result};
 use serde::{Deserialize, Serialize};
-use pema_error::PemaError;
-use std::collections::HashMap;
+use crate::error::PemaError;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OrderDetailsRequest {
@@ -41,7 +40,7 @@ pub struct OrderItem {
 
 pub async fn product_list() -> Result<HttpResponse, PemaError> {
     // پیاده‌سازی دریافت لیست محصولات از پایگاه داده
-    let products = get_products_from_database().await?;
+    let products: Vec<ProductInfo> = get_products_from_database().await?;
     Ok(HttpResponse::Ok().json(products))
 }
 
@@ -74,7 +73,7 @@ async fn get_products_from_database() -> Result<Vec<ProductInfo>, PemaError> {
 pub async fn order_details(path: web::Path<String>) -> Result<HttpResponse, PemaError> {
     let order_id = path.into_inner();
     // پیاده‌سازی دریافت جزئیات سفارش از پایگاه داده
-    let order = get_order_from_database(&order_id).await?;
+    let order: OrderInfo = get_order_from_database(&order_id).await?;
     Ok(HttpResponse::Ok().json(order))
 }
 
