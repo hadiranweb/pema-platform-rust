@@ -61,7 +61,7 @@ pub fn trans(props: &TransProps) -> Html {
     let params_owned: HashMap<String, String> = props.params.clone();
     
     // Always call hooks at the top level
-    let simple_translation = use_translation(key_string.clone());
+    let simple_translation = use_translation(&key_string);
     let param_translation = use_translation_params(key_string.clone(), params_owned.clone());
     
     let translation = if props.params.is_empty() {

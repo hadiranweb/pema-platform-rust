@@ -73,7 +73,7 @@ pub struct I18nProviderProps {
 #[function_component(I18nProvider)]
 pub fn i18n_provider(props: &I18nProviderProps) -> Html {
     let ctx = use_reducer(|| {
-        let mut ctx = I18nContext::new(props.default_language);
+        let ctx = I18nContext::new(props.default_language);
         
         if let Some(translations) = &props.translations {
             for (lang, trans) in translations {

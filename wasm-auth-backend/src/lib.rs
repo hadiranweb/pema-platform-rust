@@ -10,6 +10,6 @@ pub fn generate_auth_token(user_id: String) -> Result<String, JsValue> {
 
 #[wasm_bindgen]
 pub fn validate_auth_token(token: String) -> Result<String, JsValue> {
-    jwt::validate_token(token)
+    jwt::verify_token(token)
 }
 
